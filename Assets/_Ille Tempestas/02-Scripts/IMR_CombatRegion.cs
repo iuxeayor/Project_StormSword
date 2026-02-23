@@ -13,6 +13,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using static IMR_CharacterAttributes;
+using System.Xml.Serialization;
 
 
 
@@ -111,11 +112,16 @@ public class IMR_CombatRegion : MonoBehaviour
 	{
 		if (other.gameObject.GetComponent<IMR_CharacterAttributes>() != null)
 		{
-			CharacterTags guestTags = other.gameObject.GetComponent<IMR_CharacterAttributes>().MyCharacterTags;
+			IMR_CharacterAttributes MyAttributes = other.gameObject.GetComponent<IMR_CharacterAttributes>();
 
-			if (guestTags == CharacterTags.RedTeam || guestTags == CharacterTags.GreenTeam || guestTags == CharacterTags.Player)
+			if (MyAttributes.Alive)
 			{
-				AddToList(other.gameObject);
+				CharacterTags guestTags = other.gameObject.GetComponent<IMR_CharacterAttributes>().MyCharacterTags;
+
+				if (guestTags == CharacterTags.RedTeam || guestTags == CharacterTags.GreenTeam || guestTags == CharacterTags.Player)
+				{
+					AddToList(other.gameObject);
+				}
 			}
 
 			CheckWhosInRegion();
@@ -171,9 +177,10 @@ public class IMR_CombatRegion : MonoBehaviour
 							break;
 						}
 
-						else
+						else if (MyAttributes.MyCharacterTags == CharacterTags.RedTeam)
 						{
 							RedPresent = false;
+							RemoveFromList(CharactersInRegionList[i]);
 						}
 					}
 
@@ -199,9 +206,10 @@ public class IMR_CombatRegion : MonoBehaviour
 							break;
 						}
 
-						else
+						else if(MyAttributes.MyCharacterTags == CharacterTags.Player)
 						{
 							GreenPresent = false;
+							RemoveFromList(CharactersInRegionList[i]);
 						}
 					}
 

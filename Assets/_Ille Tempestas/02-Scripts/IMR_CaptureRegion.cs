@@ -1,6 +1,7 @@
 ﻿//IMR_CaptureRegion.cs
 /*
- * 
+ * This is for Command Posts, primarily. Not used for CZs.
+ * Use Combat Regions for CZs.
 */
 
 
