@@ -22,7 +22,19 @@ namespace MalbersAnimations.IK
         public abstract bool RequireTargets { get; }
 
         public virtual void Start(IKSet IKSet, Animator anim, int index) { }
+
+        public virtual void OnEnable(IKSet IKSet, Animator anim, int index) { }
+
+        public virtual void OnDisable(IKSet IKSet, Animator anim, int index) { }
+
+
         public virtual void OnAnimatorIK(IKSet IKSet, Animator anim, int index, float weight) { }
+
+        /// <summary> LateUpdate to call all IK Processors that need to be updated after the Animator IK  </summary>
+        /// <param name="IKSet">IK Set</param>
+        /// <param name="anim">Reference for the animator controller</param>
+        /// <param name="index">index of the Processor in the IK Set List</param>
+        /// <param name="weight">Weight of the Processor</param>
         public virtual void LateUpdate(IKSet IKSet, Animator anim, int index, float weight) { }
         public virtual void OnDrawGizmos(IKSet IKSet, Animator anim, float weight) { }
 
@@ -33,11 +45,11 @@ namespace MalbersAnimations.IK
         public float GetProcessorAnimWeight(Animator animator)
             => AnimParameterHash != 0 ? animator.GetFloat(AnimParameterHash) : 1;
 
-
-
-        internal virtual void OnSceneGUI(IKSet set, Animator animator, UnityEngine.Object target, int index)
-        {
-
-        }
+        internal virtual void OnSceneGUI(IKSet set, Animator animator, UnityEngine.Object target, int index) { }
     }
+
+
+    public enum UpVectorType { VectorUp, Local, Global }
+
+
 }

@@ -12,9 +12,7 @@ namespace MalbersAnimations
     [UnityEngine.CreateAssetMenu(menuName = "Malbers Animations/ID/Element", fileName = "New Element ID", order = -1000)]
     public class StatElement : IDs
     {
-        /// <summary>
-        /// Base color for the Stat Element. This is used on the UI Floating Numbers to show the color of the element 
-        /// </summary>
+
         public Color color = Color.white;
         //[Tooltip("Interaction list with other Elements")]
         //public List<ElementMultiplier> Interactions = new List<ElementMultiplier>();
@@ -41,7 +39,7 @@ namespace MalbersAnimations
         private void Reset() => GetID();
 
         [UnityEngine.ContextMenu("Get ID")]
-        private void GetID() => FindID<StatElement>();
+        public void GetID() => FindID<StatElement>();
 #endif
         #endregion 
     }
@@ -53,21 +51,18 @@ namespace MalbersAnimations
         public StatElement element;
 
         [Tooltip("Multiplier applied when interacting with other elements." +
-            "\nGreater than 1 means is weak agains this element." +
+            "\nGreater than 1 means is weak against this element." +
             "\nLess than one means is resistant to this element")]
         public FloatReference multiplier;
 
-
-        //[Tooltip("Critical chance the Element gets to activate itself, or you can also use it to increase the damage it can do ")]
-        //public FloatReference criticalChance = new FloatReference(1);
+        public readonly bool Valid => element != null;
 
         public ElementMultiplier(StatElement element)
         {
             this.element = element;
             multiplier = new FloatReference(2);
-
-
         }
+
         public ElementMultiplier(StatElement element, float value)
         {
             this.element = element;

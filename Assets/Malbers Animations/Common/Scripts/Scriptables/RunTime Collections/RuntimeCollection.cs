@@ -10,12 +10,12 @@ namespace MalbersAnimations.Scriptables
 {
     public abstract class RuntimeCollection<T> : ScriptableObject where T : Object
     {
-        public List<T> items = new List<T>();
+        public List<T> items = new();
 
         // [TextArea(4,5)]
         public string Description;
 
-        public UnityEvent OnSetEmpty = new UnityEvent();
+        public UnityEvent OnSetEmpty = new();
 
         /// <summary>Ammount of object on the list</summary>
         public int Count => items.Count;
@@ -75,13 +75,13 @@ namespace MalbersAnimations.Scriptables
             {
                 items.RemoveAll(x => x == null); //Remove all Assets that are Empty/ Type Mismatch error
 
+                //Add only if it's not already in the list
                 if (!items.Contains(newItem))
                 {
                     items.Add(newItem);
                     OnAddEvent(newItem);
 
                     Debugging($"Add [{newItem.name}]");
-
                 }
             }
         }
@@ -102,6 +102,7 @@ namespace MalbersAnimations.Scriptables
             {
                 items.RemoveAll(x => x == null); //Remove all Assets that are Empty/ Type Mismatch error
 
+                //Remove only if it's in the list
                 if (items.Contains(newItem))
                 {
                     OnRemoveEvent(newItem);

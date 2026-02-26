@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -17,11 +18,44 @@ namespace MalbersAnimations
         [Tooltip("Integer value to Identify IDs")]
         public int ID;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //: force optimize small method call
         public static implicit operator int(IDs reference) => reference != null ? reference.ID : 0; //  =>  reference.ID;
+
+      
+
+      
+
+        /// <summary> Returns if an ID is inside a list (Include or Exclude) </summary>
+        /// <param name="list">the list to verify </param>
+        /// <param name="include">true: check if is included. false check if is excluded</param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: force optimize small method call
+        public bool Included<T>(List<T> list, bool include) where T : IDs
+        {
+            bool isIncluded = list.Contains(this);
+            return include ? isIncluded : !isIncluded;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: force optimize small method call
+        public bool Included(List<IDs> list) => Included(list, true);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: force optimize small method call
+        public bool Excluded(List<IDs> list) => Included(list, false);
+
+
+#if UNITY_EDITOR
 
         protected virtual void OnValidate()
         {
             if (string.IsNullOrEmpty(DisplayName)) DisplayName = name;
+        }
+
+
+        [ContextMenu("Get ID <Hash>")]
+        private void GetIDHash()
+        {
+            ID = Animator.StringToHash(name);
+            MTools.SetDirty(this);
         }
 
         protected void FindID<T>() where T : IDs
@@ -41,27 +75,7 @@ namespace MalbersAnimations
             MTools.SetDirty(this);
         }
 
-        /// <summary> Returns if an ID is inside a list (Include or Exclude) </summary>
-        /// <param name="list">the list to verify </param>
-        /// <param name="include">true: check if is included. false check if is excluded</param>
-        /// <returns></returns>
-        public bool Included<T>(List<T> list, bool include) where T : IDs
-        {
-            bool isIncluded = list.Contains(this);
-            return include ? isIncluded : !isIncluded;
-        }
 
-        public bool Included(List<IDs> list) => Included(list, true);
-        public bool Excluded(List<IDs> list) => Included(list, false);
-
-
-#if UNITY_EDITOR 
-        [ContextMenu("Get ID <Hash>")]
-        private void GetIDHash()
-        {
-            ID = Animator.StringToHash(name);
-            MTools.SetDirty(this);
-        }
 #endif
     }
 
@@ -71,27 +85,25 @@ namespace MalbersAnimations
     public class IDDrawer : PropertyDrawer
     {
         /// <summary> Cached style to use to draw the popup button. </summary>
-        private GUIStyle popupStyle;
+        protected GUIStyle popupStyle;
 
-        List<IDs> Instances;
-        List<string> popupOptions;
+        protected List<IDs> Instances;
+        protected GenericMenu menu;
 
-        // private readonly Color Require= new Color(1, 0.4f, 0.4f, 1);
+        //  readonly Dictionary<string, GUIContent> m_TypeNameCaches = new();
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (popupStyle == null)
+            popupStyle ??= new(GUI.skin.GetStyle("PaneOptions"))
             {
-                popupStyle = new GUIStyle(GUI.skin.GetStyle("PaneOptions"));
-                popupStyle.imagePosition = ImagePosition.ImageOnly;
-            }
+                imagePosition = ImagePosition.ImageOnly
+            };
 
             label = EditorGUI.BeginProperty(position, label, property);
 
             if (property.objectReferenceValue)
             {
                 label.tooltip += $"\n ID Value: [{(property.objectReferenceValue as IDs).ID}]";
-                //  if (label.text.Contains("Element")) label.text = property.objectReferenceValue.name;
             }
 
             if (label.text.Contains("Element"))
@@ -102,35 +114,52 @@ namespace MalbersAnimations
             else
                 position = EditorGUI.PrefixLabel(position, label);
 
-            EditorGUI.BeginChangeCheck();
-
-
-
-            float height = EditorGUIUtility.singleLineHeight;
-
-
-            // Calculate rect for configuration button
-            Rect buttonRect = new Rect(position);
-            buttonRect.yMin += popupStyle.margin.top;
-            buttonRect.width = popupStyle.fixedWidth + popupStyle.margin.right;
-            buttonRect.x -= 20;
-            buttonRect.height = height;
-
-            //position.xMin = buttonRect.xMax;
-
             // Store old indent level and set it to 0, the PrefixLabel takes care of it
             int indent = EditorGUI.indentLevel;
             EditorGUI.indentLevel = 0;
 
+            // Calculate rect for configuration button
+            Rect buttonRect = new(position);
+            buttonRect.yMin += popupStyle.margin.top;
+            buttonRect.width = popupStyle.fixedWidth + popupStyle.margin.right;
+            buttonRect.x -= 20;
+            buttonRect.height = EditorGUIUtility.singleLineHeight;
 
+            //position.xMin = buttonRect.xMax;
+
+            if (EditorGUI.DropdownButton(buttonRect, GUIContent.none, FocusType.Passive, popupStyle))
+            {
+                FindAllInstances(property);  //Find the instances only when the dropdown is pressed
+                menu.DropDown(buttonRect);
+            }
+
+            position.height = EditorGUIUtility.singleLineHeight;
+
+            EditorGUI.PropertyField(position, property, GUIContent.none, false);
+            EditorGUI.indentLevel = indent;
+            EditorGUI.EndProperty();
+        }
+
+
+        protected virtual void DrawProperty(Rect newPos, SerializedProperty property)
+        {
+            EditorGUI.PropertyField(newPos, property, GUIContent.none, false);
+        }
+        protected void SetPropertyValue(SerializedProperty property, IDs value)
+        {
+            property.objectReferenceValue = value;
+            property.serializedObject.ApplyModifiedProperties();
+        }
+
+        protected void FindAllInstances(SerializedProperty property)
+        {
             if (Instances == null || Instances.Count == 0)
             {
                 var NameOfType = GetPropertyType(property);
                 string[] guids = AssetDatabase.FindAssets("t:" + NameOfType);  //FindAssets uses tags check documentation for more info
 
-                Instances = new List<IDs>();
-                popupOptions = new List<string>();
-                popupOptions.Add("None");
+                Instances = new();
+
 
                 for (int i = 0; i < guids.Length; i++)         //probably could get optimized 
                 {
@@ -141,79 +170,36 @@ namespace MalbersAnimations
 
                 Instances = Instances.OrderBy(x => x.ID).ToList(); //Order by ID
 
-                for (int i = 0; i < Instances.Count; i++)         //probably could get optimized 
+
+            }
+            //Weird bug taht was not updating the IDS correctly on an array
+            menu = new GenericMenu();
+            menu.AddItem(new GUIContent("None"), false, () => SetPropertyValue(property, null));
+
+            for (int i = 0; i < Instances.Count; i++)         //probably could get optimized 
+            {
+                var inst = Instances[i];
+                var displayname = inst.name;
+                var idString = "[" + Instances[i].ID.ToString() + "] ";
+
+                if (Instances[i] is Tag) idString = ""; //Do not show On tag 
+
+                if (!string.IsNullOrEmpty(inst.DisplayName))
                 {
-                    var inst = Instances[i];
-                    var displayname = inst.name;
-                    var idString = "[" + Instances[i].ID.ToString() + "] ";
-
-                    if (Instances[i] is Tag) idString = ""; //Do not show On tag 
-
-                    if (!string.IsNullOrEmpty(inst.DisplayName))
-                    {
-                        displayname = inst.DisplayName;
-                        int pos = displayname.LastIndexOf("/") + 1;
-                        displayname = displayname.Insert(pos, idString);
-                    }
-                    else
-                    {
-                        displayname = idString + displayname;
-                    }
-
-                    popupOptions.Add(displayname);
+                    displayname = inst.DisplayName;
+                    int pos = displayname.LastIndexOf("/") + 1;
+                    displayname = displayname.Insert(pos, idString);
                 }
-            }
-            var PropertyValue = property.objectReferenceValue;
+                else
+                {
+                    displayname = idString + displayname;
+                }
 
-            //  Debug.Log(PropertyValue);
-            int result = 0;
-
-            if (PropertyValue != null && Instances.Count > 0)
-            {
-                result = Instances.FindIndex(i => i.name == PropertyValue.name) + 1; //Plus 1 because 0 is None
+                menu.AddItem(new GUIContent(displayname), false, () => SetPropertyValue(property, inst));
             }
 
-
-            result = EditorGUI.Popup(buttonRect, result, popupOptions.ToArray(), popupStyle);
-
-            if (result == 0)
-            {
-                property.objectReferenceValue = null;
-            }
-            else
-            {
-                var NewSelection = Instances[result - 1];
-                property.objectReferenceValue = NewSelection;
-
-            }
-
-            position.height = EditorGUIUtility.singleLineHeight;
-
-
-            //if (property.objectReferenceValue != null)
-            //{
-            //    var id = (property.objectReferenceValue as IDs).ID;
-
-            //    position.width-=50;
-            //    var IntRect = new Rect(position);
-            //    IntRect.x = position.width+80;
-            //    IntRect.width = 50;
-
-            //    using (new EditorGUI.DisabledGroupScope(true))
-            //        EditorGUI.IntField(IntRect, GUIContent.none, id);
-            //}
-
-            EditorGUI.PropertyField(position, property, GUIContent.none, false);
-
-
-            if (EditorGUI.EndChangeCheck())
-                property.serializedObject.ApplyModifiedProperties();
-
-            EditorGUI.indentLevel = indent;
-            EditorGUI.EndProperty();
         }
-
-        public static string GetPropertyType(SerializedProperty property)
+        protected static string GetPropertyType(SerializedProperty property)
         {
             var type = property.type;
             var match = System.Text.RegularExpressions.Regex.Match(type, @"PPtr<\$(.*?)>");

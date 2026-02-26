@@ -27,28 +27,40 @@ namespace MalbersAnimations.Weapons
             }
         }
 
-        public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+        public override void OnStateExit(Animator anim, AnimatorStateInfo state, int layer)
         {
+            //means is transitioning to it self
+            if (anim.GetCurrentAnimatorStateInfo(layer).fullPathHash == state.fullPathHash) return;
+
+            // Debug.Log("OnStateExit");
+
             if (manager != null)
             {
                 foreach (var item in weaponActions)
                 {
                     //WEAPON BEHAVIOR SEND MESSAGE ON EXIT
                     if (!item.MessageSent && item.sendInterrupted)
-                        item.Execute(animator, manager, debug); //Sent everything that was not sent
+                        item.Execute(anim, manager, debug); //Sent everything that was not sent
 
                 }
             }
         }
 
-        public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+        public override void OnStateUpdate(Animator anim, AnimatorStateInfo state, int layer)
         {
+            var NextAnim = anim.GetNextAnimatorStateInfo(layer).shortNameHash;
+            var InExitTransition = anim.IsInTransition(layer) && state.shortNameHash != NextAnim; //Check only the Exit Transition not the Start Transition
+
+
             if (manager != null)
             {
                 foreach (var item in weaponActions)
                 {
+                    if (item.MessageSent) continue; //If the message was sent, skip it
+
                     //WEAPON BEHAVIOR SEND MESSAGE ON TIME
-                    if (!item.MessageSent && stateInfo.normalizedTime >= item.time) item.Execute(animator, manager, debug);
+                    if (!item.MessageSent && state.normalizedTime % 1 >= item.time && item.time != 1 || InExitTransition && item.time == 1)
+                        item.Execute(anim, manager, debug);
                 }
             }
         }
@@ -78,8 +90,6 @@ namespace MalbersAnimations.Weapons
         }
 #endif
     }
-
-
 
     [System.Serializable]
     public class WeaponMessages
@@ -120,7 +130,6 @@ namespace MalbersAnimations.Weapons
                     manager.Unequip_Weapon();
                     break;
                 case WeaponOption.EquipProjectile:
-
                     if (manager.Weapon is MShootable mshoo)
                     {
                         if (equip) mshoo.EquipProjectile();
@@ -150,9 +159,11 @@ namespace MalbersAnimations.Weapons
                     break;
                 case WeaponOption.UseFreeHand:
                     manager.FreeHandUse();
+                    // Debug.Log("UseFreeHand");
                     break;
                 case WeaponOption.ReleaseFreeHand:
                     manager.FreeHandRelease();
+                    //Debug.Log("ReleaseFreeHand");
                     break;
                 case WeaponOption.Aim:
                     manager.Aim_Set(aim);

@@ -9,28 +9,34 @@ namespace MalbersAnimations
     [AddTypeMenu("Malbers/Scriptables/Set Bool Var Listener")]
     public class SetBoolVarReaction : Reaction
     {
+        public override string DynamicName => $"Set Bool Var Listener [ID: {(ID.Value == -1 ? "Any" : ID.Value)}] to [{newValue.Value}]"; //Name of the Reaction
+
         public override System.Type ReactionType => typeof(BoolVarListener); //set the Type of component this Reaction Needs
 
-        [Header("Set Bool Var Listener")]
         [Tooltip("ID for the Var Listener. If is set to -1 it will get the first Bool Listener found")]
         public IntReference ID = new(-1);
         public BoolReference newValue;
-       
+
 
         protected override bool _TryReact(Component reactor)
         {
-            var listeners = reactor.GetComponents<BoolVarListener>().ToList();
+            var listenersP = reactor.GetComponentsInParent<BoolVarListener>().ToList();
+            var listenersC = reactor.GetComponentsInChildren<BoolVarListener>().ToList();
+
+            var mergeList = listenersP.Union(listenersC).ToList(); //Merge the two lists
 
             if (ID != -1)
-                listeners = listeners.FindAll(x => x.ID.Value == ID.Value);
-
-            if (listeners != null)
             {
-                foreach (var item in listeners)
+                mergeList = mergeList.FindAll(x => x.ID.Value == ID.Value); //Find all in Parent
+            }
+
+            if (mergeList != null)
+            {
+                foreach (var item in mergeList)
                 {
                     item.Value = (newValue.Value);
                 }
-                return true; //Reaction succesful!!
+                return true; //Reaction successful!!
             }
 
             return false;

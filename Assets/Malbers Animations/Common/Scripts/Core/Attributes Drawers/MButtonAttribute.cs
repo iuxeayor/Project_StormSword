@@ -11,17 +11,27 @@ namespace MalbersAnimations
         public string MethodName { get; }
 
         public bool OnlyPlayMode;
+        public string displayName;
 
         public MButtonAttribute(string methodName)
         {
             MethodName = methodName;
             OnlyPlayMode = false;
+            displayName = methodName;
         }
 
         public MButtonAttribute(string methodName, bool inplaymode)
         {
             MethodName = methodName;
             OnlyPlayMode = inplaymode;
+            displayName = methodName;
+        }
+
+        public MButtonAttribute(string methodName, string display, bool inplaymode)
+        {
+            MethodName = methodName;
+            OnlyPlayMode = inplaymode;
+            displayName = display;
         }
     }
 
@@ -54,7 +64,7 @@ namespace MalbersAnimations
                     GUI.Label(position, "Method cannot have parameters.");
                     return;
                 }
-                if (GUI.Button(position, method.Name))
+                if (GUI.Button(position, att.displayName))
                 {
                     method.Invoke(target, null);
                 }
@@ -63,5 +73,5 @@ namespace MalbersAnimations
     }
 #endif
 
-  
+
 }

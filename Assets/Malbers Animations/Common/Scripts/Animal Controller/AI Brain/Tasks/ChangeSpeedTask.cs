@@ -11,6 +11,7 @@ namespace MalbersAnimations.Controller.AI
         [Space, Tooltip("Apply the Task to the Animal(Self) or the Target(Target)")]
         public Affected affect = Affected.Self;
 
+        [Tooltip("Name of the Speed Set you want to change. Leave it empty if you just want to change the Speed index of the current speed set ")]
         public string SpeedSet = "Ground";
         public IntReference SpeedIndex = new(3);
         public bool Sprint = false;

@@ -62,7 +62,7 @@ namespace MalbersAnimations.Controller.AI
                 }
                 else if (onEnter && restoreDefaultOnEnter || !onEnter && restoreDefaultOnExit)
                 {
-                    animal.Stance_RestoreDefault();
+                    animal.Stance_RestoreDefaultValue();
                 }
             }
         }

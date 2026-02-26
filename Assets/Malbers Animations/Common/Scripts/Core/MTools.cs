@@ -11,55 +11,89 @@ using System.Text.RegularExpressions;
 using Object = UnityEngine.Object;
 
 
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace MalbersAnimations
 {
-    /// <summary> Used to store Transform pos, rot and scale values </summary>
-    [System.Serializable]
-    public struct TransformOffset
-    {
-        public Vector3 Position;
-        public Vector3 Rotation;
-        public Vector3 Scale;
-
-
-        public TransformOffset(int def)
-        {
-            Position = Vector3.zero;
-            Rotation = Vector3.zero;
-            Scale = Vector3.one;
-        }
-
-        public TransformOffset(Transform def)
-        {
-            Position = def.localPosition;
-            Rotation = def.localEulerAngles;
-            Scale = def.localScale;
-        }
-
-        public void RestoreTransform(Transform def)
-        {
-            def.localPosition = Position;
-            def.localEulerAngles = Rotation;
-            def.localScale = Scale;
-        }
-
-        public readonly void SetOffset(Transform t)
-        {
-            t.localPosition = Position;
-            t.localEulerAngles = Rotation;
-            t.localScale = Scale;
-        }
-    }
-
-
     /// <summary>Redundant functions to be used all over the assets</summary>
     public static class MTools
     {
+        public static string CompareToString(ComparerInt Compare)
+        {
+            return Compare switch
+            {
+                ComparerInt.Equal => "=",
+                ComparerInt.Greater => ">",
+                ComparerInt.Less => "<",
+                ComparerInt.NotEqual => "!=",
+                _ => string.Empty,
+            };
+        }
+
+        /// <summary>  Transforms an AxisDirection into a Vector3 based on a target Transform </summary>
+        /// <param name="target"> If null it will use World Axis </param>
+        /// <param name="direction"> Direction to transform </param>
+        /// <returns></returns>
+        public static Vector3 TransformDirVector(Transform target, AxisDirection direction)
+        {
+            if (target == null)
+            {
+                return direction switch
+                {
+                    AxisDirection.Right => Vector3.right,
+                    AxisDirection.Left => -Vector3.right,
+                    AxisDirection.Up => Vector3.up,
+                    AxisDirection.Down => -Vector3.up,
+                    AxisDirection.Forward => Vector3.forward,
+                    AxisDirection.Backward => -Vector3.forward,
+                    AxisDirection.None => Vector3.zero,
+                    _ => Vector3.zero,
+                };
+            }
+            else
+            {
+                return direction switch
+                {
+                    AxisDirection.Right => target.right,
+                    AxisDirection.Left => -target.right,
+                    AxisDirection.Up => target.up,
+                    AxisDirection.Down => -target.up,
+                    AxisDirection.Forward => target.forward,
+                    AxisDirection.Backward => -target.forward,
+                    AxisDirection.None => Vector3.zero,
+                    _ => Vector3.zero,
+                };
+            }
+        }
+
+
+        #region GameObjects
+
+        /// <summary> Find from a collider the main Root Object. which contains a IObject Core interface attached to it </summary>
+        /// <param name="collider"></param>
+        public static GameObject FindRealRoot(Collider collider, bool includeInactive = false)
+        {
+            var realRoot = collider.transform.root.gameObject;        //Get the animal on the entering collider
+
+            //Find the Right Root if the objects is a Malbers Core Object in Parent
+            var coreRoot = collider.GetComponentInParent<IObjectCore>(includeInactive);
+
+            if (coreRoot != null)
+            {
+                realRoot = coreRoot.transform.gameObject;
+            }
+            //Means there is no IObjectCore then we are going to find the Parent that uses the same Layer
+            else if (realRoot.layer != collider.gameObject.layer)
+            {
+                realRoot = FindRealParentByLayer(collider.transform);
+            }
+
+            return realRoot;
+        }
+        #endregion
+
         #region Mesh Rendererers
 
         public static bool ReboneSkinnedMesh(Transform RootBone, SkinnedMeshRenderer thisRenderer)
@@ -112,6 +146,23 @@ namespace MalbersAnimations
         {
             return vector - Vector3.Dot(vector, planeNormal) * planeNormal;
         }
+
+        /// <summary>
+        /// Projects a point onto the plane defined by a transform's position and up vector,
+        /// without using Unity's Plane struct.
+        /// </summary>
+        public static Vector3 ProjectPointOnTransformPlane(Vector3 planePoint, Vector3 planeNormal, Vector3 point)
+        {
+            // Vector from plane point to target point
+            Vector3 v = point - planePoint;
+
+            // Remove the component along the normal
+            Vector3 vProj = v - Vector3.Dot(v, planeNormal) * planeNormal;
+
+            // Final projected point
+            return planePoint + vProj;
+        }
+
 
         /// <summary>
         /// Calculate the Range of a value with a min and a max reference. 
@@ -403,7 +454,6 @@ namespace MalbersAnimations
 
         #endregion
 
-
         public static bool RayArcCast(Vector3 center, Quaternion rotation, float angle, float radius, int resolution, LayerMask layer, out RaycastHit hit)
         {
             rotation *= Quaternion.Euler(-angle / 2, 0, 0);
@@ -483,6 +533,30 @@ namespace MalbersAnimations
         #endregion
 
         #region Vector Math
+
+        public static void RotateInBoneSpace(Quaternion target, Transform boneToRotate, Vector3 rotationAmount)
+        {
+            var headRot = boneToRotate.rotation;
+            var headToMesh = Quaternion.Inverse(target) * headRot;
+            var headOffsetRot = target * Quaternion.Euler(rotationAmount);
+
+            var finalRot = headOffsetRot * headToMesh;
+
+            boneToRotate.rotation = finalRot;
+        }
+
+        public static void RotateInBoneSpace(Quaternion target, Transform boneToRotate, Quaternion rotationAmount)
+        {
+            var headRot = boneToRotate.rotation;
+            var headToMesh = Quaternion.Inverse(target) * headRot;
+            var headOffsetRot = target * rotationAmount;
+
+            var finalRot = headOffsetRot * headToMesh;
+
+            boneToRotate.rotation = finalRot;
+        }
+
+
         /// <summary> Gives the force needed to throw something at a target using Physyics / </summary>
         public static float PowerFromAngle(Vector3 OriginPos, Vector3 TargetPos, float angle)
         {
@@ -630,7 +704,7 @@ namespace MalbersAnimations
 
             Vector3 CurrentPos = slave.position;
 
-            slave.TryDeltaRootMotion(); //Reset DeltaRootMotion
+            slave.TryResetDeltaRootMotion(); //Reset DeltaRootMotion
 
 
             while ((time > 0) && (elapsedTime <= time))
@@ -656,7 +730,12 @@ namespace MalbersAnimations
 
             Vector3 CurrentPos = t1.position;
 
-            t1.TryDeltaRootMotion(); //Reset DeltaRootMotion
+            t1.TryResetDeltaRootMotion(); //Reset DeltaRootMotion????
+
+
+            MDebug.DrawWireSphere(t1.position, 0.1f, Color.cyan, 1f);
+            MDebug.DrawWireSphere(NewPosition, 0.1f, Color.cyan, 1f);
+            MDebug.DrawLine(t1.position, NewPosition, Color.cyan, 1f);
 
 
             while ((time > 0) && (elapsedTime <= time))
@@ -675,17 +754,14 @@ namespace MalbersAnimations
             yield return AlignTransform(t1, t2.position, t2.rotation, time, curve);
         }
 
-
         public static IEnumerator AlignTransform(Transform t1, Vector3 t2Pos, Quaternion t2Rot, float time, AnimationCurve curve = null)
         {
             float elapsedTime = 0;
 
-            Vector3 CurrentPos = t1.position;
-            Quaternion CurrentRot = t1.rotation;
-
+            t1.GetPositionAndRotation(out Vector3 CurrentPos, out Quaternion CurrentRot);
             var Wait = new WaitForFixedUpdate();
 
-            t1.TryDeltaRootMotion();
+            t1.TryResetDeltaRootMotion();
 
             while ((time > 0) && (elapsedTime <= time))
             {
@@ -710,8 +786,6 @@ namespace MalbersAnimations
 
             direction = Vector3.ProjectOnPlane(direction, t1.up);
             Quaternion FinalRot = Quaternion.LookRotation(direction);
-
-
 
             Vector3 Offset = t1.position + AlignOffset * scale * t1.forward; //Use Offset
 
@@ -774,7 +848,7 @@ namespace MalbersAnimations
         }
 
 
-        public static IEnumerator AlignLookAtTransform(Transform t1, Transform t2, float time, float angleOffset = 0, AnimationCurve curve = null)
+        public static IEnumerator AlignLookAtTransform(Transform t1, Transform t2, float time, float angleOffset = 0, AnimationCurve curve = null, float delay = 0)
         {
             float elapsedTime = 0;
             var wait = new WaitForFixedUpdate();
@@ -786,6 +860,8 @@ namespace MalbersAnimations
 
             Quaternion FinalRot = Quaternion.LookRotation(direction) * Quaternion.Euler(0, angleOffset, 0);
 
+            if (delay > 0)
+                yield return new WaitForSeconds(delay);
 
             while ((time > 0) && (elapsedTime <= time))
             {
@@ -796,8 +872,6 @@ namespace MalbersAnimations
                 yield return wait;
             }
             t1.rotation = FinalRot;
-
-
         }
 
         public static IEnumerator AlignLookAtTransformDirection(Transform t1, Vector3 direction, float time, AnimationCurve curve = null)
@@ -906,28 +980,60 @@ namespace MalbersAnimations
 
                 Debug.DrawRay(TargetRay.origin, TargetRay.direction, Color.white, 1f);
 
-                TargetToAlign.TryDeltaRootMotion(); //Reset delta RootMotion
+                TargetToAlign.TryResetDeltaRootMotion(); //Reset delta RootMotion
 
                 MDebug.DrawWireSphere(TargetPos, Color.red, 0.05f, 3);
 
                 while ((time > 0) && (elapsedTime <= time))
                 {
                     float result = curve != null ? curve.Evaluate(elapsedTime / time) : elapsedTime / time;               //Evaluation of the Pos curve
-
                     TargetToAlign.position = Vector3.LerpUnclamped(CurrentPos, TargetPos, result);
-
                     MDebug.DrawWireSphere(TargetToAlign.position, Color.white, 0.05f, 3);
-
-
                     elapsedTime += Time.fixedDeltaTime;
-
                     yield return Wait;
                 }
                 TargetToAlign.position = TargetPos;
+            }
+            yield return null;
+        }
+
+        public static IEnumerator AlignTransformRadius(Transform objectToAlign, Transform target, float time, float radius, AnimationCurve curve = null)
+        {
+            if (radius > 0)
+            {
+                float elapsedTime = 0;
+
+                var Wait = new WaitForFixedUpdate();
+
+                objectToAlign.TryResetDeltaRootMotion(); //Reset delta RootMotion
+
+                while ((time > 0) && (elapsedTime <= time))
+                {
+                    yield return Wait;
+
+                    Vector3 direction = (target.position - objectToAlign.position).normalized;
+                    Vector3 TargetPos = target.position - direction * radius;
+                    float result = curve != null ? curve.Evaluate(elapsedTime / time) : elapsedTime / time;               //Evaluation of the Pos curve
+
+                    objectToAlign.position = Vector3.LerpUnclamped(objectToAlign.position, TargetPos, result);
+
+                    MDebug.DrawWireSphere(TargetPos, Color.white, 0.05f, 3);
+                    MDebug.DrawRay(TargetPos, Vector3.up, Color.white);
+
+
+                    MDebug.DrawWireSphere(objectToAlign.position, Color.white, 0.05f, 3);
+                    MDebug.DrawRay(objectToAlign.position, Vector3.up, Color.white);
+
+                    elapsedTime += Time.fixedDeltaTime;
+                }
+
+
+                objectToAlign.position = target.position - (target.position - objectToAlign.position).normalized * radius;
 
             }
             yield return null;
         }
+
 
         public static IEnumerator AlignTransform_Rotation(Transform t1, Quaternion NewRotation, float time, AnimationCurve curve = null)
         {
@@ -974,14 +1080,17 @@ namespace MalbersAnimations
             float elapsedtime = 0;
             var Wait = new WaitForFixedUpdate();
 
-            Vector3 startPos = obj.localPosition;
-            Quaternion startRot = obj.localRotation;
+            obj.GetLocalPositionAndRotation(out Vector3 startPos, out Quaternion startRot);
+
             Vector3 startScale = obj.localScale;
 
             while (elapsedtime < time)
             {
-                obj.localPosition = Vector3.Slerp(startPos, LocalPos, Mathf.SmoothStep(0, 1, elapsedtime / time));
-                obj.localRotation = Quaternion.Slerp(startRot, Quaternion.Euler(LocalRot), elapsedtime / time);
+                obj.SetLocalPositionAndRotation(
+
+                    Vector3.Slerp(startPos, LocalPos, Mathf.SmoothStep(0, 1, elapsedtime / time)),
+                    Quaternion.Slerp(startRot, Quaternion.Euler(LocalRot), elapsedtime / time));
+
                 obj.localScale = Vector3.Lerp(startScale, localScale, Mathf.SmoothStep(0, 1, elapsedtime / time));
 
                 elapsedtime += Time.deltaTime;
@@ -1074,6 +1183,79 @@ namespace MalbersAnimations
 
         #endregion
 
+
+        /// <summary>Checks and find the correct component to apply a reaction  </summary>  
+        public static T VerifyComponent<T>(Object obj, T component) where T : Object
+        {
+            //Do nothing if is the same object
+            if (component == obj) return component;
+            //if the object is null then the reference is also null
+            if (obj == null) return null;
+
+            var TType = typeof(T);
+
+
+            //If the type is GameObject and the object is a Component return the GameObject
+            if (TType == typeof(GameObject) && obj is Component comp) return comp.gameObject as T;
+
+
+            if (TType.IsAssignableFrom(obj.GetType()))
+            {
+                return obj as T;
+            }
+            else if (obj is GameObject GO)
+            {
+                if (GO.TryGetComponent(TType, out var result))
+                {
+                    return result as T;
+                }
+                else
+                {
+                    var inParent = GO.GetComponentInParent(TType);
+                    if (inParent) return inParent as T;
+                    var inChildren = GO.GetComponentInChildren(TType);
+                    if (inChildren) return inChildren as T;
+                }
+            }
+            else if (obj is Component CO)
+            {
+                if (CO.TryGetComponent(TType, out var result))
+                {
+                    return result as T;
+                }
+                else
+                {
+                    var inParent = CO.GetComponentInParent(TType);
+                    if (inParent) return inParent as T;
+                    var inChildren = CO.GetComponentInChildren(TType);
+                    if (inChildren) return inChildren as T;
+                }
+            }
+            return null;
+        }
+
+
+        public static T VerifyInterface<T>(Object obj, T component)
+        {
+            //Do nothing if is the same object
+            if (obj is T ObjAsT && ObjAsT.Equals(component)) return component;
+            //if the object is null then the reference is also null
+            if (obj == null) return default;
+
+            if (obj is GameObject GO)
+            {
+                var result = GO.FindInterface<T>();
+                return result;
+            }
+            else if (obj is Component CO)
+            {
+                var result = CO.FindInterface<T>();
+                return result;
+            }
+            return default;
+        }
+
+
         /// <summary>Starts the recursive function for the closest transform to the specified point</summary>
         /// <param name="rPosition">Reference point for for the closest transform</param>
         /// <param name="rCollider">Transform that represents the collision</param>
@@ -1136,6 +1318,8 @@ namespace MalbersAnimations
 
 
         public static Color MBlue = new(0.2f, 0.5f, 1f, 0.42f);
+        public static Color MRed = new(1.1f, 0.500f, 0.500f, 1.100f);
+
         public static Color MGreen = new(0f, 1f, 0.4f, 0.3f);
         public static Color MOrange = new(1f, 0.3f, 0.0f, 0.5f);
 
@@ -1328,15 +1512,31 @@ namespace MalbersAnimations
                 var objectReference = property.objectReferenceValue;
 
                 if (objectReference != null)
-                    Editor.CreateEditor(objectReference).OnInspectorGUI();
+                {
+                    MMDrawnPropertiesEditor.MMDrawnProperties(objectReference);
+                }
             }
         }
+
+        public static void DrawObjectReferenceInspectorOld(SerializedProperty property)
+        {
+            if (property != null)
+            {
+                var objectReference = property.objectReferenceValue;
+
+                if (objectReference != null)
+                {
+                    Editor.CreateEditor(objectReference).OnInspectorGUI();
+                }
+            }
+        }
+
         public static void GetSelectedPathOrFallback() => MalbersEditor.GetSelectedPathOrFallback();
         public static void CreateScriptableAsset(SerializedProperty property, string selectedAssetPath)
         {
             var type = MSerializedTools.GetPropertyType(property);
 
-            if (type.IsAbstract)
+            if (type != null && type.IsAbstract)
             {
                 var StatesType = MTools.GetAllTypes(type);
 
@@ -1351,7 +1551,7 @@ namespace MalbersAnimations
             }
             else
             {
-                CreateAsset_SavePrompt(property, type, selectedAssetPath);
+                CreateAsset_SavePrompt(property, type, "Asset/");
             }
         }
 
@@ -1368,29 +1568,25 @@ namespace MalbersAnimations
 
             if (type.IsAbstract)
             {
-                var StatesType = MTools.GetAllTypes(type);
+                var StatesType = GetAllTypes(type);
 
                 var addMenu = new GenericMenu();
 
                 for (int i = 0; i < StatesType.Count; i++)
                 {
                     Type st = StatesType[i];
-                    addMenu.AddItem(new GUIContent(st.Name), false, () => CreateAssetInternal(property, st));
+                    addMenu.AddItem(new GUIContent(st.Name), false, () => MSerializedTools.CreateAssetInternal(property, st));
                 }
 
                 addMenu.ShowAsContext();
             }
             else
             {
-                CreateAssetInternal(property, type);
+                MSerializedTools.CreateAssetInternal(property, type);
             }
         }
 
-        private static void CreateAssetInternal(SerializedProperty property, Type type)
-        {
-            property.objectReferenceValue = ScriptableObject.CreateInstance(type);
-            property.serializedObject.ApplyModifiedProperties();
-        }
+
 
 
         // Creates a new ScriptableObject via the default Save File panel
@@ -1531,7 +1727,8 @@ namespace MalbersAnimations
         public static void SetDirty(Object ob)
         {
 #if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(ob);
+            if (!Application.isPlaying)
+                EditorUtility.SetDirty(ob);
 #endif
         }
 

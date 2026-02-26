@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace MalbersAnimations.Controller.AI
 {
+    public enum PlayingModeState { Enter, Exit, PlayingMode }
+
     [CreateAssetMenu(menuName = "Malbers Animations/Pluggable AI/Decision/Check Mode", order = 2)]
     public class CheckModeDecision : MAIDecision
     {
-        public enum PlayingModeState { Enter, Exit, PlayingMode }
 
         public override string DisplayName => "Animal/Check Mode";
 
@@ -74,12 +75,12 @@ namespace MalbersAnimations.Controller.AI
 
         private bool OnExitMode(MAnimal animal)
         {
-            if (animal.LastModeID == ModeID)
+            if (animal.LastMode != null && animal.LastMode.ID == ModeID)
             {
                 if (Ability <= 0)
                     return true; //Means that Is playing a random mode does not mater which one
                 else
-                    return Ability == (animal.LastAbilityIndex); //Return if the Ability is playing 
+                    return Ability == (animal.LastMode.AbilityIndex); //Return if the Ability is playing 
             }
             return false;
         }

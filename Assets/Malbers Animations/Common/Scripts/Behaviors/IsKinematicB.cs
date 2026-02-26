@@ -27,6 +27,9 @@ namespace MalbersAnimations
         {
             if (rb == null) rb = animator.GetComponent<Rigidbody>();
 
+            if (rb == null) return;
+
+
             sent = false;
 
             if (SetKinematic == OnEnterOnExit.OnEnter)
@@ -52,30 +55,30 @@ namespace MalbersAnimations
         {
             switch (SetKinematic)
             {
-                case OnEnterOnExit.OnExit:            Set_RB_Kinematic(isKinematic); break;
-                case OnEnterOnExit.OnEnterOnExit:     Set_RB_Kinematic(false); break;
+                case OnEnterOnExit.OnExit: Set_RB_Kinematic(isKinematic); break;
+                case OnEnterOnExit.OnEnterOnExit: Set_RB_Kinematic(false); break;
                 case OnEnterOnExit.OnTime: if (!sent) Set_RB_Kinematic(isKinematic); break;
                 default: break;
-            } 
+            }
         }
         private void Set_RB_Kinematic(bool value)
         {
             if (value)
             {
                 current = rb.collisionDetectionMode;
-                rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
                 rb.isKinematic = true;
             }
             else
             {
-                rb.isKinematic = false;
                 rb.collisionDetectionMode = current;
+                rb.isKinematic = false;
             }
         }
     }
 
 #if UNITY_EDITOR
-    [CustomEditor(typeof(IsKinematicB))] 
+    [CustomEditor(typeof(IsKinematicB))]
     public class IsKinematicBED : Editor
     {
         SerializedProperty SetKinematic, isKinematic, Time;
@@ -103,7 +106,7 @@ namespace MalbersAnimations
                 }
                 EditorGUIUtility.labelWidth = 0;
             }
-            
+
             if (SetKinematic.intValue == 3)
             {
                 EditorGUILayout.PropertyField(Time);

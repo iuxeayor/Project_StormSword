@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MalbersAnimations
 {
-  //  public enum AnimCycle { None, Loop, Repeat, PingPong }
+    //  public enum AnimCycle { None, Loop, Repeat, PingPong }
 
     public class PlayTransformAnimation : MonoBehaviour
     {
@@ -18,12 +18,12 @@ namespace MalbersAnimations
 
         [SerializeField]
         [ContextMenuItem("Store starting value", "StoreDefault")]
-        TransformOffset DefaultValue;
+        private TransformOffset DefaultValue;
 
-        private void Reset()
+
+        private void Awake()
         {
-            m_transform = transform;
-            DefaultValue = new TransformOffset(m_transform);
+            StoreDefault();
         }
 
         [ContextMenu("Store starting value")]
@@ -32,8 +32,13 @@ namespace MalbersAnimations
             DefaultValue = new TransformOffset(m_transform);
         }
 
-        private void Start()
+        private void OnEnable()
         {
+            StopAllCoroutines();
+            anim.CleanCoroutine();
+
+            DefaultValue.RestoreTransform(m_transform);
+
             if (PlayOnStart) Play();
         }
 
@@ -56,7 +61,7 @@ namespace MalbersAnimations
             if (PlayForever)
             {
                 ICoroutine = anim.PlayTransformAnimationForever(m_transform);
-                
+
             }
             else
             {

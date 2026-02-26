@@ -36,7 +36,7 @@ MonoBehaviour:
     *Dynamic
 
 '
-  debug: 1
+  debug: 0
   m_int:
     UseConstant: 1
     ConstantValue: 0

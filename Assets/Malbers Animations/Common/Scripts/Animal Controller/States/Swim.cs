@@ -1,21 +1,31 @@
-﻿using MalbersAnimations.Reactions;
-using MalbersAnimations.Scriptables;
+﻿using MalbersAnimations.Scriptables;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace MalbersAnimations.Controller
 {
+    [AddTypeMenu("Water/Swim")]
     /// <summary>Swim Logic</summary>
     public class Swim : State
     {
-        public override string StateName => "Swim";
+        //public override string StateName => "Swim";
         public override string StateIDName => "Swim";
 
-        [Header("Swim Paramenters")]
+        #region Public Variables    
+
+        [Header("Swim Parameters")]
         public LayerMask WaterLayer = 16;
 
+        [Tooltip("Transform to Store the the water level when the character enter the swim state")]
+        public string HitTransform = "SwimHit";
+        private Transform m_HitTransform;
 
-        [Tooltip("Ray to Shoot Down To find the water leve;")]
+        [Tooltip("Transform to Store the the water  when the character finds a water surface")]
+        public string waterTransform = "WaterHit";
+        private Transform m_WaterTransform;
+
+
+        [Tooltip("Ray to Shoot Down To find the water level")]
         public float UpSearch = 3;
 
         [Tooltip("Lerp value for the animal to stay align to the water level ")]
@@ -32,15 +42,11 @@ namespace MalbersAnimations.Controller
 
         [Tooltip("Gives an extra impulse when entering the state using the accumulated  inertia")]
         public bool KeepInertia = true;
-        [Tooltip("Spherecast radius to find water using the Water Pivot")]
+        [Tooltip("SphereCast radius to find water using the Water Pivot")]
         [Min(0.01f)] public float m_Radius = 0.1f;
 
         [Tooltip("Ray to the Front to check if the Animal has touched a Front Ground and it cannot push it")]
         [Min(0)] public float FrontRayLength = 1;
-
-
-        //[Tooltip("Check the ground while swimming to see if we can exit earlier")]
-        //public bool checkGround = true;
 
         [Tooltip("When checking he ground, this will be the multiplier for the height value")]
         [Range(0f, 0.9f)]
@@ -48,11 +54,8 @@ namespace MalbersAnimations.Controller
 
 
         [Header("Reactions")]
-        [SerializeReference, SubclassSelector]
-        public Reaction OnTouchedWaterEnter;
-
-        [SerializeReference, SubclassSelector]
-        public Reaction OnTouchedWaterExit;
+        public MalbersAnimations.Reactions.Reaction2 OnTouchedWaterEnter;
+        public MalbersAnimations.Reactions.Reaction2 OnTouchedWaterExit;
 
         /// <summary>Has the animal found Water</summary>
         [Disable]
@@ -66,23 +69,17 @@ namespace MalbersAnimations.Controller
         /// <summary>The Character has touched Water</summary>
         public bool TouchedWater { get; protected set; }
 
-
         protected float EnterWaterTime;
-
         public MPivots WaterPivot { get; protected set; }
-
 
         protected Vector3 WaterNormal = Vector3.up;
         protected Vector3 HorizontalInertia;
 
-
         /// <summary>Difference to align the character to the water</summary>
         public Vector3 WaterLine_Difference { get; internal set; }
 
-        /// <summary>WaterLine postion</summary>
-
+        /// <summary>WaterLine position</summary>
         public Vector3 WaterLevel { get; internal set; }
-
 
         readonly Vector3 NoWaterLevel = new(0, float.MinValue, 0);
 
@@ -91,13 +88,15 @@ namespace MalbersAnimations.Controller
         /// <summary>Value to push Down the Animal when entering the water</summary>
         [Disable] public Vector3 BounceDown;
 
-
         protected Vector3 BounceUpTarget;
         protected int TryLoopOriginal;
         public Vector3 WaterPivotPoint => WaterPivot.World(animal.transform) + animal.DeltaVelocity;
 
         /// <summary>Water Collider used on the Sphere Cast</summary>
         protected Collider[] WaterCollider;
+
+        #endregion
+
 
         public override void InitializeState()
         {
@@ -108,6 +107,28 @@ namespace MalbersAnimations.Controller
             IsInWater = false;
             TouchedWater = false;
             TryLoopOriginal = TryLoop;
+
+            //Find the Hit Transform
+            m_HitTransform = animal.transform.FindGrandChild(HitTransform);
+            if (m_HitTransform == null)
+            {
+                m_HitTransform = new GameObject(HitTransform).transform;
+                m_HitTransform.parent = transform;
+
+            }
+
+            m_HitTransform.ResetLocal();
+            m_HitTransform.gameObject.SetActive(false); //Disable the Hit Transform
+
+            //Find the Water Transform
+            m_WaterTransform = animal.transform.FindGrandChild(waterTransform);
+            if (m_WaterTransform == null)
+            {
+                m_WaterTransform = new GameObject(waterTransform).transform;
+                m_WaterTransform.parent = transform;
+            }
+            m_WaterTransform.ResetLocal();
+            m_WaterTransform.gameObject.SetActive(false); //Disable the Water Transform
         }
 
         //Checks if the Animal is inside a water volume
@@ -120,6 +141,8 @@ namespace MalbersAnimations.Controller
         {
             base.Activate();
 
+            m_HitTransform.gameObject.SetActive(true); //Enable the Hit Transform
+
             HorizontalInertia = Vector3.ProjectOnPlane(animal.DeltaPos, animal.UpVector);
 
             //Clean the Vector from Forward and Horizontal Influence    
@@ -130,15 +153,15 @@ namespace MalbersAnimations.Controller
 
             IgnoreLowerStates = true;                                               //Ignore Falling, Idle and Locomotion while swimming 
             animal.UseGravity = false; //IMPORTANT
-                                       //  animal.InertiaPositionSpeed = Vector3.zero;                             //THIS MOTHER F!#$ER was messing with the water entering
+
+            //animal.InertiaPositionSpeed = Vector3.zero;                             //THIS MOTHER F!#$ER was messing with the water entering
             animal.Force_Reset();
             WaterNormal = Vector3.up;
 
             BounceUpTarget = -Gravity * bounce;
 
-            animal.SetPlatform(null);//IMPORTANT
+            animal.Reset_Platform(); //IMPORTANT
         }
-
 
         /// <summary>  Check if the animal is inside a Water Trigger  </summary>
         public bool CheckWater()
@@ -154,6 +177,8 @@ namespace MalbersAnimations.Controller
         /// <summary>Check if the Animal in a water surface </summary>
         public bool FindWaterLevel2()
         {
+            if (WaterPivot == null) return false;
+
             var UpPoint = WaterPivotPoint + (Vector3.up * (UpSearch * ScaleFactor));
             var RayLength = (UpSearch + WaterPivot.position.y) * ScaleFactor;
             var rad = m_Radius * ScaleFactor;
@@ -170,11 +195,16 @@ namespace MalbersAnimations.Controller
                 WaterLevel = WaterHit.point;  //Find the water Level
                 WaterNormal = WaterHit.normal;
 
+                m_HitTransform.position = WaterHit.point; //Store the Hit Position of the Raycast
+                m_WaterTransform.position = WaterHit.point; //Store the Hit Position of the Raycast
+
                 if (!TouchedWater)
                 {
                     TouchedWater = true;
-                    OnTouchedWaterEnter?.React(animal);
+                    OnTouchedWaterEnter.React(animal);
                     TryLoop = 1; //Force using TryLoop1
+
+                    m_WaterTransform.gameObject.SetActive(true); // Enable the Water Transform
                 }
 
                 Vector3 PointBelow = WaterPivotPoint - WaterLevel;
@@ -199,8 +229,13 @@ namespace MalbersAnimations.Controller
                 if (TouchedWater)
                 {
                     TouchedWater = false;
-                    OnTouchedWaterExit?.React(animal);
+                    OnTouchedWaterExit.React(animal);
                     TryLoop = TryLoopOriginal; //Reset TryLoop
+
+                    m_HitTransform.position = Vector3.zero;         //Reset the Hit Transform Position
+                    m_WaterTransform.position = Vector3.zero;       //Reset the Water Transform Position
+
+                    m_WaterTransform.gameObject.SetActive(false); //Disable the Water Transform
                 }
                 if (GizmoDebug) Debug.DrawRay(UpPoint, ScaleFactor * UpSearch * Gravity, Color.cyan);
 
@@ -210,7 +245,7 @@ namespace MalbersAnimations.Controller
         }
 
 
-        /// <summary> The animal cast a ray to the ground and if the ground is hitted then is not longer in the water</summary>
+        /// <summary> The animal cast a ray to the ground and if the ground is hit then is not longer in the water</summary>
         public bool CheckNearGround()
         {
             var length = HeightMult * WaterPivot.position.y * ScaleFactor;
@@ -302,6 +337,11 @@ namespace MalbersAnimations.Controller
             if (GizmoDebug) Debug.DrawRay(WaterPivotPoint, animal.Forward * FrontRayLength, rayColor);
         }
 
+
+        /// <summary>
+        /// IMPROVEEEEEEEEEEEEEE THIS
+        /// </summary>
+        /// <param name="delta"></param>
         private void BounceEnteringWater(float delta)
         {
             if (BounceUp != Vector3.zero)
@@ -320,8 +360,8 @@ namespace MalbersAnimations.Controller
 
                 if (GizmoDebug) MDebug.DrawWireSphere(NextPos, Color.green, m_Radius);
 
-                Vector3 PointAvobe = NextPos - WaterLevel;
-                PivotAboveWater = Vector3.Dot(PointAvobe, Gravity) < 0; //Check if the next position will be above water
+                Vector3 PointAbove = NextPos - WaterLevel;
+                PivotAboveWater = Vector3.Dot(PointAbove, Gravity) < 0; //Check if the next position will be above water
 
                 if (PivotAboveWater)
                 {
@@ -333,7 +373,6 @@ namespace MalbersAnimations.Controller
                     animal.AdditivePosition += (BounceUp) * (delta * bounceLerp);
                     WaterLine_Difference = Vector3.zero; //Clear the water line difference
                 }
-
             }
         }
 
@@ -356,6 +395,8 @@ namespace MalbersAnimations.Controller
             HorizontalInertia = Vector3.zero;
             WaterNormal = Vector3.up;
             WaterLevel = NoWaterLevel;
+            m_HitTransform.gameObject.SetActive(false); //Disable the Hit Transform
+
         }
 
 #if UNITY_EDITOR
@@ -417,15 +458,15 @@ namespace MalbersAnimations.Controller
 
                 if (Pivot != null)
                 {
-                    var UPsearch = animal.transform.position + Vector3.up * (UpSearch);
+                    var UpSearch = animal.transform.position + Vector3.up * (this.UpSearch);
 
                     Gizmos.color = cyan;
                     Gizmos.DrawSphere(Pivot.World(animal.transform), m_Radius * scale);
-                    Gizmos.DrawSphere(UPsearch, m_Radius * scale);
+                    Gizmos.DrawSphere(UpSearch, m_Radius * scale);
                     Gizmos.color = Color.cyan;
                     Gizmos.DrawWireSphere(Pivot.World(animal.transform), m_Radius * scale);
-                    Gizmos.DrawWireSphere(UPsearch, m_Radius * scale);
-                    Gizmos.DrawRay(UPsearch, animal.Gravity * UpSearch);
+                    Gizmos.DrawWireSphere(UpSearch, m_Radius * scale);
+                    Gizmos.DrawRay(UpSearch, animal.Gravity * this.UpSearch);
                 }
             } //Show only when is not playing
         }

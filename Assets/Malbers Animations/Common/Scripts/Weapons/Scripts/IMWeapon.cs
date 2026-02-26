@@ -42,7 +42,7 @@ namespace MalbersAnimations.Weapons
         /// <summary>Maximum Force the Weapon can casue to an object </summary>
         float MaxForce { get; }
         /// <summary> Is the Weapon Equiped </summary>
-        bool IsEquiped { get; set; }
+        bool IsEquipped { get; set; }
         /// <summary>Enables the Main Attack</summary>
         bool Input { get; set; }
 
@@ -145,6 +145,7 @@ namespace MalbersAnimations.Weapons
         /// <summary>Set Aiming on the Weapon Owner</summary>
         void Aim_Set(bool value);
         void UnEquip();
+        void Drop_Weapon();
     }
 
 }

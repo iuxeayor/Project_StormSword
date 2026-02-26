@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace MalbersAnimations.Controller.AI
 {
+    public enum VarType { Bool, Int, Float }
+    public enum BoolType { True, False }
+
     [CreateAssetMenu(menuName = "Malbers Animations/Pluggable AI/Decision/Check Scriptable Variable", order = 6)]
     public class CheckScriptableVar : MAIDecision
     {
@@ -21,58 +24,42 @@ namespace MalbersAnimations.Controller.AI
 
         public bool boolValue = true;
         public int intValue = 0;
-        public float floatValue = 0f; 
+        public float floatValue = 0f;
 
         public override bool Decide(MAnimalBrain brain, int Index)
         {
-            switch (varType)
+            return varType switch
             {
-                case VarType.Bool:
-                    return Bool != null && Bool.Value == boolValue;
-                case VarType.Int:
-                    return Int != null && CompareInteger(Int.Value);
-                case VarType.Float:
-                    return Float != null && CompareFloat(Float.Value);
-                default:
-                    return false;
-            }
+                VarType.Bool => Bool != null && Bool.Value == boolValue,
+                VarType.Int => Int != null && CompareInteger(Int.Value),
+                VarType.Float => Float != null && CompareFloat(Float.Value),
+                _ => false,
+            };
         }
 
 
-        public enum VarType { Bool, Int, Float }
-        public enum BoolType { True, False }
 
         public bool CompareInteger(int IntValue)
         {
-            switch (compare)
+            return compare switch
             {
-                case ComparerInt.Equal:
-                    return (IntValue == intValue);
-                case ComparerInt.Greater:
-                    return (IntValue > intValue);
-                case ComparerInt.Less:
-                    return (IntValue < intValue);
-                case ComparerInt.NotEqual:
-                    return (IntValue != intValue);
-                default:
-                    return false;
-            }
+                ComparerInt.Equal => (IntValue == intValue),
+                ComparerInt.Greater => (IntValue > intValue),
+                ComparerInt.Less => (IntValue < intValue),
+                ComparerInt.NotEqual => (IntValue != intValue),
+                _ => false,
+            };
         }
         public bool CompareFloat(float IntValue)
         {
-            switch (compare)
+            return compare switch
             {
-                case ComparerInt.Equal:
-                    return (IntValue == floatValue);
-                case ComparerInt.Greater:
-                    return (IntValue > floatValue);
-                case ComparerInt.Less:
-                    return (IntValue < floatValue);
-                case ComparerInt.NotEqual:
-                    return (IntValue != floatValue);
-                default:
-                    return false;
-            }
+                ComparerInt.Equal => (IntValue == floatValue),
+                ComparerInt.Greater => (IntValue > floatValue),
+                ComparerInt.Less => (IntValue < floatValue),
+                ComparerInt.NotEqual => (IntValue != floatValue),
+                _ => false,
+            };
         }
 
 #if UNITY_EDITOR
@@ -111,11 +98,11 @@ namespace MalbersAnimations.Controller.AI
                 {
                     case VarType.Bool:
                         UnityEditor.EditorGUILayout.PropertyField(Bool, GUIContent.none, GUILayout.Width(LBW));
-                      
+
                         var Ct = new GUIContent(boolValue.boolValue ? "Is True" : "Is False");
                         // UnityEditor.EditorGUILayout.LabelField(Ct, UnityEditor.EditorStyles.miniButton, GUILayout.MinWidth(50));
-                        boolValue.boolValue =  GUILayout.Toggle(boolValue.boolValue, Ct, UnityEditor.EditorStyles.miniButton);
-                        break;  
+                        boolValue.boolValue = GUILayout.Toggle(boolValue.boolValue, Ct, UnityEditor.EditorStyles.miniButton);
+                        break;
                     case VarType.Int:
                         UnityEditor.EditorGUILayout.PropertyField(Int, GUIContent.none, GUILayout.Width(LBW));
                         UnityEditor.EditorGUILayout.PropertyField(compare, GUIContent.none, GUILayout.MinWidth(70));

@@ -132,6 +132,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
+  ignoreStatic:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   trigger: {fileID: 0}
   Editor_Tabs1: 0
 --- !u!114 &1641551291
@@ -324,7 +328,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7808745598944374104, guid: 1c7a0f3efad6ffd4898f40074ea5bcc2,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 748592714}
+      addedObject: {fileID: 6506181803565088348}
   m_SourcePrefab: {fileID: 100100000, guid: 1c7a0f3efad6ffd4898f40074ea5bcc2, type: 3}
 --- !u!1 &3320733372154244841 stripped
 GameObject:
@@ -332,7 +336,7 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 4777089777221534641}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &748592714
+--- !u!114 &6506181803565088348
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -341,26 +345,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 3320733372154244841}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8097927ca26ab4343a884532eb8eb442, type: 3}
+  m_Script: {fileID: 11500000, guid: 41eb9c17bc0693d448a412425a2d17b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputs:
-  - name: Open Chest
-    active:
-      UseConstant: 1
-      ConstantValue: 1
-      Variable: {fileID: 0}
-    ignoreOnPause:
-      UseConstant: 1
-      ConstantValue: 0
-      Variable: {fileID: 0}
-    type: 1
-    input: InputValue
-    key: 101
-    debug: 0
-    GetPressed: 1
-    ResetOnDisable: 1
-    OnInputDown:
+  Events:
+  - Event: {fileID: 11400000, guid: e4a7e6d4be37807428caed3b4e40282e, type: 2}
+    useInt: 0
+    useFloat: 0
+    useVoid: 1
+    useString: 0
+    useBool: 0
+    useGO: 0
+    useTransform: 0
+    useVector3: 0
+    useVector2: 0
+    useComponent: 0
+    useSprite: 0
+    Response:
       m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 1641551294}
@@ -375,187 +376,52 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 1
           m_CallState: 2
-    OnInputUp:
+    ResponseNull:
       m_PersistentCalls:
         m_Calls: []
-    OnLongPress:
+    ResponseFloat:
       m_PersistentCalls:
         m_Calls: []
-    OnLongPressReleased:
+    ResponseInt:
       m_PersistentCalls:
         m_Calls: []
-    OnDoubleTap:
+    ResponseBool:
       m_PersistentCalls:
         m_Calls: []
-    OnInputChanged:
+    ResponseBoolFalse:
       m_PersistentCalls:
         m_Calls: []
-    OnInputEnable:
+    ResponseBoolTrue:
       m_PersistentCalls:
         m_Calls: []
-    OnInputDisable:
+    ResponseString:
       m_PersistentCalls:
         m_Calls: []
-    DoubleTapTime: 0.3
-    LongPressTime: 0.5
-    SmoothDecrease: 0
-    OnInputPressed:
+    ResponseGO:
       m_PersistentCalls:
         m_Calls: []
-    OnInputFloat:
+    ResponseTransform:
       m_PersistentCalls:
         m_Calls: []
-  AllInputs: []
-  actionMaps: []
-  ActiveMapIndex: 0
-  DefaultMap:
-    name:
-      UseConstant: 1
-      ConstantValue: Default
-      Variable: {fileID: 0}
-    inputs:
-    - name: Open Chest
-      active:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      ignoreOnPause:
-        UseConstant: 1
-        ConstantValue: 0
-        Variable: {fileID: 0}
-      type: 1
-      input: InputValue
-      key: 101
-      debug: 0
-      GetPressed: 1
-      ResetOnDisable: 1
-      OnInputDown:
-        m_PersistentCalls:
-          m_Calls:
-          - m_Target: {fileID: 1641551294}
-            m_TargetAssemblyTypeName: 
-            m_MethodName: OnEnable
-            m_Mode: 1
-            m_Arguments:
-              m_ObjectArgument: {fileID: 0}
-              m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-              m_IntArgument: 0
-              m_FloatArgument: 0
-              m_StringArgument: 
-              m_BoolArgument: 1
-            m_CallState: 2
-      OnInputUp:
-        m_PersistentCalls:
-          m_Calls: []
-      OnLongPress:
-        m_PersistentCalls:
-          m_Calls: []
-      OnLongPressReleased:
-        m_PersistentCalls:
-          m_Calls: []
-      OnDoubleTap:
-        m_PersistentCalls:
-          m_Calls: []
-      OnInputChanged:
-        m_PersistentCalls:
-          m_Calls: []
-      OnInputEnable:
-        m_PersistentCalls:
-          m_Calls: []
-      OnInputDisable:
-        m_PersistentCalls:
-          m_Calls: []
-      DoubleTapTime: 0.3
-      LongPressTime: 0.5
-      SmoothDecrease: 0
-      OnInputPressed:
-        m_PersistentCalls:
-          m_Calls: []
-      OnInputFloat:
-        m_PersistentCalls:
-          m_Calls: []
-    selectedIndex: 0
-  ActiveMap:
-    name:
-      UseConstant: 1
-      ConstantValue: Default
-      Variable: {fileID: 0}
-    inputs:
-    - name: Open Chest
-      active:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      ignoreOnPause:
-        UseConstant: 1
-        ConstantValue: 0
-        Variable: {fileID: 0}
-      type: 1
-      input: InputValue
-      key: 101
-      debug: 0
-      GetPressed: 1
-      ResetOnDisable: 1
-      OnInputDown:
-        m_PersistentCalls:
-          m_Calls:
-          - m_Target: {fileID: 1641551294}
-            m_TargetAssemblyTypeName: 
-            m_MethodName: OnEnable
-            m_Mode: 1
-            m_Arguments:
-              m_ObjectArgument: {fileID: 0}
-              m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-              m_IntArgument: 0
-              m_FloatArgument: 0
-              m_StringArgument: 
-              m_BoolArgument: 1
-            m_CallState: 2
-      OnInputUp:
-        m_PersistentCalls:
-          m_Calls: []
-      OnLongPress:
-        m_PersistentCalls:
-          m_Calls: []
-      OnLongPressReleased:
-        m_PersistentCalls:
-          m_Calls: []
-      OnDoubleTap:
-        m_PersistentCalls:
-          m_Calls: []
-      OnInputChanged:
-        m_PersistentCalls:
-          m_Calls: []
-      OnInputEnable:
-        m_PersistentCalls:
-          m_Calls: []
-      OnInputDisable:
-        m_PersistentCalls:
-          m_Calls: []
-      DoubleTapTime: 0.3
-      LongPressTime: 0.5
-      SmoothDecrease: 0
-      OnInputPressed:
-        m_PersistentCalls:
-          m_Calls: []
-      OnInputFloat:
-        m_PersistentCalls:
-          m_Calls: []
-    selectedIndex: 0
-  ResetAllInputsOnDisable: 1
-  showInputEvents: 0
-  ResetOnFocusLost: 0
-  OnInputEnabled:
-    m_PersistentCalls:
-      m_Calls: []
-  OnInputDisabled:
-    m_PersistentCalls:
-      m_Calls: []
-  IgnoreOnPause:
-    UseConstant: 1
-    ConstantValue: 1
-    Variable: {fileID: 0}
-  PlayerID: Player0
+    ResponseComponent:
+      m_PersistentCalls:
+        m_Calls: []
+    ResponseSprite:
+      m_PersistentCalls:
+        m_Calls: []
+    ResponseVector3:
+      m_PersistentCalls:
+        m_Calls: []
+    ResponseVector2:
+      m_PersistentCalls:
+        m_Calls: []
+    IntEventList: []
+    AdvancedInteger: 0
+    AdvancedBool: 0
+    InvertBool: 0
+    multiplier: 1
+  ShowEvents: 1
+  SelectedEvent: 0
 --- !u!4 &5916045707621084677 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1175903420998626740, guid: 1c7a0f3efad6ffd4898f40074ea5bcc2,

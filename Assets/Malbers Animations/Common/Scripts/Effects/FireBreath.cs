@@ -31,7 +31,7 @@ namespace MalbersAnimations
             }
         }
 
-        private void OnEnable()
+         protected virtual void OnEnable()
         {
             if (onStart) Activate(true);
         }

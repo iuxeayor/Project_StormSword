@@ -1,8 +1,15 @@
 fileFormatVersion: 2
-guid: 65cd1133c29484a4b8ac1763b7a1478c
+guid: 0235cefa813e33c45b40abf00b1bbe1d
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 4890085278179872738
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Animal Controller/1 - Demos/0 - Sandbox Utilities/DemoLightingSettings.lighting
+  uploadId: 848732

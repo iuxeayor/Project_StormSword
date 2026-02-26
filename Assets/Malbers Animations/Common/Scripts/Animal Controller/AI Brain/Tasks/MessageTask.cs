@@ -20,7 +20,7 @@ namespace MalbersAnimations.Controller.AI
         [Tooltip("The message will be send to the Root of the Hierarchy")]
         public bool SendToRoot = true;
         [NonReorderable] 
-        public MesssageItem[] messages;                                     //Store messages to send it when Enter the animation State
+        public MessageItem[] messages;                                     //Store messages to send it when Enter the animation State
 
 
         public override void StartTask(MAnimalBrain brain, int index)

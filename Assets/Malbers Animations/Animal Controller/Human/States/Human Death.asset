@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -27,14 +35,15 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  Priority: 14
+  Priority: 15
   resetInputOnFailed: 0
   ResetLastState: 0
   General:
     modify: -1
     RootMotion: 1
+    RootMotionRotation: 1
     Sprint: 0
-    Gravity: 0
+    Gravity: 1
     Grounded: 0
     OrientToGround: 0
     CustomRotation: 0
@@ -57,7 +66,7 @@ MonoBehaviour:
   DisableModes: []
   noModes:
     UseConstant: 1
-    ConstantValue: 0
+    ConstantValue: 1
     Variable: {fileID: 0}
   QueueFrom:
   - {fileID: 11400000, guid: 8078fbdb01991b44b9c1351f444b5efe, type: 2}
@@ -65,6 +74,17 @@ MonoBehaviour:
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 1
@@ -96,8 +116,16 @@ MonoBehaviour:
   IdleStrafe: 1
   m_debug: 1
   Editor_Tabs1: 4
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets: []
   ID: {fileID: 11400000, guid: adfa24f62d6db4d40a1d837f4ec1a6e9, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   DisableAllComponents: 0
   DisableMainCollider: 1
   DisableInternalColliders: 0
@@ -107,3 +135,6 @@ MonoBehaviour:
   RigidbodyAngularDrag: 15
   disableAnimal: 0
   disableAnimalTime: 5
+  references:
+    version: 2
+    RefIds: []

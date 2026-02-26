@@ -1,5 +1,6 @@
 using MalbersAnimations.Scriptables;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace MalbersAnimations.Controller
@@ -24,7 +25,7 @@ namespace MalbersAnimations.Controller
             " Use this when you dont want other stances to interrupt ")]
         public BoolReference activeOnly = new();
 
-        [Tooltip("Does this Stance allows Straffing?")]
+        [Tooltip("Does this Stance allows Strafing?")]
         public BoolReference CanStrafe = new();
 
         [Tooltip("After the Stance has exited, it cannot be activated again after the cooldown has passed")]
@@ -48,9 +49,23 @@ namespace MalbersAnimations.Controller
         [Tooltip("Stances to Block while this stance is active")]
         public List<StanceID> DisableStances = new();
 
+
+        [Tooltip("When the stance is playing ,it will override the main capsule collider to fit better the stance")]
+        public bool OverrideCapsule = false;
+
+        public OverrideCapsuleCollider newCapsule = new();
+
         /// <summary> Current Stored Input Value </summary>
         public bool InputValue { get; set; }
 
+        [Tooltip("Strafe Multiplier when movement is detected. This will make the Character be aligned to the Strafe Direction Quickly." +
+            " This value is multiplied by the [State] Movement Strafe Multiplier")]
+        [Range(0, 1)]
+        public float MovementStrafe = 1f;
+        [Tooltip("Strafe Multiplier when there's no movement. This will make the Character be aligned to the Strafe Direction Quickly." +
+            "  This value is multiplied by the [State] Idle Strafe Multiplier")]
+        [Range(0, 1)]
+        public float IdleStrafe = 1f;
 
         /// <summary>Set Block Values to check if anyone else have disabled this Stace</summary>
         public int DisableValue { get; set; }
@@ -67,12 +82,12 @@ namespace MalbersAnimations.Controller
             set
             {
                 persistent.Value = value;
-                 //Debug.Log($" Persistent [{ID.name} ] {value}");
+                //Debug.Log($" Persistent [{ID.name} ] {value}");
             }
         }
 
         /// <summary>Current Activated Stance on the Animal</summary>
-        public bool Active  { get; set; }
+        public bool Active { get; set; }
         //{
         //    get => acti;
         //    set
@@ -83,9 +98,17 @@ namespace MalbersAnimations.Controller
         //}
         //bool acti;
 
-
-        /// <summary>The State try to be activated but a state did not allowed. That State is on the QeueList so Lets queue it</summary>
+        /// <summary>The State try to be activated but a state did not allowed. That State is on the QueueList so Lets queue it</summary>
         public bool Queued { get; set; }
+        //{
+        //    get => queue;
+        //    set
+        //    {
+        //        queue = value;
+        //        Debug.Log($" {ID.name} queue: " + value);
+        //    }
+        //}
+        //bool queue;
 
         public MAnimal Animal { get; set; }
 
@@ -102,7 +125,6 @@ namespace MalbersAnimations.Controller
         public float CoolDownLeft => ExitTime + CoolDown - Time.time;
         /// <summary> Remaining Time to allow to exit the stance</summary>
         public float CanExitTimeLeft => ActivationTime + ExitAfter - Time.time;
-
 
         /// <summary>After Activation, can the Stance be activated again?</summary>
         public bool InCoolDown => CoolDown > 0 && !MTools.ElapsedTime(ExitTime, CoolDown);
@@ -123,7 +145,6 @@ namespace MalbersAnimations.Controller
             Queued = false;
         }
 
-
         internal void ConnectInput(IInputSource InputSource, bool connect)
         {
             if (connect)
@@ -136,7 +157,7 @@ namespace MalbersAnimations.Controller
         {
             if (Active || Queued)
             {
-                Debugging($"Persistent [{value}]");
+                Debugging($"Persistent [{value}]. Queued [{Queued}]");
                 Persistent = value;
             }
             else
@@ -154,7 +175,9 @@ namespace MalbersAnimations.Controller
 
         public void ActivatebyInput(bool Input_Value)
         {
-            if (CanActivate())
+            if (Animal.LockInput) return;
+
+            if (CanActivate)
             {
                 InputValue = Input_Value;
 
@@ -164,13 +187,22 @@ namespace MalbersAnimations.Controller
                 }
                 else
                 {
-                    Animal.Stance_Reset();
+                    if (Animal.ActiveStance.Persistent && Animal.ActiveStance == this)
+                    {
+                        Animal.Stance_ResetPersistent(); //Reset the Stance to the Default one when is persistent
+                    }
+                    else
+                    {
+                        Animal.Stance_Reset();
+                    }
+
                     Queued = false;
                 }
             }
         }
 
         /// <summary> Enable Temporally the State using a Counter </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: hint optimize small method call
         public void Disable_Temp_Restore()
         {
             DisableValue++;
@@ -178,6 +210,7 @@ namespace MalbersAnimations.Controller
         }
 
         /// <summary> Disable Temporally the State using a Counter </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: hint optimize small method call
         public void Disable_Temp()
         {
             DisableValue--;
@@ -185,48 +218,57 @@ namespace MalbersAnimations.Controller
         }
 
         /// <summary> Verifies if the Stance can be activated </summary>
-        public bool CanActivate()
+        public bool CanActivate
         {
-            if (!Enabled) { Debugging("Failed. Stance is Disabled"); return false; }
-            if (!Animal.enabled) { Debugging("Failed. Animal disabled"); return false; }
-            if (DisableTemp) { Debugging($"Failed. Disable by External [{DisableValue}]"); return false; }
-
-
-            //Only Activates the default one
-            if (Animal.ActiveStance != null)
+            get
             {
-                if (Animal.ActiveStance.ActiveOnly && Animal.DefaultStanceID != ID)
-                { Debugging($"Ignored. Active Stance [{Animal.ActiveStance.ID.name}] Is Active Only"); return false; }
+                if (!Enabled) { Debugging("Failed. Stance is Disabled"); return false; }
+                if (!Animal.enabled) { Debugging("Failed. Animal disabled"); return false; }
+                if (DisableTemp) { Debugging($"Failed. Disable by External [{DisableValue}]"); return false; }
 
-                if (Animal.ActiveStance.Persistent) { Debugging($"Ignored. Active Stance [{Animal.ActiveStance.ID.name}] is Persistent"); return false; }
-                if (InCoolDown) { Debugging($"Failed. Stance in CoolDown. Time left {CoolDownLeft:F2}"); return false; }
-                if (!Animal.ActiveStance.CanExit)
+                //Only Activates the default one
+                if (Animal.ActiveStance != null)
                 {
-                    Debugging($"Failed. Active Stance [{Animal.ActiveStance.ID.name}] can't exit yet. Exit After {(Animal.ActiveStance.CanExitTimeLeft):F2}");
-                    return false;
+                    if (Animal.ActiveStance.ActiveOnly && Animal.ActiveStance != this && Animal.DefaultStanceID != ID)
+                    {
+                        Debugging($"Ignored. Next ({ID.name}) Active Stance [{Animal.ActiveStance.ID.name}] Is Active Only");
+                        return false;
+                    }
+
+                    if (Animal.ActiveStance.Persistent && Animal.ActiveStance != this)  //Make sure the stances are not the same
+                    { Debugging($"Ignored. Active Stance [{Animal.ActiveStance.ID.name}] is Persistent"); return false; }
+
+                    if (InCoolDown)
+                    { Debugging($"Failed. Stance in CoolDown. Time left {CoolDownLeft:F2}"); return false; }
+
+                    if (!Animal.ActiveStance.CanExit)
+                    {
+                        Debugging($"Failed. Active Stance [{Animal.ActiveStance.ID.name}] can't exit yet. Exit After {(Animal.ActiveStance.CanExitTimeLeft):F2}");
+                        return false;
+                    }
                 }
+
+                if (HasStates)
+                {
+                    var ActiveState = Animal.ActiveStateID;
+
+                    var ContainState = states.Contains(ActiveState); //Find if the Active State is on the list
+
+                    if (ContainState && !Include)
+                    {
+                        if (OnQueueState(ActiveState)) { Queued = true; }
+                        Debugging($"Failed. Active State [{ActiveState.name}] is Excluded from the allowed States. Set Queued[{Queued}]");
+                        return false;
+                    }
+                    if (!ContainState && Include)
+                    {
+                        if (OnQueueState(ActiveState)) { Queued = true; }
+                        Debugging($"Failed. Active State [{ActiveState.name}] is Not Included in the allowed States. Set Queued[{Queued}]");
+                        return false;
+                    }
+                }
+                return true;
             }
-
-            if (HasStates)
-            {
-                var ActiveState = Animal.ActiveStateID;
-
-                var ContainState = states.Contains(ActiveState); //Find if the Active State is on the list
-
-                if (ContainState && !Include)
-                {
-                    if (OnQueueState(ActiveState)) { Queued = true; }
-                    Debugging($"Failed. Active State [{ActiveState.name}] is Excluded from the allowed States. Set Queued[{Queued}]");
-                    return false;
-                }
-                if (!ContainState && Include)
-                {
-                    if (OnQueueState(ActiveState)) { Queued = true; }
-                    Debugging($"Failed. Active State [{ActiveState.name}] is Not Included in the allowed States. Set Queued[{Queued}]");
-                    return false;
-                }
-            }
-            return true;
         }
 
 
@@ -243,19 +285,18 @@ namespace MalbersAnimations.Controller
             Active = true;
             Queued = false;
 
-            //If we are activating the Default then Release the queue from the last stance
-            if (ID == Animal.DefaultStanceID)
-                Animal.LastActiveStance.Queued = false;
+            //If we are activating the Default then Release the queue from the last stance (BUG)
+            // if (ID == Animal.DefaultStanceID)
+            //    Animal.LastActiveStance.Queued = false;
 
-            events?.OnEnter.Invoke();
+            events?.OnEnter?.Invoke(); //CustomPatch: corrected/improved event usage (here the OnEnter unity events are not guaranteed to be initialized)
         }
 
         internal void Exit()
         {
             Active = false;
             ExitTime = Time.time;
-            events?.OnExit.Invoke();
-
+            events?.OnExit?.Invoke(); //CustomPatch: corrected/improved event usage (here the OnExit unity events are not guaranteed to be initialized)
 
             //Remember to reset the input value of a stance on exit
             if (!Queued) Animal.InputSource?.ResetInput(Input);
@@ -278,26 +319,27 @@ namespace MalbersAnimations.Controller
 
             return activeStateID.Included(states, Include);
 
-           /* var ContainState = states.Contains(activeStateID); //Find if the Active State is on the list
-            if (ContainState && !Include) return false;
-            if (!ContainState && Include) return false;
+            /* var ContainState = states.Contains(activeStateID); //Find if the Active State is on the list
+             if (ContainState && !Include) return false;
+             if (!ContainState && Include) return false;
 
-            return true;*/
+             return true;*/
         }
 
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: force optimize small method call
         internal bool OnQueueState(StateID activeStateID)
         {
             return StateQueue.Contains(activeStateID); //Find if the Active State is on the list
         }
 
-
+        //CustomPatch: Added Conditionals to auto-exclude Debugging calls from builds
         private void Debugging(string value)
         {
 #if UNITY_EDITOR    
             if (Animal.debugStances)
             {
-                Debug.Log($"<B>[{Animal.name}]</B> - <B><color=yellow>[Stances:{ID.name}:{ID.ID}]</color> - <color=white>{value}</color></B>", Animal.gameObject);
+                MDebug.Log($"<B>[{Animal.name}]</B> - <B><color=yellow>[Stances:{ID.name}({ID.ID})]</color> - <color=white>{value}</color></B>", Animal.gameObject);
             }
 #endif
         }

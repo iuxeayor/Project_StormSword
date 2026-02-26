@@ -3,10 +3,12 @@ using UnityEngine;
 
 namespace MalbersAnimations.Reactions
 {
-    [System.Serializable]
-    [AddTypeMenu("Malbers/Animal/State Enable-Disable")]
+    [System.Serializable, AddTypeMenu("Malbers/Animal/State Enable-Disable")]
     public class StateEnableReaction : MReaction
-    { 
+    {
+        override public string DynamicName =>
+               $"Enable-Disable States [Total: {(states != null ? states.Length : 0)}]";
+
         public IDEnable<StateID>[] states;
 
         protected override bool _TryReact(Component component)

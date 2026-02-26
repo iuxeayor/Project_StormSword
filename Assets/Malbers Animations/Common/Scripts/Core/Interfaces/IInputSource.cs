@@ -11,7 +11,7 @@ namespace MalbersAnimations
 
         /// <summary>Allows the Input to move the Character (Use Axis)</summary>
         bool MoveCharacter { get; set; }
-         
+
         /// <summary>Returns the Input Action by its name</summary>
         IInputAction GetInput(string input);
         void EnableInput(string input);
@@ -30,11 +30,16 @@ namespace MalbersAnimations
         void ResetInput(string name);
 
         /// <summary>BroadCast the Move Axis Value so any component can listen to it (x-> Horizontal, Y-> UpDown Z-> Forward-Vertical </summary> 
-        System.Action<Vector3> OnMoveAxis {  get; set; }
+        System.Action<Vector3> OnMoveAxis { get; set; }
 
-        ///// <summary>BroadCast the Up DOwn Value so any component can listen to it</summary> 
-        //System.Action<float> UpDown {  get; set; }
+        Vector3 MoveAxis { get; set; }
 
+        /// <summary>  Send the source to the Input so it can extract the values from it.
+        /// The horse uses this to extract the Player Input Component from the Rider </summary>
+        void PlayerInput(IInputSource player);
+
+        /// <summary> Reference of the IInputSource Transform</summary>
+        Transform transform { get; }
     }
 
     public interface IInputAction
@@ -46,11 +51,11 @@ namespace MalbersAnimations
         bool GetValue { get; }
 
         string Name { get; }
- 
+
         BoolEvent InputChanged { get; }
     }
-   
-    
+
+
 
     /// <summary> Common Entries for all Inputs on the Store </summary>
     public interface IInputSystem
@@ -61,12 +66,14 @@ namespace MalbersAnimations
         bool GetButtonUp(string button);
         bool GetButton(string button);
     }
-     
+
     /// <summary>Function Needed for moving Characters</summary>
     public interface ICharacterMove
     {
         /// <summary>Move the Character using a Direction</summary>
-        void Move(Vector3 move);
+        void Move(Vector3 Direction);
+
+        void RotateAtDirection(Vector3 Direction);
 
         /// <summary>Stop the Character from moving</summary>
         void StopMoving();
@@ -76,21 +83,50 @@ namespace MalbersAnimations
 
         /// <summary>Sends to the the Raw Input Axis </summary>
         void SetInputAxis(Vector2 inputAxis);
+
+        bool MovementDetected { get; }
+
+        Transform transform { get; }
     }
 
 
     /// <summary> Default Unity Input</summary>
     public class DefaultInput : IInputSystem
     {
-        public float GetAxis(string Axis) => Input.GetAxis(Axis);
+        public float GetAxis(string Axis) =>
+#if  !ENABLE_LEGACY_INPUT_MANAGER
+            0;
+#else
+            Input.GetAxis(Axis);
+#endif
 
-        public float GetAxisRaw(string Axis) => Input.GetAxisRaw(Axis);
+        public float GetAxisRaw(string Axis) =>
+#if !ENABLE_LEGACY_INPUT_MANAGER
+            0;
+#else
+            Input.GetAxis(Axis);
+#endif
 
-        public bool GetButton(string button) => Input.GetButton(button);
+        public bool GetButton(string button) =>
+#if !ENABLE_LEGACY_INPUT_MANAGER
+             false;
+#else
+             Input.GetButton(button);
+#endif
 
-        public bool GetButtonDown(string button) => Input.GetButtonDown(button);
+        public bool GetButtonDown(string button) =>
+#if !ENABLE_LEGACY_INPUT_MANAGER
+            false;
+#else
+        Input.GetButtonDown(button);
+#endif
 
-        public bool GetButtonUp(string button) => Input.GetButtonUp(button);
+        public bool GetButtonUp(string button) =>
+#if !ENABLE_LEGACY_INPUT_MANAGER
+            false;
+#else
+            Input.GetButtonUp(button);
+#endif
 
         /// <summary> This Gets the Current Input System that is being used... Unity's, CrossPlatform or Rewired</summary>
         public static IInputSystem GetInputSystem(string PlayerID = "")
@@ -104,9 +140,6 @@ namespace MalbersAnimations
                 Input_System = new RewiredInput(player);
             else
                 Debug.LogError("NO REWIRED PLAYER WITH THE ID:" + PlayerID + " was found");
-#endif
-#if OOTII_EI
-            Input_System = new EasyInput();
 #endif
             return Input_System;
         }
@@ -148,35 +181,4 @@ namespace MalbersAnimations
         }
     }
 #endif
-
-#if OOTII_EI
-    public class EasyInput : IInputSystem
-    {
-        public float GetAxis(string Axis)
-        {
-            return com.ootii.Input.InputManager.GetValue(Axis);
-        }
-
-        public float GetAxisRaw(string Axis)
-        {
-           return GetAxis(Axis);
-        }
-
-        public bool GetButton(string button)
-        {
-            return com.ootii.Input.InputManager.IsPressed(button);
-        }
-
-        public bool GetButtonDown(string button)
-        {
-            return com.ootii.Input.InputManager.IsJustPressed(button);
-        }
-
-        public bool GetButtonUp(string button)
-        {
-            return com.ootii.Input.InputManager.IsJustReleased(button);
-        }
-    }
-#endif
-
 }

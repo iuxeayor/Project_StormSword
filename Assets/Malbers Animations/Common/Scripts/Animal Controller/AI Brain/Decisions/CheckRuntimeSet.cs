@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace MalbersAnimations.Controller.AI
 {
+    public enum CheckSetSize { Empty, Equal, Greater, Less }
     public class CheckRuntimeSet : MAIDecision
     {
-        public enum CheckSetSize { Empty, Equal, Greater, Less }
 
         public override string DisplayName => "Runtime Set/Check Runtime Set";
         [RequiredField] public RuntimeGameObjects Set;
@@ -14,7 +14,7 @@ namespace MalbersAnimations.Controller.AI
         public CheckSetSize CheckSize = CheckSetSize.Equal;
 
         [Tooltip("Size of the Current Set")]
-        [Hide("CheckSize",true,0)]
+        [Hide("CheckSize", true, 0)]
         public int Size = 0;
 
         public override bool Decide(MAnimalBrain brain, int Index)

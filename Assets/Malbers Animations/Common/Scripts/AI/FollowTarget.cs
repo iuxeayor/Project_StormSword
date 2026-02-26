@@ -1,24 +1,22 @@
-﻿using UnityEngine;
+﻿using MalbersAnimations.Scriptables;
+using UnityEngine;
 
 namespace MalbersAnimations
 {
     [AddComponentMenu("Malbers/AI/Follow Target")]
-
-    /// <summary> Simple follow target for the animal </summary>
     public class FollowTarget : MonoBehaviour
     {
-        public Transform target;
+        public TransformReference target;
         [Min(0)] public float stopDistance = 3;
         [Min(0)] public float SlowDistance = 6;
         [Tooltip("Limit for the Slowing Multiplier to be applied to the Speed Modifier")]
-        [Range(0, 1)]
-        [SerializeField] private float slowingLimit = 0.3f;
-        ICharacterMove animal;
+        [Range(0, 1)][SerializeField] private float slowingLimit = 0.3f;
 
+        public bool LookAt = true; // Boolean to enable or disable LookAt in the Inspector
 
+        private ICharacterMove animal;
+        private float RemainingDistance;
 
-
-        /// <summary>Used to Slow Down the Animal when its close the Destination</summary>
         public float SlowMultiplier
         {
             get
@@ -31,39 +29,50 @@ namespace MalbersAnimations
             }
         }
 
-        private float RemainingDistance;
-
-        // Use this for initialization
-        void Start()
+        void Awake()
         {
             animal = GetComponentInParent<ICharacterMove>();
         }
 
-        // Update is called once per frame
-        void Update()
+        void FixedUpdate()
         {
-            Vector3 Direction = (target.position - transform.position).normalized;          //Calculate the direction from the animal to the target
-            RemainingDistance = Vector3.Distance(transform.position, target.position);      //Calculate the distance..
+            if (target == null || target.Value == null) return; // Ensure target.Value is not null
 
+            Vector3 direction = (target.Value.position - transform.position).normalized;
+            RemainingDistance = Vector3.Distance(transform.position, target.Value.position);
 
-            //Move the Animal if we are not on the Stop Distance Radius
-            animal.Move(RemainingDistance > stopDistance ? Direction * SlowMultiplier : Vector3.zero);
+            if (RemainingDistance > stopDistance)
+            {
+                animal.Move(direction * SlowMultiplier);
+            }
+            else
+            {
+                if (LookAt)
+                {
+                    animal.RotateAtDirection(direction);
+                }
+                else
+                {
+                    animal.StopMoving();
+                }
+            }
         }
+
+
+
 
         private void OnDisable()
         {
-            animal.Move(Vector3.zero);      //In case this script gets disabled stop the movement of the Animal
+            animal.Move(Vector3.zero);
         }
 
 #if UNITY_EDITOR
-
         private void OnDrawGizmos()
         {
             var center = transform.position;
 
-            if (Application.isPlaying && target)
+            if (Application.isPlaying && target.Value)
             {
-
                 center = target.position;
             }
 

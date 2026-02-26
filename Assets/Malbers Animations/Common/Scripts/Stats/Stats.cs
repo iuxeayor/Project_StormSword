@@ -13,8 +13,9 @@ namespace MalbersAnimations
     [AddComponentMenu("Malbers/Stats/Stats")]
     public class Stats : MonoBehaviour, IAnimatorListener, IRestart
     {
-        //[Tooltip("Track these Stats in a Runtime Set")]
-        //[CreateScriptableAsset] public RuntimeStats Set;
+#pragma warning disable CS0414 // Add readonly modifier
+        [SerializeField] private int Selected_StatIndex = 0; //Editor Only
+#pragma warning restore CS0414 // Add readonly modifier
 
         /// <summary>List of Stats</summary>
         public List<Stat> stats = new();
@@ -51,7 +52,7 @@ namespace MalbersAnimations
         }
 
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             foreach (var stat in stats_D)
             {
@@ -62,12 +63,20 @@ namespace MalbersAnimations
                 }
                 stat.Value.InitializeStat(this);
             }
+
+
+            foreach (var stat in stats)
+            {
+                stat.InitializeStat(this);
+            }
         }
 
 
         /// <summary>Restart all Stat parameters IRestart interface</summary>
         public virtual void Restart()
         {
+            if (!gameObject.activeInHierarchy) return;
+
             StopAllCoroutines();
 
             foreach (var s in stats_D)
@@ -144,10 +153,21 @@ namespace MalbersAnimations
         /// <summary>Find a Stat Using a int Value for the ID and Return if the Stat is on the List. Also Saves it to the PinnedStat</summary>
         public virtual Stat Stat_Get(int ID)
         {
-            if (stats_D != null && stats_D.TryGetValue(ID, out PinnedStat))
+            if (stats_D == null) Initialize(); //Initialize the Dictionary if is not initialized
+
+            if (stats_D.TryGetValue(ID, out PinnedStat))
                 return PinnedStat;
             return null;
         }
+
+        public virtual bool TryGetValue(int ID, out Stat result)
+        {
+            if (stats_D.TryGetValue(ID, out result))
+                return true;
+            return false;
+        }
+
+
         /// <summary>Find a Stat Using an IntVar and Return if the Stat is on the List. Also Saves it to the PinnedStat</summary>
         public virtual Stat Stat_Get(IntVar ID) => Stat_Get(ID.Value);
         public virtual float Stat_GetValue(StatID ID) => Stat_Get(ID).Value;
@@ -160,7 +180,6 @@ namespace MalbersAnimations
         public virtual void Stat_ModifyValue(StatID ID, float Value) => Stat_Get(ID)?.Modify(Value);
         public virtual void Stat_ModifyValue(int ID, float Value) => Stat_Get(ID)?.Modify(Value);
         public virtual void Stat_ModifyValue(string Name, float Value) => Stat_Get(Name)?.Modify(Value);
-
         public virtual void Stat_ModifyValue(StatID ID, float Value, StatOption Type) => Stat_Get(ID)?.Modify(Value, Type);
         public virtual void Stat_ModifyValue(string Name, float Value, StatOption Type) => Stat_Get(Name)?.Modify(Value, Type);
 
@@ -242,21 +261,12 @@ namespace MalbersAnimations
         public virtual void DegenerateOn(StatID ID) => Stat_Degenerate_On(ID);
 
 
-
-
-
-
-
 #if UNITY_EDITOR
 
         [ContextMenu("Create/Stamina")]
         private void ConnectStamina()
         {
-            if (stats == null) stats = new List<Stat>();
-
-
             var staminaID = MTools.GetInstance<StatID>("Stamina");
-
 
             if (staminaID != null)
             {
@@ -278,25 +288,27 @@ namespace MalbersAnimations
                     };
                     stats.Add(staminaStat);
                 }
+                MTools.SetDirty(this);
+            }
+        }
 
+        [ContextMenu("Connect/Stamina to Animal Sprint")]
+        void ConnectStaminaToAnimal()
+        {
+
+            var staminaID = MTools.GetInstance<StatID>("Stamina");
+            var staminaStat = Stat_Get(staminaID);
+
+            if (staminaStat != null)
+            {
                 //Connect to the Animal Controller in case it exist
                 var method = this.GetUnityAction<bool>("MAnimal", "UseSprint");
 
                 if (method != null)
                 {
-                    Debug.Log("medho" + method.ToString());
                     UnityEditor.Events.UnityEventTools.AddBoolPersistentListener(staminaStat.OnStatBelow, method, false);
                     UnityEditor.Events.UnityEventTools.AddBoolPersistentListener(staminaStat.OnStatAbove, method, true);
                 }
-
-                MEvent UIStamina = MTools.GetInstance<MEvent>("UI Stamina Stat");
-
-                if (UIStamina)
-                {
-                    UnityEditor.Events.UnityEventTools.AddPersistentListener(staminaStat.OnValueChangeNormalized, UIStamina.Invoke);
-                    UnityEditor.Events.UnityEventTools.AddPersistentListener(staminaStat.OnStatFull, UIStamina.Invoke);
-                }
-
 
                 var onSprintEnable = this.GetFieldClass<BoolEvent>("MAnimal", "OnSprintEnabled");
 
@@ -305,10 +317,30 @@ namespace MalbersAnimations
                     UnityEditor.Events.UnityEventTools.AddObjectPersistentListener<StatID>(onSprintEnable, Stat_Pin, staminaID);
                     UnityEditor.Events.UnityEventTools.AddPersistentListener(onSprintEnable, Stat_Pin_Degenerate);
                 }
+            }
+        }
+
+
+        [ContextMenu("Connect/Stamina to UI Events")]
+        void ConnectStaminatoUI()
+        {
+            var staminaID = MTools.GetInstance<StatID>("Stamina");
+            var staminaStat = Stat_Get(staminaID);
+
+            if (staminaStat != null)
+            {
+                MEvent UIStamina = MTools.GetInstance<MEvent>("UI Stamina Stat");
+
+                if (UIStamina)
+                {
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(staminaStat.OnValueChangeNormalized, UIStamina.Invoke);
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(staminaStat.OnStatFull, UIStamina.Invoke);
+                }
 
                 MTools.SetDirty(this);
             }
         }
+
 
         [ContextMenu("Create/Health")]
         void CreateHealth()
@@ -317,7 +349,6 @@ namespace MalbersAnimations
 
             if (health != null)
             {
-
                 var HealthStat = new Stat()
                 {
                     ID = health,
@@ -326,15 +357,19 @@ namespace MalbersAnimations
                     ImmuneTime = new FloatReference(0.1f)
                 };
                 stats.Add(HealthStat);
+                MTools.SetDirty(this);
+            }
+        }
 
+        [ContextMenu("Connect/Health to UI Events")]
 
-                var deathID = MTools.GetInstance<StateID>("Death");
+        void ConnectHealthUI()
+        {
+            var health = MTools.GetInstance<StatID>("Health");
+            var HealthStat = stats.Find(x => x.ID == health);
 
-                var method = this.GetUnityAction<StateID>("MAnimal", "State_Activate");
-
-                if (method != null) UnityEditor.Events.UnityEventTools.AddObjectPersistentListener<StateID>(HealthStat.OnStatEmpty, method, deathID);
-
-
+            if (HealthStat != null)
+            {
                 MEvent UIHealth = MTools.GetInstance<MEvent>("UI Health Stat");
 
                 if (UIHealth)
@@ -347,7 +382,7 @@ namespace MalbersAnimations
             }
         }
 
-        [ContextMenu("Connect Death")]
+        [ContextMenu("Connect/Health Empty to Death State")]
         void ConnectHealthDeath()
         {
             var health = MTools.GetInstance<StatID>("Health");
@@ -358,7 +393,7 @@ namespace MalbersAnimations
             {
                 var method = this.GetUnityAction<StateID>("MAnimal", "State_Activate");
                 if (method != null)
-                    UnityEditor.Events.UnityEventTools.AddObjectPersistentListener<StateID>(HealthStat.OnStatEmpty, method, deathID);
+                    UnityEditor.Events.UnityEventTools.AddObjectPersistentListener(HealthStat.OnStatEmpty, method, deathID);
             }
         }
 
@@ -383,33 +418,41 @@ namespace MalbersAnimations
                     DegenRate = new FloatReference(10)
                 };
                 stats.Add(HealthStat);
+                MTools.SetDirty(this);
+            }
+        }
 
+        [ContextMenu("Connect/Mana to UI Events")]
+        void ConnectManaUI()
+        {
+            var Mana = MTools.GetInstance<StatID>("Mana");
+            var ManaStat = stats.Find(x => x.ID == Mana);
 
-                MEvent UIHealth = MTools.GetInstance<MEvent>("UI Mana Stat");
+            if (ManaStat != null)
+            {
 
-                if (UIHealth)
+                MEvent ManaUIStat = MTools.GetInstance<MEvent>("UI Mana Stat");
+
+                if (ManaUIStat)
                 {
-                    UnityEditor.Events.UnityEventTools.AddPersistentListener(HealthStat.OnValueChangeNormalized, UIHealth.Invoke);
-                    UnityEditor.Events.UnityEventTools.AddPersistentListener(HealthStat.OnStatFull, UIHealth.Invoke);
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(ManaStat.OnValueChangeNormalized, ManaUIStat.Invoke);
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(ManaStat.OnStatFull, ManaUIStat.Invoke);
                 }
 
                 MTools.SetDirty(this);
             }
         }
 
-        private void Reset()
+        void Reset()
         {
-            if (stats == null) stats = new List<Stat>();
+            stats = new List<Stat>();
 
             CreateHealth();
-            MTools.SetDirty(this);
+            ConnectHealthDeath();
         }
-
 
 #endif
     }
-
-
     public enum StatCondition { HasStat, Enabled, Full, Empty, Regenerating, Degenerating, Inmune, Value, ValueNormalized, MaxValue, MinValue }
 
     ///──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -425,18 +468,18 @@ namespace MalbersAnimations
 
         [Tooltip("Enable/Disable the Stat. Disable Stats cannot be modified")]
         public bool active = true;
-        [Tooltip("Key Idendifier for the Stat")]
+        [Tooltip("Key Identifier for the Stat")]
         public StatID ID;
         [Tooltip("Current Value of the Stat")]
         public FloatReference value = new(0);
-        [Tooltip("Maximun Value of the Stat")]
+        [Tooltip("Maximum Value of the Stat")]
         public FloatReference maxValue = new(100);
         [Tooltip("Minimum Value of the Stat")]
         public FloatReference minValue = new();
         [Tooltip("If the Stat is Empty it will be disabled to avoid future changes")]
         public BoolReference DisableOnEmpty = new();
 
-        [Tooltip("Round the Stat value to decimal values.\n0 will be set to integer\n-1 will ingore the round Logic")]
+        [Tooltip("Round the Stat value to decimal values.\n0 will be set to integer\n-1 will ignore the round Logic")]
         public IntReference Round = new(-1);
 
         /// <summary>Multiplier to modify the Stat value</summary>
@@ -463,8 +506,12 @@ namespace MalbersAnimations
         public BoolReference immune = new();
 
 
-        /// <summary>If the ResetStat funtion is called it will reset to Max or Low Value</summary>
+        /// <summary>If the ResetStat function is called it will reset to Max or Low Value</summary>
         public ResetTo resetTo = ResetTo.MaxValue;
+
+        [Tooltip("Reset the Stat when the Stat is Enabled")]
+        public BoolReference ResetOnEnable = new(true);
+
         /// <summary> Save the Last State of the Regeneration bool</summary>
         private bool regenerate_LastValue;
         /// <summary> Save the Last State of the Regeneration bool</summary>
@@ -525,6 +572,8 @@ namespace MalbersAnimations
                 active = value;
 
                 OnActive.Invoke(value);
+
+                if (active && ResetOnEnable.Value) ResetValue(); //Reset the Stat if is Enabled
 
                 Debbuging($"Active: {value}");
 
@@ -670,8 +719,9 @@ namespace MalbersAnimations
             DefaultValue = Value;
 
             DefaultMultiplier = Multiplier;
-            DefaultDegenRate = RegenRate.Value;
+            DefaultDegenRate = DegenRate.Value;
             DefaultRegenRate = DegenRate.Value;
+
 
 
             I_Regeneration = null;
@@ -712,15 +762,14 @@ namespace MalbersAnimations
 
         public void SetMultiplier(float value) => multiplier.Value = value;
 
-
-        internal void ValueEvents()
+        public virtual void ValueEvents()
         {
             if (!Active) return; //Do not Invoke Events if the Stat is Disabled!!!!
 
             OnValueChangeNormalized.Invoke(NormalizedValue);
             OnValueChange.Invoke(value);
 
-            if (this.value == minValue.Value)
+            if (this.value <= minValue.Value)
             {
                 this.value.Value = minValue.Value;
                 OnStatEmpty.Invoke();   //if the Value is 0 invoke Empty Stat
@@ -732,7 +781,7 @@ namespace MalbersAnimations
                 }
 
             }
-            else if (this.value == maxValue.Value)
+            else if (this.value >= maxValue.Value)
             {
                 this.value.Value = maxValue.Value;
                 OnStatFull.Invoke();    //if the Value is 0 invoke Empty Stat
@@ -768,8 +817,10 @@ namespace MalbersAnimations
                 return value >= Above;
         }
 
-        internal void SetValue(float value)
+        public virtual void SetValue(float value)
         {
+            if (!Active) return;
+
             var RealValue = Mathf.Clamp(value, MinValue, MaxValue);
 
             if ((!Active) ||                                    //If the  Stat is not Active do nothing 
@@ -779,7 +830,7 @@ namespace MalbersAnimations
 
             this.value.Value = RealValue;
 
-            Debbuging($"Value: {RealValue}");
+            //Debbuging($"Value: {RealValue}");
 
             ValueEvents();
         }
@@ -812,6 +863,11 @@ namespace MalbersAnimations
             if (!IsImmune && Active)
             {
                 Value += newValue * Multiplier; //Apply the Multiplier!
+
+                JustModified = true; //This is to avoid the Stat to be modified while the Coroutine is running
+                //Reset the JustModified after a frame 
+                Owner.Delay_Action(() => { JustModified = false; });
+
                 StartRegeneration();
                 if (!Regenerate)
                     StartDegeneration();
@@ -819,6 +875,8 @@ namespace MalbersAnimations
                 SetInmune();
             }
         }
+
+        private bool JustModified = false;
 
         public virtual void UpdateStat()
         {
@@ -833,8 +891,9 @@ namespace MalbersAnimations
         {
             if (!IsImmune && Active)
             {
-                StopSlowModification();
-                Owner.StartCoroutine(out I_ModifySlow, C_SmoothChangeValue(newValue, time));
+                StopCoroutine(I_ModifySlow); //If there was a modification active .... interrupt it
+                I_ModifySlow = C_SmoothChangeValue(newValue, time);
+                Owner.StartCoroutine(I_ModifySlow);
                 SetInmune();
             }
         }
@@ -844,8 +903,8 @@ namespace MalbersAnimations
         {
             if (!Active) return;            //Ignore if the Stat is Disable
             StopCoroutine(I_ModifyPerTicks);
-
-            Owner.StartCoroutine(out I_ModifyPerTicks, C_ModifyTicksValue(newValue, ticks, timeBetweenTicks));
+            I_ModifyPerTicks = C_ModifyTicksValue(newValue, ticks, timeBetweenTicks);
+            Owner.StartCoroutine(I_ModifyPerTicks);
         }
 
         /// <summary> Add or Remove Value the 'MaxValue' of the Stat </summary>
@@ -915,7 +974,6 @@ namespace MalbersAnimations
             StopSlowModification();
         }
 
-
         public virtual void RegenerateOverTime(float time)
         {
             if (time <= 0)
@@ -932,40 +990,50 @@ namespace MalbersAnimations
         {
             if (ImmuneTime > 0)
             {
-                StopCoroutine(I_IsInmune);
                 if (Owner != null && Owner.enabled && Owner.gameObject.activeInHierarchy)
-                    Owner.StartCoroutine(out I_IsInmune, C_InmuneTime());
+                {
+                    StopCoroutine(I_IsInmune); //If there was a active .... interrupt it
+                    I_IsInmune = C_InmuneTime();
+                    Owner.StartCoroutine(I_IsInmune);
+                }
             }
         }
 
         private void StopCoroutine(IEnumerator Cor)
         {
-            if (Cor != null) Owner.StopCoroutine(Cor);
+            if (Cor != null)
+                Owner.StopCoroutine(Cor);
         }
 
         protected virtual void StartRegeneration()
         {
+            if (Owner.enabled == false || Owner.gameObject.activeInHierarchy == false) return; //If the Owner is not enabled or not active do nothing
+
             StopRegeneration();
 
             if (RegenRate == 0 || !Regenerate) return;   //Means if there's no Regeneration
 
-            Owner.StartCoroutine(out I_Regeneration, C_Regenerate());
+            I_Regeneration = C_Regenerate();
+            Owner.StartCoroutine(I_Regeneration);
         }
 
 
         protected virtual void StartDegeneration()
         {
-            StopDegeneration();
-            if (DegenRate == 0 || !Degenerate) return;  //Means there's no Degeneration
+            if (Owner.enabled == false || Owner.gameObject.activeInHierarchy == false) return; //If the Owner is not enabled or not active do nothing
 
-            Owner.StartCoroutine(out I_Degeneration, C_Degenerate());
+            if (DegenRate == 0 || !Degenerate) return;  //Means there's no Degeneration
+            StopDegeneration();
+
+            I_Degeneration = C_Degenerate();
+            Owner.StartCoroutine(I_Degeneration);
         }
 
         protected virtual void StopRegeneration()
         {
             if (I_Regeneration != null)
             {
-                StopCoroutine(I_Regeneration);    //If there was a regenation active .... interrupt it
+                StopCoroutine(I_Regeneration);    //If there was a regeneration active .... interrupt it
                 OnRegenerate.Invoke(false);
             }
 
@@ -993,7 +1061,7 @@ namespace MalbersAnimations
 
         protected virtual void StopSlowModification()
         {
-            StopCoroutine(I_ModifySlow);       //If there was a regenation active .... interrupt it
+            StopCoroutine(I_ModifySlow);       //If there was a regeneration active .... interrupt it
             I_ModifySlow = null;
         }
 
@@ -1002,61 +1070,41 @@ namespace MalbersAnimations
         {
             switch (modify)
             {
-                case StatOption.AddValue:
-                    Modify(Value);
-                    break;
-                case StatOption.SetValue:
-                    this.Value = Value;
-                    break;
-                case StatOption.SubstractValue:
-                    Modify(-Value);
-                    break;
-                case StatOption.ModifyMaxValue:
-                    ModifyMAX(Value);
-                    break;
-                case StatOption.SetMaxValue:
-                    MaxValue = Value;
-                    break;
+                case StatOption.AddValue: Modify(Value); break;
+                case StatOption.SetValue: this.Value = Value; break;
+                case StatOption.SubstractValue: Modify(-Value); break;
+                case StatOption.ModifyMaxValue: ModifyMAX(Value); break;
+                case StatOption.SetMaxValue: MaxValue = Value; break;
                 case StatOption.Degenerate:
-                    if (Value > 0) DegenRate = Value;
+                    DegenRate.Value = Value;
+                    Debbuging($"DegenRate: {DegenRate.Value}");
                     Degenerate = true;
                     break;
-                case StatOption.DegenerateOff:
-                    Degenerate = false;
-                    break;
                 case StatOption.Regenerate:
-                    if (Value > 0) Regenerate = true;
                     RegenRate = Value;
+                    Debbuging($"RegenRate: {Value}");
+                    Regenerate = true;
                     break;
-                case StatOption.RegenerateOff:
-                    Regenerate = false;
-                    break;
-                case StatOption.Reset:
-                    ResetValue();
-                    break;
-                case StatOption.ReduceByPercent:
-                    Modify(-(MaxValue * Value / 100));
-                    break;
-                case StatOption.IncreaseByPercent:
-                    Modify(MaxValue * Value / 100);
-                    break;
-                case StatOption.Multiplier:
-                    Multiplier = Value;
-                    break;
+                case StatOption.DegenerateOff: Degenerate = false; break;
+                case StatOption.RegenerateOff: Regenerate = false; break;
+                case StatOption.Reset: ResetValue(); break;
+                case StatOption.ReduceByPercent: Modify(-(MaxValue * Value / 100)); break;
+                case StatOption.IncreaseByPercent: Modify(MaxValue * Value / 100); break;
+                case StatOption.Multiplier: Multiplier = Value; break;
                 case StatOption.ResetToMax: Reset_to_Max(); break;
                 case StatOption.ResetToMin: Reset_to_Min(); break;
-                case StatOption.None: break;
                 case StatOption.Enable: SetActive(Value != 0); break;
                 case StatOption.Inmune: SetImmune(Value != 0); break;
                 case StatOption.RegenerateOn: Regenerate = true; break;
                 case StatOption.DegenerateOn: Degenerate = true; break;
                 case StatOption.RestoreRegeneration: RestoreRegenRate(); break;
                 case StatOption.RestoreDegeneration: RestoreDegenRate(); break;
-                case StatOption.RestoreValue: Value = DefaultValue; break;
+                case StatOption.RestoreValue: this.Value = DefaultValue; break;
                 case StatOption.RestoreMax: RestoreMax(); break;
                 case StatOption.RestoreMin: RestoreMin(); break;
                 case StatOption.RestoreMultiplier: RestoreMultiplier(); break;
                 case StatOption.MultiplierModify: SetMultiplier(Multiplier + Value); break;
+                case StatOption.None: break;
                 default:
                     break;
             }
@@ -1064,9 +1112,7 @@ namespace MalbersAnimations
 
 
         #region Coroutines
-        /// <summary>
-        ///  I need this to use coroutines in this class because it does not inherit from Monobehaviour, Also to Identify where is this Stat coming from
-        /// </summary>
+        /// <summary>  I need this to use coroutines in this class because it does not inherit from Monobehaviour, Also to Identify where is this Stat coming from  </summary>
         public Stats Owner { get; private set; }
         private IEnumerator I_Regeneration;
         private IEnumerator I_Degeneration;
@@ -1117,13 +1163,16 @@ namespace MalbersAnimations
             IsRegenerating = true;
             OnRegenerate.Invoke(true);
 
-
-            // OnRegenerate.Invoke(true);
-
             while (Regenerate && Value < MaxValue)
             {
-                Value += (RegenRate * Time.deltaTime);
+                if (JustModified) //If the Stat was modified while regenerating, stop the regeneration
+                {
+                    Debbuging($"Regeneration Stopped because the Stat was just modified");
+                    yield break;
+                }
+
                 yield return null;
+                Value += (RegenRate * Time.deltaTime);
             }
 
             IsRegenerating = false;
@@ -1145,8 +1194,14 @@ namespace MalbersAnimations
 
             while (Degenerate && Value > MinValue)
             {
-                Value -= (DegenRate * Time.deltaTime);
+                if (JustModified) //If the Stat was modified while regenerating, stop the regeneration
+                {
+                    Debbuging($"Degeneration Stopped because the Stat was just modified");
+                    yield break;
+                }
+
                 yield return null;
+                Value -= (DegenRate * Time.deltaTime);
             }
 
             IsDegenerating = false;
@@ -1263,7 +1318,7 @@ namespace MalbersAnimations
         ResetToMin,
         /// <summary>Enable Disable the Stat</summary>
         Enable,
-        /// <summary>Set the Imnune Option of the Stat</summary>
+        /// <summary>Set the Immune Option of the Stat</summary>
         Inmune,
         [InspectorName("Regenerate/Start")]
         RegenerateOn,

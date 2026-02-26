@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace MalbersAnimations.Reactions
@@ -12,8 +13,14 @@ namespace MalbersAnimations.Reactions
     {
         public override Type ReactionType => typeof(Component);
 
-        [SerializeReference, SubclassSelector]
-        public List<Reaction> reactions = new();
+        [SerializeReference] public List<Reaction> reactions = new();
+
+        public ListReaction() => reactions = new List<Reaction>();
+
+        public ListReaction(List<Reaction> reactions) => this.reactions = reactions;
+
+        public ListReaction(Reaction[] reactions) => this.reactions = reactions.ToList();
+
 
         protected override bool _TryReact(Component component)
         {

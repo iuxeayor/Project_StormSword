@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -31,8 +39,9 @@ MonoBehaviour:
   resetInputOnFailed: 1
   ResetLastState: 0
   General:
-    modify: 7423
+    modify: 15615
     RootMotion: 0
+    RootMotionRotation: 0
     Sprint: 1
     Gravity: 0
     Grounded: 0
@@ -51,6 +60,7 @@ MonoBehaviour:
     modifier:
       modify: 7423
       RootMotion: 1
+      RootMotionRotation: 0
       Sprint: 0
       Gravity: 0
       Grounded: 0
@@ -80,6 +90,17 @@ MonoBehaviour:
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 1
@@ -110,9 +131,17 @@ MonoBehaviour:
   MovementStrafe: 1
   IdleStrafe: 1
   m_debug: 1
-  Editor_Tabs1: 1
+  Editor_Tabs1: 4
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets: []
   ID: {fileID: 11400000, guid: c44e7e8d6840aa243b6c33ec85052763, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   Bank: 45
   PitchLimit: 80
   BankStrafe: 20
@@ -171,6 +200,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 17
   trigger: 0
+  avoidLerp: 7
   FlapSpeed: 1
   GlideSpeed: 1
   GlideOnly:
@@ -208,3 +238,6 @@ MonoBehaviour:
   BoneName: Head
   BoneOffsetPos: {x: 0, y: 0, z: 0}
   BlockLandDist: 0.4
+  references:
+    version: 2
+    RefIds: []

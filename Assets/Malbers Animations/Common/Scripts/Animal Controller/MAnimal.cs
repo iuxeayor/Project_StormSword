@@ -1,21 +1,24 @@
 ﻿using MalbersAnimations.Events;
 using MalbersAnimations.Scriptables;
-using MalbersAnimations.Utilities;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace MalbersAnimations.Controller
 {
-    /// <summary>  This will controll all Animals Motion
+    /// <summary>  This will control all Animals Motion
     /// See changelog here https://malbersanimations.gitbook.io/animal-controller/annex/changelog
     /// </summary>
 
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/main-components/manimal-controller")]
     [DefaultExecutionOrder(-10)]
     [SelectionBase]
-    [AddComponentMenu("Malbers/Animal Controller/Animal")]
+    [AddComponentMenu("Malbers/Animal Controller/Animal Controller")]
     public partial class MAnimal : MonoBehaviour,
         IAnimatorListener, ICharacterMove, IGravity, IObjectCore,
         IRandomizer, IMAnimator, ISleepController, IMDamagerSet, ILockCharacter,
@@ -49,6 +52,7 @@ namespace MalbersAnimations.Controller
         [HideInInspector, SerializeField] private bool showPivots = true;
         [HideInInspector, SerializeField] private bool showModeList = true;
         [HideInInspector, SerializeField] private bool showStateList = true;
+        [HideInInspector, SerializeField] private bool ShowOnGUIData = false;
 #pragma warning restore 414
 
         [HideInInspector, SerializeField] internal bool debugStates;
@@ -58,25 +62,25 @@ namespace MalbersAnimations.Controller
 
         [HideInInspector, SerializeField] private int Runtime_Tabs1;
         [HideInInspector, SerializeField] private int Runtime_Tabs2;
+        [HideInInspector, SerializeField] private int SpeedTabs;
+        [HideInInspector, SerializeField] private int SelectedSpeed;
         #endregion
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (Anim == null) Anim = GetComponentInParent<Animator>();   //Cache the Animator
-            if (RB == null) RB = GetComponentInParent<Rigidbody>();      //Cache the Rigid Body  
-            if (Aimer == null) Aimer = gameObject.FindComponent<Aim>();  //Cache the Aim Component 
-            if (t == null) t = transform;
+            CacheComponents();
+            SetDefaultMainColliderValues();
         }
 
         void Reset()
         {
-            MTools.SetLayer(base.transform, 20);     //Set all the Childrens to Animal Layer   .
-            gameObject.tag = "Animal";                      //Set the Animal to Tag Animal
+            MTools.SetLayer(transform, 20);     //Set all the Children to Animal Layer   .
+            gameObject.tag = "Animal";  //Set the Animal to Tag Animal
             AnimatorSpeed = 1;
 
-            Anim = GetComponentInParent<Animator>();            //Cache the Animator
-            RB = GetComponentInParent<Rigidbody>();             //Catche the Rigid Body  
+            Anim = this.FindComponent<Animator>();            //Cache the Animator
+            RB = this.FindComponent<Rigidbody>();             //Cache the Rigid Body  
 
             if (RB == null)
             {
@@ -91,19 +95,20 @@ namespace MalbersAnimations.Controller
                 Anim = gameObject.AddComponent<Animator>();
             }
 
-            Anim.updateMode = AnimatorUpdateMode.AnimatePhysics; //Set the Animator to Animate Physics
+            if (AnimalMaterial == null)
+                AnimalMaterial = MTools.GetInstance<PhysicsMaterial>("Flesh");
 
-
+            Anim.updateMode = AnimatorUpdateMode.Fixed; //Set the Animator to Animate Physics
 
             speedSets = new List<MSpeedSet>(1)
             {
                 new MSpeedSet()
             {
                 name = "Ground",
-                    StartVerticalIndex = new IntReference(1),
-                    TopIndex = new IntReference(3),
+                    StartVerticalIndex = new(1),
+                    TopIndex = new(3),
                     states =  new  List<StateID>(2) { MTools.GetInstance<StateID>("Idle") , MTools.GetInstance<StateID>("Locomotion")},
-                    Speeds =  new  List<MSpeed>(3) { new MSpeed("Walk",1,4,4) , new MSpeed("Trot", 2, 4, 4), new MSpeed("Run", 3, 4, 4) }
+                    Speeds =  new  List<MSpeed>(3) { new ("Walk",1,4,4) , new ("Trot", 2, 4, 4), new ("Run", 3, 4, 4) }
             }
             };
 
@@ -124,14 +129,6 @@ namespace MalbersAnimations.Controller
                 new("Water", new Vector3(0,1,0), 0.05f)
             };
 
-
-            //Pivot_Hip =  new  MPivots(pivots[0].name, pivots[0].position, pivots[0].multiplier);
-            //Pivot_Chest = new MPivots(pivots[1].name, pivots[1].position, pivots[1].multiplier);
-
-            //Has_Pivot_Hip = true;
-            //Has_Pivot_Chest = true;
-            //Starting_PivotChest = true;
-
             MTools.SetDirty(this);
         }
 
@@ -150,13 +147,23 @@ namespace MalbersAnimations.Controller
             };
         }
 
+        [ContextMenu("Events/Damage Event")]
+        void CreateDamageEventListener()
+        {
+            MEventListener listener = this.FindComponent<MEventListener>();
+
+            if (listener == null) listener = gameObject.AddComponent<MEventListener>();
+            listener.Events ??= new List<MEventItemListener>();
+            SetModesListeners(listener, "Set Damage", "Damage");
+        }
+
         [ContextMenu("Create Event Listeners")]
         void CreateListeners()
         {
             MEventListener listener = this.FindComponent<MEventListener>();
 
             if (listener == null) listener = gameObject.AddComponent<MEventListener>();
-            if (listener.Events == null) listener.Events = new List<MEventItemListener>();
+            listener.Events ??= new List<MEventItemListener>();
 
             MEvent MovementMobile = MTools.GetInstance<MEvent>("Set Movement Mobile");
             if (listener.Events.Find(item => item.Event == MovementMobile) == null)
@@ -182,15 +189,16 @@ namespace MalbersAnimations.Controller
             SetModesListeners(listener, "Set Attack1", "Attack1");
             SetModesListeners(listener, "Set Attack2", "Attack2");
             SetModesListeners(listener, "Set Action", "Action");
+            SetModesListeners(listener, "Set Set Damage", "Damage");
 
             /************************/
 
-            MEvent actionstatus = MTools.GetInstance<MEvent>("Set Action Status");
-            if (listener.Events.Find(item => item.Event == actionstatus) == null)
+            MEvent actionStatus = MTools.GetInstance<MEvent>("Set Action Status");
+            if (listener.Events.Find(item => item.Event == actionStatus) == null)
             {
                 var item = new MEventItemListener()
                 {
-                    Event = actionstatus,
+                    Event = actionStatus,
                     useVoid = false,
                     useInt = true,
                     useFloat = true
@@ -274,7 +282,7 @@ namespace MalbersAnimations.Controller
             }
         }
 
-        void SetStateListeners(MEventListener listener, string EventName, string statename)
+        void SetStateListeners(MEventListener listener, string EventName, string stateName)
         {
             MEvent e = MTools.GetInstance<MEvent>(EventName);
             if (listener.Events.Find(item => item.Event == e) == null)
@@ -287,7 +295,7 @@ namespace MalbersAnimations.Controller
                     useBool = true,
                 };
 
-                StateID ss = MTools.GetInstance<StateID>(statename);
+                StateID ss = MTools.GetInstance<StateID>(stateName);
 
                 UnityEditor.Events.UnityEventTools.AddObjectPersistentListener<StateID>(item.ResponseBool, State_Pin, ss);
                 UnityEditor.Events.UnityEventTools.AddPersistentListener(item.ResponseBool, State_Pin_ByInput);
@@ -303,6 +311,8 @@ namespace MalbersAnimations.Controller
 
         private void OnGUI()
         {
+            if (!ShowOnGUIData) return;
+
             if (Editor_Tabs2 == 3 && Application.isPlaying && Selection.gameObjects.Length == 1 && Selection.gameObjects[0] == gameObject
 #if UNITY_EDITOR
                 &&
@@ -445,6 +455,60 @@ namespace MalbersAnimations.Controller
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(Center, 0.02f * sc);
             Gizmos.DrawWireSphere(Center, 0.02f * sc);
+
+            //Draw Capsule Collider on Editor
+            if (MainCollider != null)
+            {
+                //Draw the Capsule Collider on Stances
+                if (Editor_Tabs1 == 3 && SelectedStance >= 0)
+                {
+                    var currentStance = Stances[SelectedStance];
+                    if (currentStance.OverrideCapsule)
+                    {
+
+                        var col = currentStance.newCapsule;
+                        MDebug.GizmoCapsule(transform.TransformPoint(col.center), transform.rotation, col.height, col.radius, Color.yellow + Color.red, col.direction, 16);
+                    }
+                }
+
+
+                //Draw the Capsule collider on States
+                if (Editor_Tabs1 == 1)
+                {
+                    var currentSate = states[SelectedState];
+                    if (currentSate.OverrideCapsule)
+                    {
+                        var col = currentSate.newCapsule;
+                        MDebug.GizmoCapsule(transform.TransformPoint(col.center), transform.rotation, col.height, col.radius, Color.cyan, col.direction, 16);
+                    }
+                }
+            }
+
+
+            //Draw all the internal colliders 
+            if (Editor_Tabs1 == 0)
+            {
+                Gizmos.color = Color.green;
+                foreach (var col in colliders)
+                {
+                    var oldMatrix = Gizmos.matrix;
+                    if (col is CapsuleCollider capsule)
+                    {
+                        MDebug.GizmoCapsule(capsule.transform.TransformPoint(capsule.center), capsule.transform.rotation, capsule.height * sc, capsule.radius * sc, Color.green, capsule.direction, 36);
+                    }
+                    else if (col is BoxCollider box)
+                    {
+                        Gizmos.matrix = col.transform.localToWorldMatrix;
+                        Gizmos.DrawWireCube(box.center, box.size);
+                    }
+                    else if (col is SphereCollider sphere)
+                    {
+                        Gizmos.matrix = col.transform.localToWorldMatrix;
+                        Gizmos.DrawWireSphere(sphere.center, sphere.radius);
+                    }
+                    Gizmos.matrix = oldMatrix; //Restore the Gizmos Matrix
+                }
+            }
         }
 
         void OnDrawGizmos()
@@ -463,14 +527,13 @@ namespace MalbersAnimations.Controller
                 {
                     if (pivot != null)
                     {
-                        if (pivot.PivotColor.a == 0)
-                        {
-                            pivot.PivotColor = Color.blue;
-                        }
-
                         Gizmos.color = pivot.PivotColor;
+
                         Gizmos.DrawWireSphere(pivot.World(t), sc * RayCastRadius);
-                        Gizmos.DrawRay(pivot.World(t), pivot.WorldDir(t) * pivot.multiplier * sc);
+                        Gizmos.DrawSphere(pivot.World(t), sc * RayCastRadius);
+
+                        if (pivot.name.Equals("Water")) continue; // Water Pivot is not a Ray Pivot
+                        MDebug.GizmoRay(pivot.World(t), Pivot_Multiplier * sc * -t.up, 3);
                     }
                 }
             }
@@ -482,17 +545,6 @@ namespace MalbersAnimations.Controller
 
             if (Application.isPlaying)
             {
-
-                // Gizmos.color = Color.green;
-                //  MDebug.Gizmo_Arrow(pos, TargetSpeed * 5 * sc);    //Draw the Target Direction 
-
-                //Gizmos.color = Color.cyan;
-                //MDebug.Gizmo_Arrow(pos + Vector3.one*0.1f, InertiaPositionSpeed * 2 * sc);  //Draw the Intertia Direction 
-
-
-                Gizmos.color = Color.red;
-                //  MTools.Gizmo_Arrow(pos, Move_Direction * sc*2); //MOVE DIRECTION RED
-
                 Gizmos.color = Color.black;
                 Gizmos.DrawSphere(pos + DeltaPos, 0.02f * sc);
 
@@ -502,9 +554,6 @@ namespace MalbersAnimations.Controller
                     Gizmos.DrawWireSphere(Center, 0.02f * sc);
                     Gizmos.DrawSphere(Center, 0.02f * sc);
                 }
-                // return;
-
-
 
                 if (CurrentExternalForce != Vector3.zero)
                 {
@@ -513,22 +562,19 @@ namespace MalbersAnimations.Controller
                     Gizmos.DrawSphere(Center + (CurrentExternalForce * sc / 10), 0.05f * sc);
                 }
             }
-
         }
 #endif
-        //#endif
     }
 
     [System.Serializable] public class AnimalEvent : UnityEvent<MAnimal> { }
-
     public enum Stance_Reaction
     {
         Set,
         SetPersistent,
         Toggle,
         SetDefault,
-        Reset,
+        ResetToDefault,
         ResetPersistent,
-        RestoreDefault,
+        RestoreDefaultStanceValue,
     }
 }

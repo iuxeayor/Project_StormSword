@@ -4,24 +4,19 @@ using MalbersAnimations.Events;
 using MalbersAnimations.Reactions;
 
 
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace MalbersAnimations.Controller
 {
-    [AddComponentMenu("Malbers/Interaction/Pickable")]
-    [SelectionBase]
+    [SelectionBase, AddComponentMenu("Malbers/Interaction/Pickable")]
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/secondary-components/pickable")]
     public class Pickable : MonoBehaviour, ICollectable
     {
-        //  public enum CollectType { Collectable, Hold, OneUse } //For different types of collectable items? FOR ANOTHER UPDATE
-        private RigidbodyParameters rigidbodyParameters;
-
-        public bool Align = false;
-        // public bool AlignPos = true;
-        [Min(0)] public float AlignTime = 0.15f;
-        //[Min(0)] public float AlignDistance = 1f;
+        //public bool Align = false;
+        //[Min(0)] public float AlignTime = 0.15f;
 
         [Tooltip("Delay time after calling the Pick() method. the item will be parented to the PickUp component after this time has passed")]
         public FloatReference PickDelay = new(0);
@@ -36,18 +31,29 @@ namespace MalbersAnimations.Controller
         public BoolReference m_ByAnimation = new(false);
         [Tooltip("The Pick Up Drop Logic will be called via animator events/messages")]
         public BoolReference m_DestroyOnPick = new(false);
-        //[Tooltip("Unparent the Pickable, so it does not have any Transform parents.")]
-        //public BoolReference SceneRoot = new BoolReference(true);
 
         [Tooltip(" Amount Pickable Item can store.. that it can be use for anything")]
         public IntReference m_Amount = new(1); //Not done yet
-        [Tooltip("The Pick Up Drop Logic will be called via animator events/messages")]
 
+        //[Tooltip("The pickable can be picked. Set it to false to temporally disabled the Pick method at runtime")]
+        //public BoolReference canBePicked = new(true); //Not done yet
+
+
+        [Tooltip("The pickable will be pick automatically when it enters the focus area from the picker")]
         public BoolReference m_AutoPick = new(false); //Not done yet
         public IntReference m_ID = new();         //Not done yet
 
         /// <summary>Who Did the Picking </summary>
-        public MPickUp Picker { get; set; }
+        public GameObject Picker { get; set; }
+
+        [Tooltip("Set a World rotation when the item is dropped")]
+        public bool UseDropRotation = false;
+        [Tooltip("World rotation value when the item is dropped")]
+        public Vector3 DropRotation = Vector3.zero;
+        [Tooltip("Set a local rotation value when the item is dropped")]
+        public bool UsePickRotation = false;
+        [Tooltip("Local rotation value when the item is dropped")]
+        public Vector3 PickRotation = Vector3.zero;
 
 
         [Tooltip("What holder will the item be parent to. -1: Default Holder. >=0 : Index of the Extra Holder list")]
@@ -57,23 +63,17 @@ namespace MalbersAnimations.Controller
         public GameObjectEvent OnFocusedBy = new();
         public GameObjectEvent OnUnfocusedBy = new();
         public GameObjectEvent OnPicked = new();
+        public GameObjectEvent OnPickedFailed = new();
         public GameObjectEvent OnPrePicked = new();
         public GameObjectEvent OnDropped = new();
         public GameObjectEvent OnPreDropped = new();
 
-
-        [SerializeReference, SubclassSelector]
-        public Reaction FocusedByReaction;
-        [SerializeReference, SubclassSelector]
-        public Reaction UnFocusedByReaction;
-        [SerializeReference, SubclassSelector]
-        public Reaction PickedReaction;
-        [SerializeReference, SubclassSelector]
-        public Reaction PrePickedReaction;
-        [SerializeReference, SubclassSelector]
-        public Reaction DroppedReaction;
-        [SerializeReference, SubclassSelector]
-        public Reaction PreDroppedReaction;
+        public Reaction2 FocusedByReaction;
+        public Reaction2 UnFocusedByReaction;
+        public Reaction2 PickedReaction;
+        public Reaction2 PrePickedReaction;
+        public Reaction2 DroppedReaction;
+        public Reaction2 PreDroppedReaction;
 
         [SerializeField] private Rigidbody rb;
 
@@ -88,19 +88,29 @@ namespace MalbersAnimations.Controller
 
         [Tooltip("Disable Colliders when the Item is picked (Colliders will be enabled back when the item is dropped")]
         public BoolReference disableColliders = new(true);
-        private bool defaultKinematic;
-        private RigidbodyConstraints defaultConstraints;
 
-        private float currentPickTime;
+        /// <summary>  Cache the Rigid body parameters  on start  </summary>
+        protected RigidbodyParameters rigidbodyParameters;
+        /// <summary>  Cache  if the RB is kinematic  </summary>
+        protected bool defaultKinematic;
+        protected RigidbodyConstraints defaultConstraints;
+
+        protected float currentPickTime;
 
         /// <summary>Is this Object being picked </summary>
         public bool IsPicked { get; set; }
 
+        public int Holder => holder;
+
         /// <summary>Current value of the Item</summary>
         public int Amount { get => m_Amount.Value; set => m_Amount.Value = value; }
 
-        /// <summary>The Item will be autopicked if the Picker is focusing it</summary>
+        /// <summary>The Item will be auto picked if the Picker is focusing it</summary>
         public bool AutoPick { get => m_AutoPick.Value; set => m_AutoPick.Value = value; }
+
+        // /// <summary>The pickable can be picked. Set it to false to temporally disabled the Pick method at runtime</summary>
+        // public bool CanBePicked { get => canBePicked.Value; set => canBePicked.Value = value; }
+
         public bool Collectable { get => m_Collectable.Value; set => m_Collectable.Value = value; }
         public Rigidbody RigidBody => rb;
 
@@ -110,55 +120,51 @@ namespace MalbersAnimations.Controller
         public bool InCoolDown => !MTools.ElapsedTime(CurrentPickTime, coolDown);
         public int ID { get => m_ID.Value; set => m_ID.Value = value; }
 
-        private Vector3 DefaultScale;
+        public bool Active { get => enabled; set => enabled = value; }
 
+        protected Vector3 DefaultScale;
 
-        private bool focused;
-        public bool Focused
+        protected bool focused;
+        public virtual bool Focused
         {
             get => focused;
-            private set
+            protected set
             {
                 focused = value;
                 OnFocused.Invoke(focused);
             }
         }
 
-        public void SetFocused(GameObject FocusBy)
+        public virtual void SetFocused(GameObject FocusBy, bool isFocused)
         {
-            if (FocusBy)
+            Focused = isFocused;
+
+            if (isFocused)
             {
-                Focused = true;
                 OnFocusedBy.Invoke(FocusBy);
-                FocusedByReaction?.React(FocusBy);
+                FocusedByReaction.React(FocusBy);
+
+                Picker = FocusBy; //Set the Picker to the Focused GameObject
             }
             else
             {
-                Focused = false;
-
                 //Maybe this can be removed after
                 OnFocusedBy.Invoke(null);
-                FocusedByReaction?.React((Component)null);
-
+                FocusedByReaction.React((Component)null);
 
                 OnUnfocusedBy.Invoke(FocusBy);
-                UnFocusedByReaction?.React(FocusBy);
+                UnFocusedByReaction.React(FocusBy);
             }
         }
 
-
-
         /// <summary>Game Time the Pickable was Picked</summary>
         public float CurrentPickTime { get => currentPickTime; set => currentPickTime = value; }
+        float ICollectable.DropDelay { get => this.DropDelay.Value; }
+        float ICollectable.PickDelay { get => this.PickDelay.Value; }
 
-        private void OnDisable()
-        {
-            Focused = false;
-        }
+        protected virtual void OnDisable() => Focused = false;
 
-
-
-        private void Awake()
+        protected virtual void Awake()
         {
             rb = GetComponent<Rigidbody>();
 
@@ -178,50 +184,72 @@ namespace MalbersAnimations.Controller
 
         public virtual void Pick()
         {
-            OnPickDisablePhysics();                       //Disable all physics when the item is picked
+            Physics_Disable();                 //Disable all physics when the item is picked
             IsPicked = !Collectable;                //Check if the Item is collectable 
-            Focused = false;                        //Unfocus the Item
 
-            OnFocusedBy.Invoke(null);
-            FocusedByReaction?.React((Component)null);
+            //Weapons can be picked without having a picker
+            SetFocused(Picker, false);
 
-
-            //Weapons can be picked witout having a picker
-            var realPicker = Picker ? Picker.Root.gameObject : null;
-
-            OnPicked.Invoke(realPicker);             //Call the Event
-            PickedReaction?.React(realPicker);
+            OnPicked.Invoke(Picker);             //Call the Event
+            PickedReaction.React(Picker);
 
             CurrentPickTime = Time.time;            //Store the time it was picked
             if (Collectable) enabled = false;
+
+            if (DestroyOnPick)
+            {
+                if (TryGetComponent(out IPoolGameObject poolObject))
+                {
+                    poolObject.Pool_Release(gameObject); //Go back to the Pool
+                }
+                else
+                {
+                    DestroyPickUp();
+                }
+            }
+            else
+            {
+                if (UsePickRotation) transform.localEulerAngles = PickRotation; //Set the Local Pick Rotation after it was parented
+            }
+        }
+
+        protected virtual void DestroyPickUp()
+        {
+            //Needs to check first if the item is from a Pool
+            Destroy(gameObject);
         }
 
         public virtual void Drop()
         {
-            OnDropEnablePhysics();
+            Physics_Restore();
             IsPicked = false;
             enabled = true;
 
-            transform.parent = null;                                //UnParent
+            SetParent(null);                                        //UnParent
             transform.localScale = DefaultScale;                    //Restore the Scale
 
-
-            var realPicker = Picker ? Picker.Root.gameObject : null;
-
-            OnDropped.Invoke(realPicker);
-            DroppedReaction?.React(realPicker);
+            OnDropped.Invoke(Picker);
+            DroppedReaction.React(Picker);
 
             Picker = null;                                          //Reset who did the picking
             CurrentPickTime = Time.time;
+
+            if (UseDropRotation) transform.eulerAngles = DropRotation; //Set the World Drop Rotation after it was unparented
+        }
+
+        public virtual void SetParent(Transform parent)
+        {
+            transform.parent = parent;
         }
 
         /// <summary> Call this in case a picker has still the item </summary>
         public virtual void ForceDrop()
         {
-            Picker?.DropItem();
+            var picker = Picker.FindComponent<MPickUp>(); //Check if the Picker has the IPickup
+            if (picker) picker.DropItem();
         }
 
-        public void OnPickDisablePhysics()
+        public virtual void Physics_Disable()
         {
             if (DestroyRbOnPick) //Destroy the Rigidbody
             {
@@ -234,9 +262,6 @@ namespace MalbersAnimations.Controller
             {
                 RigidBody.useGravity = false;
 
-#if !UNITY_2022_3_OR_NEWER
-                RigidBody.velocity = Vector3.zero;
-#endif
                 RigidBody.isKinematic = kinematicOnPick.Value;
 
                 if (RigidBody.isKinematic)
@@ -244,17 +269,18 @@ namespace MalbersAnimations.Controller
 
                 RigidBody.constraints = RigidbodyConstraints.FreezeAll; //Freeze the rotation of the item
 
-
-                RigidBody.detectCollisions = false;
-
             }
 
             if (disableColliders.Value)
+            {
                 foreach (var c in m_colliders)
+                {
                     if (c) c.enabled = false; //Disable all colliders
+                }
+            }
         }
 
-        public void OnDropEnablePhysics()
+        public virtual void Physics_Restore()
         {
             if (RigidBody)
             {
@@ -264,8 +290,7 @@ namespace MalbersAnimations.Controller
                 if (!RigidBody.isKinematic)
                     RigidBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
-
-                RigidBody.detectCollisions = true;
+                // RigidBody.detectCollisions = true;
 
                 RigidBody.constraints = defaultConstraints; //Restore the constraints of the item
             }
@@ -276,90 +301,55 @@ namespace MalbersAnimations.Controller
                 rigidbodyParameters.RestoreRigidBody(rb);
             }
 
-            foreach (var c in m_colliders) c.enabled = true; //Enable all colliders
+            foreach (var c in m_colliders)
+            {
+                c.enabled = true; //Enable all colliders
+            }
         }
 
-        public void SetEnable(bool enable)
+        public virtual void SetEnable(bool enable)
         {
             this.enabled = enable;
         }
 
+        public void PreDrop(GameObject gameObject)
+        {
+            OnPreDropped.Invoke(gameObject);
+            PreDroppedReaction.React(gameObject);
+        }
+
+        public void PrePicked(GameObject gameObject)
+        {
+            OnPrePicked.Invoke(gameObject);
+            PrePickedReaction.React(gameObject);
+        }
+
+        public void PickedFailed(GameObject FailedByPicker) => OnPickedFailed.Invoke(FailedByPicker);
+
+
         [HideInInspector] public int EditorTabs = 0;
-
-        //#if UNITY_EDITOR
-        //        private void OnDrawGizmosSelected()
-        //        {
-        //            if (Align)
-        //            {
-        //                UnityEditor.Handles.color = Color.yellow;
-        //                UnityEditor.Handles.DrawWireDisc(transform.position, transform.up, AlignDistance);
-        //            }
-        //        }
-
-
-        //#endif
     }
 
-    public struct RigidbodyParameters
-    {
-        public bool useGravity;
-        public bool isKinematic;
-        public CollisionDetectionMode collisionDetectionMode;
-        public RigidbodyConstraints constraints;
-        public bool detectCollisions;
-        public RigidbodyInterpolation interpolation;
-        public float mass;
-        public float drag;
-        public float angularDrag;
-        public Vector3 centerOfMass;
-        public Vector3 inertiaTensor;
-
-        public RigidbodyParameters(Rigidbody rb)
-        {
-            useGravity = rb.useGravity;
-            isKinematic = rb.isKinematic;
-            collisionDetectionMode = rb.collisionDetectionMode;
-            constraints = rb.constraints;
-            detectCollisions = rb.detectCollisions;
-            interpolation = rb.interpolation;
-            mass = rb.mass;
-            drag = rb.drag;
-            angularDrag = rb.angularDrag;
-            centerOfMass = rb.centerOfMass;
-            inertiaTensor = rb.inertiaTensor;
-        }
-
-        public void RestoreRigidBody(Rigidbody rb)
-        {
-            rb.useGravity = useGravity;
-            rb.isKinematic = isKinematic;
-            rb.collisionDetectionMode = collisionDetectionMode;
-            rb.constraints = constraints;
-            rb.detectCollisions = detectCollisions;
-            rb.interpolation = interpolation;
-            rb.mass = mass;
-            rb.drag = drag;
-            rb.angularDrag = angularDrag;
-            rb.centerOfMass = centerOfMass;
-            rb.inertiaTensor = inertiaTensor;
-        }
-
-    }
     //INSPECTOR
 #if UNITY_EDITOR
     [CustomEditor(typeof(Pickable)), CanEditMultipleObjects]
     public class PickableEditor : Editor
     {
         private SerializedProperty //   PickAnimations, PickUpMode, PickUpAbility, DropMode, DropAbility,DropAnimations, 
-            Align, AlignTime, AlignDistance, AlignPos, EditorTabs,
+                                   // Align, AlignTime, AlignDistance, AlignPos,
+            EditorTabs,
             m_AutoPick, DropDelay, PickDelay, rb, kinematicOnPick, disableColliders, DestroyRbOnPick,
+            // canBePicked,
             //kinematicOnDrop,
             CoolDown,// SceneRoot,
             OnFocused, OnFocusedBy, OnUnfocusedBy,
-            OnPrePicked, OnPicked, OnDropped, OnPreDropped, holder,
+            OnPrePicked, OnPicked, OnDropped, OnPreDropped, holder, OnPickedFailed,
 
             PrePickedReaction, PreDroppedReaction, DroppedReaction, PickedReaction, UnFocusedByReaction, FocusedByReaction,
 
+
+
+            UseDropRotation, DropRotation, UsePickRotation, PickRotation,
 
             Amount, IntID, m_collider, m_Collectable, m_ByAnimation, m_DestroyOnPick;
 
@@ -367,7 +357,7 @@ namespace MalbersAnimations.Controller
 
         protected string[] Tabs1 = new string[] { "General", "Events", "Reactions" };
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             m = (Pickable)target;
 
@@ -388,10 +378,13 @@ namespace MalbersAnimations.Controller
             m_DestroyOnPick = serializedObject.FindProperty("m_DestroyOnPick");
 
 
-            Align = serializedObject.FindProperty("Align");
-            AlignTime = serializedObject.FindProperty("AlignTime");
-            AlignDistance = serializedObject.FindProperty("AlignDistance");
+            //  Align = serializedObject.FindProperty("Align");
+            // AlignTime = serializedObject.FindProperty("AlignTime");
+            // AlignDistance = serializedObject.FindProperty("AlignDistance");
+            //AlignPos = serializedObject.FindProperty("AlignPos");
 
+            // canBePicked = serializedObject.FindProperty("canBePicked");
+            OnPickedFailed = serializedObject.FindProperty("OnPickedFailed");
             OnFocused = serializedObject.FindProperty("OnFocused");
             OnFocusedBy = serializedObject.FindProperty("OnFocusedBy");
             OnUnfocusedBy = serializedObject.FindProperty("OnUnfocusedBy");
@@ -402,6 +395,12 @@ namespace MalbersAnimations.Controller
 
 
             holder = serializedObject.FindProperty("holder");
+
+
+            UseDropRotation = serializedObject.FindProperty("UseDropRotation");
+            DropRotation = serializedObject.FindProperty("DropRotation");
+            UsePickRotation = serializedObject.FindProperty("UsePickRotation");
+            PickRotation = serializedObject.FindProperty("PickRotation");
 
 
             FocusedByReaction = serializedObject.FindProperty("FocusedByReaction");
@@ -417,7 +416,7 @@ namespace MalbersAnimations.Controller
             Amount = serializedObject.FindProperty("m_Amount");
             IntID = serializedObject.FindProperty("m_ID");
             m_collider = serializedObject.FindProperty("m_colliders");
-            AlignPos = serializedObject.FindProperty("AlignPos");
+
             //Collectable = serializedObject.FindProperty("Collectable");
             m_AutoPick = serializedObject.FindProperty("m_AutoPick");
             CoolDown = serializedObject.FindProperty("coolDown");
@@ -436,6 +435,9 @@ namespace MalbersAnimations.Controller
                     {
                         EditorGUILayout.ToggleLeft("Is Picked", m.IsPicked);
                         EditorGUILayout.ToggleLeft("Is Focused", m.Focused);
+
+                        EditorGUILayout.ObjectField("Picker-Focuser", m.Picker, typeof(GameObject), true);
+                        // EditorGUILayout.ObjectField("Focuser",m.Focused)
                     }
                 }
 
@@ -463,6 +465,8 @@ namespace MalbersAnimations.Controller
                 EditorGUILayout.PropertyField(OnPreDropped, new GUIContent("On Pre-Dropped By"));
             EditorGUILayout.PropertyField(OnDropped, new GUIContent("On Dropped By"));
 
+            EditorGUILayout.PropertyField(OnPickedFailed);
+
         }
 
         private void DrawReactions()
@@ -471,9 +475,9 @@ namespace MalbersAnimations.Controller
             EditorGUILayout.PropertyField(UnFocusedByReaction);
             if (m.PickDelay > 0 || m.m_ByAnimation.Value)
                 EditorGUILayout.PropertyField(PrePickedReaction);
-            EditorGUILayout.PropertyField(PickedReaction);
             if (m.DropDelay > 0 || m.m_ByAnimation.Value)
                 EditorGUILayout.PropertyField(PreDroppedReaction);
+            EditorGUILayout.PropertyField(PickedReaction);
             EditorGUILayout.PropertyField(DroppedReaction);
 
         }
@@ -484,6 +488,7 @@ namespace MalbersAnimations.Controller
 
             if (m_AutoPick.isExpanded)
             {
+                //EditorGUILayout.PropertyField(canBePicked);
                 EditorGUILayout.PropertyField(holder);
                 EditorGUILayout.PropertyField(IntID, new GUIContent("ID", "Int value the Pickable Item can store. This ID is used by the Picker component to Identify each Pickable Object"));
                 EditorGUILayout.PropertyField(Amount);
@@ -525,31 +530,40 @@ namespace MalbersAnimations.Controller
                 EditorGUILayout.PropertyField(DropDelay);
             }
 
+            UseDropRotation.isExpanded = MalbersEditor.Foldout(UseDropRotation.isExpanded, "Rotation Offsets");
 
-            Align.isExpanded = MalbersEditor.Foldout(Align.isExpanded, "Alignment");
-
-            if (Align.isExpanded)
+            if (UseDropRotation.isExpanded)
             {
-                EditorGUILayout.PropertyField(Align, new GUIContent("Align On Pick", "Align the Item to the Picker Position"));
-
-                if (Align.boolValue)
-                {
-
-                    //using (new GUILayout.HorizontalScope())
-                    //{
-
-                    //    EditorGUILayout.PropertyField(AlignPos, new GUIContent("Align Pos", "align the Position"));
-
-                    //    EditorGUIUtility.labelWidth = 60;
-                    //    EditorGUILayout.PropertyField
-                    //        (AlignDistance, new GUIContent("Distance", "Distance to move the Animal towards the Item"), GUILayout.MinWidth(50));
-                    //    EditorGUIUtility.labelWidth = 0;
-                    //}
-                    EditorGUILayout.PropertyField(AlignTime, new GUIContent("Time", "Time required to do the alignment"));
-                }
+                EditorGUILayout.PropertyField(UsePickRotation);
+                if (UsePickRotation.boolValue)
+                    EditorGUILayout.PropertyField(PickRotation);
+                EditorGUILayout.PropertyField(UseDropRotation);
+                if (UseDropRotation.boolValue)
+                    EditorGUILayout.PropertyField(DropRotation);
             }
 
+            //   Align.isExpanded = MalbersEditor.Foldout(Align.isExpanded, "Alignment");
 
+            //if (Align.isExpanded)
+            //{
+            //    EditorGUILayout.PropertyField(Align, new GUIContent("Align On Pick", "Align the Item to the Picker Position"));
+
+            //    if (Align.boolValue)
+            //    {
+
+            //        //using (new GUILayout.HorizontalScope())
+            //        //{
+
+            //        //    EditorGUILayout.PropertyField(AlignPos, new GUIContent("Align Pos", "align the Position"));
+
+            //        //    EditorGUIUtility.labelWidth = 60;
+            //        //    EditorGUILayout.PropertyField
+            //        //        (AlignDistance, new GUIContent("Distance", "Distance to move the Animal towards the Item"), GUILayout.MinWidth(50));
+            //        //    EditorGUIUtility.labelWidth = 0;
+            //        //}
+            //        EditorGUILayout.PropertyField(AlignTime, new GUIContent("Time", "Time required to do the alignment"));
+            //    }
+            //}
         }
     }
 #endif

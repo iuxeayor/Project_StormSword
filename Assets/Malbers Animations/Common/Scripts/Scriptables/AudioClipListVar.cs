@@ -1,12 +1,12 @@
-﻿using UnityEngine; 
+﻿using UnityEngine;
+using UnityEngine.Audio;
 
 namespace MalbersAnimations.Scriptables
 {
     ///<summary> Store a list of Materials</summary>
-    [CreateAssetMenu(menuName = "Malbers Animations/Collections/Audio Clip Set", order = 1000)]
+    [CreateAssetMenu(menuName = "Malbers Animations/Variables/AudioClip List", order = 2000)]
     public class AudioClipListVar : ScriptableList<AudioClip>
     {
-
         [MinMaxRange(-3, 3)]
         public RangedFloat pitch = new(1, 1);
         [MinMaxRange(0, 1)]
@@ -15,9 +15,14 @@ namespace MalbersAnimations.Scriptables
         [Range(0, 1)]
         public float SpatialBlend = 1;
 
+        public bool PlayRandom = true;
+        private int CurrentIndex;
+
         public void Play(AudioSource source)
         {
-            var clip = Item_GetRandom();
+            var clip = PlayRandom ? Item_GetRandom() : Item_Get(CurrentIndex);
+            CurrentIndex++;
+
             source.clip = clip;
             source.pitch = pitch.RandomValue;
             source.volume = volume.RandomValue;
@@ -28,7 +33,7 @@ namespace MalbersAnimations.Scriptables
 
         public void Play()
         {
-            var NewGO = new GameObject() { name = "Audio [" + this.name +"]"};
+            var NewGO = new GameObject() { name = "Audio [" + this.name + "]" };
             var source = NewGO.AddComponent<AudioSource>();
             source.spatialBlend = 1f;
             var clip = Item_GetRandom();
@@ -45,13 +50,28 @@ namespace MalbersAnimations.Scriptables
     [System.Serializable]
     public class AudioClipReference : ReferenceVar
     {
-        public AudioClip ConstantValue;
+        public AudioResource ConstantValue;
         [RequiredField] public AudioClipListVar Variable;
 
-        public AudioClip Value => UseConstant ? ConstantValue : (Variable != null ? Variable.Item_GetRandom() : null);
+        public AudioResource Value => UseConstant ? ConstantValue : (Variable != null ? Variable.Item_GetRandom() : null);
 
         /// <summary>Check if the Audio Clip list var is not empty or Null </summary>
         public bool NullOrEmpty() => UseConstant ? (ConstantValue == null) : (Variable == null);
+
+        public AudioClipReference() { }
+
+        public AudioClipReference(AudioClipReference copyValue)
+        {
+            UseConstant = copyValue.UseConstant;
+            ConstantValue = copyValue.ConstantValue;
+            Variable = copyValue.Variable;
+        }
+
+        public AudioClipReference(AudioClip audioClip)
+        {
+            UseConstant = true;
+            ConstantValue = audioClip;
+        }
 
         public void Play(AudioSource source)
         {
@@ -59,7 +79,7 @@ namespace MalbersAnimations.Scriptables
 
             if (UseConstant)
             {
-                source.clip = ConstantValue;
+                source.resource = ConstantValue;
                 source.Play();
             }
             else

@@ -2,7 +2,7 @@
 
 namespace MalbersAnimations
 {
-    [AddComponentMenu("Malbers/Utilities/Toggle GameObject")]
+    [AddComponentMenu("Malbers/Utilities/Toggle GameObject (Enable-Disable)")]
 
     public class ToggleGameObject : MonoBehaviour
     {

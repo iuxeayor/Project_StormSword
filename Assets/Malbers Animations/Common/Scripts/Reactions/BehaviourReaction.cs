@@ -3,10 +3,31 @@ using UnityEngine;
 
 namespace MalbersAnimations.Reactions
 {
-    [System.Serializable]
-    [AddTypeMenu("Unity/Behaviour")]
+    [Serializable, AddTypeMenu("Unity/Behaviour")]
     public class BehaviourReaction : Reaction
     {
+        public override string DynamicName
+        {
+            get
+            {
+                var display = $"Behaviour Reaction [{action}]"; //Name of the Reaction
+
+                switch (action)
+                {
+                    case Behaviour_Reaction.SetEnable:
+                        display += $" [{value}]";
+                        break;
+                    case Behaviour_Reaction.Destroy:
+                        display += $" [Time: {time}]";
+                        break;
+                    default:
+                        break;
+                }
+
+                return display;
+            }
+        }
+
         public enum Behaviour_Reaction { SetEnable, Destroy }
 
         public override Type ReactionType => typeof(Behaviour);

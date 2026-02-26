@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace MalbersAnimations.Controller
 {
+
+    [AddTypeMenu("Climb/Free Climb")]
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/main-components/manimal-controller/states/climb")]
     /// <summary>Climb Logic </summary>
     public class Climb : State
@@ -18,7 +20,7 @@ namespace MalbersAnimations.Controller
             public float sprintLength;
         }
 
-        public override string StateName => "Climb/Free Climb";
+        // public override string StateName => "Climb/Free Climb";
         public override string StateIDName => "Climb";
 
         /// <summary>Air Resistance while falling</summary>
@@ -26,9 +28,11 @@ namespace MalbersAnimations.Controller
         [Tooltip("Layer to identify climbable surfaces")]
         public LayerReference ClimbLayer = new(1);
 
+
+
         //[Tooltip("Tag used to identify climbable surfaces. Default: [Climb]")]
         //public StringReference SurfaceTag =  new StringReference("Climb");
-        public PhysicMaterial Surface;
+        public PhysicsMaterial Surface;
         [Tooltip("Climb automatically when is near a climbable surface")]
         public BoolReference automatic = new();
 
@@ -37,6 +41,9 @@ namespace MalbersAnimations.Controller
 
         [Tooltip("Disable Moving on Left and Right while climbing")]
         public BoolReference NoHorizontal = new();
+
+        [Tooltip("The Wall to climb is always Vertical")]
+        public BoolReference StraigthWall = new();
 
         /// <summary>Air Resistance while falling</summary>
         [Header("Climb Pivot"), Space]
@@ -75,7 +82,7 @@ namespace MalbersAnimations.Controller
 
         [Tooltip("Smoothness value to align the animal to the wall")]
         public float AlignSmoothness = 10f;
-        [Tooltip("Distance from the Hip Pivot to the Ground")]
+        [Tooltip("Distance from the Hip Pivot to the Ground to exit the state while climbing down.")]
         public float GroundDistance = 0.5f;
         [Tooltip("Length of the Horizontal Rays to detect Inner Corners")]
         [Min(0)] public float InnerCorner = 0.4f;
@@ -163,7 +170,6 @@ namespace MalbersAnimations.Controller
         Transform validwall;
 
 
-
         /// <summary>LastClimbableWall</summary>
         public Transform LastWall { get; private set; }
 
@@ -200,7 +206,6 @@ namespace MalbersAnimations.Controller
             }
         }
 
-
         public override void AwakeState()
         {
             //DefaultCameraInput = animal.UseCameraInput; //Store the Animal Current CameraInput
@@ -224,7 +229,6 @@ namespace MalbersAnimations.Controller
             EnableHitTransform(false);
         }
 
-
         public override void StatebyInput()
         {
             ValidWall = null; //Reset Valid Wall Always when the state uses Input
@@ -242,8 +246,16 @@ namespace MalbersAnimations.Controller
             Debugging($"Exit with Climb Input [{ExitInput.Value}]");
         }
 
+        private bool FoundTargetPos = false;
+
         public override void Activate()
         {
+            FoundTargetPos = false;
+
+            TargetPosition =
+            StartPosition = animal.Position; //Reset start and target position
+            AverageNormal = -transform.forward;
+
             ValidWall = CheckClimbRay();
 
             if (ValidWall) //it cannot be activated there's no Wall to Climb
@@ -256,29 +268,25 @@ namespace MalbersAnimations.Controller
 
                 EnableHitTransform(false);
 
-                StartPosition = animal.Position;
-
                 animal.Reset_Movement(); //Remove all Input stuff
                 animal.Force_Remove(); //Remove all forces when grabbing a ledge
 
                 //Disable the Main Collider while is doing the state
-                if (DisableMainCollider.Value && animal.MainCollider)
-                    animal.MainCollider.enabled = false;
+                if (DisableMainCollider.Value)
+                    animal.MainCollider_Enable(false);
             }
         }
 
         public override bool TryActivate()
         {
             var newWall = CheckClimbRay();
+            //Debug.Log($"newWall {newWall}");
 
             if (animal.MovementDetected && animal.VerticalSmooth > 0.9f && automatic.Value || Automatic_By_State)
             {
                 ValidWall = newWall;
 
-                if (ValidWall != null)
-                {
-                    return true;
-                }
+                return (ValidWall != null);
             }
 
             return false;
@@ -302,8 +310,8 @@ namespace MalbersAnimations.Controller
             }
 
             //Restore Main Collider 
-            if (DisableMainCollider.Value && animal.MainCollider)
-                animal.MainCollider.enabled = true;
+            if (DisableMainCollider.Value)
+                animal.MainCollider_Enable(true);
         }
 
         public override void RestoreAnimalOnExit()
@@ -342,16 +350,16 @@ namespace MalbersAnimations.Controller
 
             if (GizmoDebug)
             {
-                Debug.DrawRay(Point_Chest, ForwardScale * ClimbRayLength, Color.green);
-                Debug.DrawRay(Point_Chest, ForwardScale * WallDistance, Color.red);
+                MDebug.DrawRay(Point_Chest, ForwardScale * ClimbRayLength, Color.green);
+                MDebug.DrawRay(Point_Chest, ForwardScale * WallDistance, Color.red);
 
-                Debug.DrawRay(Point_Hip, ForwardScale * ClimbRayLength, Color.green);
-                Debug.DrawRay(Point_Hip, ForwardScale * WallDistance, Color.red);
+                MDebug.DrawRay(Point_Hip, ForwardScale * ClimbRayLength, Color.green);
+                MDebug.DrawRay(Point_Hip, ForwardScale * WallDistance, Color.red);
             }
 
 
             //  var ValidWall = false;
-            AverageNormal = ForwardScale;
+            AverageNormal = -ForwardScale;
 
             if (Physics.SphereCast(Point_Chest, RayRadius, Forward, out HitChest, Length, ClimbLayer.Value, IgnoreTrigger))
             {
@@ -379,24 +387,46 @@ namespace MalbersAnimations.Controller
                         if (m_debug && animal.debugGizmos)
                         {
                             var Pos = (HitChest.point + HitHip.point) / 2;
-                            Debug.DrawLine(HitChest.point, HitHip.point, Color.green);
-                            Debug.DrawRay(Pos, AverageResult.normalized * 0.5f, Color.white);
+                            MDebug.DrawLine(HitChest.point, HitHip.point, Color.green);
+                            MDebug.DrawRay(Pos, AverageResult.normalized * 0.5f, Color.white);
                         }
 #endif
                         #endregion
 
                         AverageNormal = AverageResult;
 
+                        if (!FoundTargetPos)
+                        {
+                            //TargetPosition = Position + (Forward * HitHip.distance) + (Forward * StartWallDistance);
+                            // TargetPosition = Position + Vector3.ProjectOnPlane((Forward * HitHip.distance) + (Forward * StartWallDistance), HitHip.normal);
 
-                        TargetPosition = Position + (Forward * HitChest.distance) + (Forward * StartWallDistance);
+                            TargetPosition = Position.ProjectPointOnPlane(HitHip.normal, HitHip.point);
+                            TargetPosition += -HitHip.normal.normalized * StartWallDistance;
 
-                        // ValidWall = HitHip.transform;
+                            //Debug.Log($"TargetPosition {TargetPosition}");
 
-                        //AverageNormal += HitHip.normal;
+                            Quaternion AlignRot = Quaternion.FromToRotation(Forward, -HitHip.normal) * Rotation;  //Calculate the orientation to Terrain 
+                            Quaternion Inverse_Rot = Quaternion.Inverse(Rotation);
+                            Quaternion Target = Inverse_Rot * AlignRot;
+
+                            //TargetPosition = transform.DeltaPositionFromRotate(Position + HitHip.point, Target);
+
+                            var Dtime = 0;
+
+                            MDebug.DrawWireSphere(TargetPosition, Color.yellow, 0.05f * ScaleFactor, Dtime);
+                            MDebug.DrawWireSphere(TargetPosition, Color.yellow, 0.04f * ScaleFactor, Dtime);
+                            MDebug.DrawWireSphere(TargetPosition, Color.yellow, 0.03f * ScaleFactor, Dtime);
+                            MDebug.DrawWireSphere(HitHip.point, Color.cyan, 0.05f * ScaleFactor, Dtime);
+                            // MDebug.DrawLine(HitHip.point, TargetPosition, Color.cyan, Dtime);
+
+                            // ValidWall = HitHip.transform;
+                            //AverageNormal += HitHip.normal;
+
+                        }
                     }
 
                     //Set new Platform
-                    if (animal.platform != HitChest.transform && HitChest.transform != null)
+                    if (IsActiveState && animal.platform != HitChest.transform && HitChest.transform != null)
                         animal.SetPlatform(HitChest.transform);
 
                     //Get the Wall Angle!!
@@ -408,7 +438,7 @@ namespace MalbersAnimations.Controller
                         EnableHitTransform(valid);
                     }
 
-                    return animal.platform;
+                    return HitChest.transform;
                 }
             }
             else
@@ -437,10 +467,7 @@ namespace MalbersAnimations.Controller
                 {
                     animal.MovementAxis.x = 0;
                     animal.MovementAxisRaw.x = 0;
-                    //animal.movementAxisRaw.x = 0;
                 }
-
-                //  animal.PlatformMovement(); //This needs to be calculated first!!! 
 
                 if (LastWall != ValidWall) LastWall = ValidWall;
 
@@ -461,8 +488,8 @@ namespace MalbersAnimations.Controller
                         CalculateSideClimbHit(-Right);
                     }
 
-                    AlignToWall(HitChest.distance, deltatime);
                     OrientToWall(AverageNormal, deltatime);
+                    AlignToWall(HitChest.distance, deltatime);
                 }
 
                 if (InInnerCorner)
@@ -474,7 +501,6 @@ namespace MalbersAnimations.Controller
             }
             else if (InEnterAnimation)  //If we are on Climb Start do a quick alignment to the Wall.
             {
-
                 //Do the correct positioning on Start Climb animation
                 if (Anim.IsInTransition(0))
                 {
@@ -482,6 +508,20 @@ namespace MalbersAnimations.Controller
                     animal.AdditivePosition = Vector3.zero;
                     animal.AdditiveRotation = Quaternion.identity;
                     transform.position = Vector3.Lerp(StartPosition, TargetPosition, TransTime);
+
+                    FoundTargetPos = true;
+                }
+                else
+                {
+                    //AlignToWall(HitChest.distance, deltatime);
+                }
+
+                ValidWall = CheckClimbRay();
+
+                if (StraigthWall.Value)
+                {
+                    AverageNormal = transform.position - ((HitChest.point + HitHip.point) / 2);
+                    AverageNormal = Vector3.ProjectOnPlane(AverageNormal, animal.UpVector).normalized;
                 }
 
                 OrientToWall(AverageNormal, deltatime);
@@ -497,22 +537,65 @@ namespace MalbersAnimations.Controller
         }
 
 
+
+
+        //Align the Animal to the Wall
+        private void AlignToWall(float distance, float deltatime)
+        {
+            float difference = distance - WallDistance * animal.ScaleFactor;
+
+            if (!Mathf.Approximately(distance, WallDistance * animal.ScaleFactor))
+            {
+                Vector3 align = AlignSmoothness * deltatime * difference * ScaleFactor * animal.Forward;
+                animal.Position += align;
+            }
+        }
+
+        private void OrientToWall(Vector3 normal, float deltatime)
+        {
+
+            Quaternion AlignRot = Quaternion.FromToRotation(Forward, -normal) * transform.rotation;  //Calculate the orientation to Terrain 
+            Quaternion Inverse_Rot = Quaternion.Inverse(transform.rotation);
+            Quaternion Target = Inverse_Rot * AlignRot;
+
+            Quaternion Delta = Quaternion.Lerp(Quaternion.identity, Target, deltatime * AlignSmoothness);      //Calculate the Delta Align Rotation
+            animal.AdditiveRotation *= Delta;
+
+            //var AveragePoint = (HitChest.point + HitHip.point) / 2;
+            //var pos = transform.DeltaPositionFromRotate(AveragePoint, Delta);
+
+            //MDebug.DrawWireSphere(AveragePoint, Color.cyan, 0.02f * ScaleFactor, 1);
+            //MDebug.DrawWireSphere(animal.Position, Color.cyan, 0.02f * ScaleFactor, 1);
+            //MDebug.DrawLine(animal.Position, animal.Position + pos, Color.cyan, 1);
+            // animal.AdditivePosition += (Delta * (AveragePoint - Position)) * deltatime;  //Rotaton Around the Average Point
+
+
+            //Update the Rotation to always look Upwards
+            var UP = Vector3.Cross(Forward, UpVector);
+            UP = Vector3.Cross(UP, Forward);
+            AlignRot = Quaternion.FromToRotation(transform.up, UP) * transform.rotation;  //Calculate the orientation to Terrain 
+            Inverse_Rot = Quaternion.Inverse(transform.rotation);
+            Target = Inverse_Rot * AlignRot;
+            animal.AdditiveRotation *= Target;
+        }
+
         public override void TryExitState(float DeltaTime)
         {
             var MainPivot = ClimbPivotChest(transform) + animal.AdditivePosition;
 
-            if (CurrentAnimTag == ExitTagHash)
-            {
-                if (animal.CheckIfGrounded())
-                {
-                    AllowExit();
-                    return;
-                }
-            }
+            if (CurrentAnimTag != MainTagHash) return; //Do nothing if the Animal is not on the Main Tag
+
+
+            //if (CurrentAnimTag == ExitTagHash)
+            //{
+            //    if (animal.CheckIfGrounded())
+            //    {
+            //        AllowExit();
+            //        return;
+            //    }
+            //}
 
             //if (InInnerCorner) return; //Fo nothing when the animal is changing from inner corners
-
-            // Debug.Log($"valid wall: {ValidWall} -> InInnerCorner: {InInnerCorner}");
 
             //The Animal did not touch a Wall Tagged Climb
             if (!ValidWall)
@@ -534,7 +617,7 @@ namespace MalbersAnimations.Controller
             //Moving Down
             if (MovementRaw.z < 0) //Means the animal is going down
             {
-                Debug.DrawRay(MainPivot, GroundDistance * ScaleFactor * -Up, Color.white);
+                MDebug.DrawRay(MainPivot, GroundDistance * ScaleFactor * -Up, Color.white);
 
                 //Means that the Animal is going down and touching the ground
                 if (Physics.Raycast(MainPivot, -Up, out var hit, ScaleFactor * GroundDistance, animal.GroundLayer, IgnoreTrigger))
@@ -551,18 +634,26 @@ namespace MalbersAnimations.Controller
 
                     if (!DeepSlope || IsDebree) //Check if we are not on a deep slope
                     {
-                        Debugging("[Allow Exit] when Grounded and pressing Down and touched the ground");
-                        AllowExit(StateEnum.Idle, ClimbDown); //Force the Idle State to be the next State
-                        animal.CheckIfGrounded();
+                        if (animal.CheckIfGrounded())
+                        {
+                            Debugging("[Allow Exit] when Grounded and pressing Down and touched the ground");
+                            AllowExit(StateEnum.Idle, ClimbDown); //Force the Idle State to be the next State
+                        }
+                        else
+                        {
+                            Debugging("[Set Exit Status] ClimbDown when near the Ground");
+                            SetExitStatus(ClimbDown);
+                            IsPersistent = true;
+                        }
                     }
                 }
 
                 var Point_Hip = ClimbPivotHip(transform) + DeltaPos;
                 var Length = animal.ScaleFactor * ClimbRayLength;
 
-                Debug.DrawRay(Point_Hip, Forward * Length, Color.white);
+                MDebug.DrawRay(Point_Hip, Forward * Length, Color.white);
 
-                if (!Physics.Raycast(Point_Hip, Forward, out _, Length, animal.GroundLayer, IgnoreTrigger))
+                if (!Physics.Raycast(Point_Hip, Forward, out _, Length, ClimbLayer, IgnoreTrigger))
                 {
                     Debugging("[Allow Exit] No Front Wall ");
                     AllowExit();
@@ -656,13 +747,13 @@ namespace MalbersAnimations.Controller
                         }
                     }
 
-                    Debug.DrawRay(ThirdPoint, -Direction * CornerLength, Ray3);
+                    MDebug.DrawRay(ThirdPoint, -Direction * CornerLength, Ray3);
                 }
 
-                Debug.DrawRay(SecondPoint, Forward * CornerLength, Ray2);
+                MDebug.DrawRay(SecondPoint, Forward * CornerLength, Ray2);
             }
 
-            Debug.DrawRay(point, Direction * CornerLength, Ray1);
+            MDebug.DrawRay(point, Direction * CornerLength, Ray1);
         }
 
         //private Vector3 platform_Pos;
@@ -670,34 +761,6 @@ namespace MalbersAnimations.Controller
 
 
 
-        //Align the Animal to the Wall
-        private void AlignToWall(float distance, float deltatime)
-        {
-            float difference = distance - WallDistance * animal.ScaleFactor;
-
-            if (!Mathf.Approximately(distance, WallDistance * animal.ScaleFactor))
-            {
-                Vector3 align = AlignSmoothness * deltatime * difference * ScaleFactor * animal.Forward;
-                animal.AdditivePosition += align;
-            }
-        }
-
-        private void OrientToWall(Vector3 normal, float deltatime)
-        {
-            Quaternion AlignRot = Quaternion.FromToRotation(Forward, -normal) * transform.rotation;  //Calculate the orientation to Terrain 
-            Quaternion Inverse_Rot = Quaternion.Inverse(transform.rotation);
-            Quaternion Target = Inverse_Rot * AlignRot;
-            Quaternion Delta = Quaternion.Lerp(Quaternion.identity, Target, deltatime * AlignSmoothness);      //Calculate the Delta Align Rotation
-            animal.AdditiveRotation *= Delta;
-
-            //Update the Rotation to always look Upwards
-            var UP = Vector3.Cross(Forward, UpVector);
-            UP = Vector3.Cross(UP, Forward);
-            AlignRot = Quaternion.FromToRotation(transform.up, UP) * transform.rotation;  //Calculate the orientation to Terrain 
-            Inverse_Rot = Quaternion.Inverse(transform.rotation);
-            Target = Inverse_Rot * AlignRot;
-            animal.AdditiveRotation *= Target;
-        }
 
         private void CheckLedgeExit()
         {
@@ -753,7 +816,6 @@ namespace MalbersAnimations.Controller
 
         public override void StateGizmos(MAnimal animal)
         {
-
             if (m_debug && !Application.isPlaying)
             {
                 var Forward = animal.Forward;
@@ -815,7 +877,7 @@ namespace MalbersAnimations.Controller
         {
             base.Reset();
 
-            Surface = MTools.GetResource<PhysicMaterial>("Climbable");
+            Surface = MTools.GetResource<PhysicsMaterial>("Climbable");
 
             General = new AnimalModifier()
             {

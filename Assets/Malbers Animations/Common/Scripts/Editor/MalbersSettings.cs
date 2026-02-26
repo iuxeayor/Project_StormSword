@@ -9,13 +9,13 @@ using UnityEngine;
 namespace MalbersAnimations
 {
     [InitializeOnLoad]
-    public class MalbersSettings : Editor
+    public class MalbersSettings// : Editor
     {
-        static ListRequest list;
+        private static readonly ListRequest list;
 
         static MalbersSettings()
         {
-            if (list == null) { list = Client.List(); }
+            list ??= Client.List();
 
             CreateLayer("Animal", 20);
             CreateLayer("Enemy", 23);
@@ -26,10 +26,8 @@ namespace MalbersAnimations
             CreateTag("WallRun");
             CreateTag("Stair");
             CreateInputAxe();
-
             // CheckInputSystem();
         }
-
         // private static void CheckInputSystem()
         // {
         //     if (HasPackage("com.unity.inputsystem"))

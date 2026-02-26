@@ -12,9 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c084bb85b499301498518868eb44437c, type: 3}
   m_Name: WM Aiming with Sniper
   m_EditorClassIdentifier: 
-  Description: 'Void; Equip Sword
-
-    Bool (Set Aim, Set Main Attack)'
+  Description: 
   debug: 0
   m_int:
     UseConstant: 1

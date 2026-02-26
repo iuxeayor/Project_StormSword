@@ -68,7 +68,7 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: {fileID: 1947218636460032601}
     Variable: {fileID: 0}
-  hitEffects: []
+  hitEffects: {fileID: 11400000, guid: 52be97e3602adfa449f7dc5cda82984b, type: 2}
   hitSound:
     UseConstant: 1
     ConstantValue: {fileID: 0}
@@ -79,17 +79,13 @@ MonoBehaviour:
     ConstantValue: 1
     Variable: {fileID: 0}
   CustomReaction:
-    rid: -2
+    reactions: []
   element: {fileID: 0}
   interactorID:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
   interact:
-    UseConstant: 1
-    ConstantValue: 1
-    Variable: {fileID: 0}
-  react:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
@@ -112,6 +108,11 @@ MonoBehaviour:
       UseConstant: 1
       ConstantValue: 1
       Variable: {fileID: 0}
+    Base: {fileID: 11400000, guid: 5ed6bad8cf6f1e54bb1af25b3a3608cc, type: 2}
+  m_MissChance:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_cChance:
     UseConstant: 1
     ConstantValue: 0
@@ -129,6 +130,7 @@ MonoBehaviour:
     ConstantValue: 100
     Variable: {fileID: 0}
   forceMode: 0
+  preventDuplicateDamage: 0
   OnHit:
     m_PersistentCalls:
       m_Calls:
@@ -151,6 +153,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnProfileChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAttackMissed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCritical:
     m_PersistentCalls:
       m_Calls: []
   animator: {fileID: 0}
@@ -196,7 +204,12 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 1
         Variable: {fileID: 0}
+      Base: {fileID: 0}
     m_cChance:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    m_MissChance:
       UseConstant: 1
       ConstantValue: 0
       Variable: {fileID: 0}
@@ -254,7 +267,12 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 1
         Variable: {fileID: 0}
+      Base: {fileID: 0}
     m_cChance:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    m_MissChance:
       UseConstant: 1
       ConstantValue: 0
       Variable: {fileID: 0}
@@ -319,6 +337,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   GroundArmPose: 1
+  groundHandID: {fileID: 0}
   RidingArmPose: 1
   GroundCombo: {fileID: 11400000, guid: dc411047be38d924fbfc67128f6957f2, type: 2}
   RidingCombo: {fileID: 0}
@@ -367,7 +386,11 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  IKHandPoint:
+  IKHandLeft:
+    UseConstant: 1
+    ConstantValue: {fileID: 0}
+    Variable: {fileID: 0}
+  IKHandRight:
     UseConstant: 1
     ConstantValue: {fileID: 0}
     Variable: {fileID: 0}
@@ -438,7 +461,7 @@ MonoBehaviour:
   OnReleaseFreeHand:
     m_PersistentCalls:
       m_Calls: []
-  Editor_Tabs1: 1
+  Editor_Tabs1: 3
   Editor_Tabs2: 4
   meleeTrigger: {fileID: 1054929852354334767}
   ignoreStaticObjects: 1
@@ -458,17 +481,17 @@ MonoBehaviour:
     - rid: 5468061679352020995
       type: {class: ModeReaction, ns: MalbersAnimations.Reactions, asm: MalbersAnimations}
       data:
+        desc: 
         Active: 1
-        localComponent:
-          component: {fileID: 0}
-          useLocal: 0
+        useLocal: 0
+        localTarget: {fileID: 0}
         delay: 0
         type: 0
         ID: {fileID: 11400000, guid: 4721f79850ae1be43aec2bccdea79fdc, type: 2}
+        abilityStatus: 0
         Ability: 1
         HasCoolDown: 1
         coolDown: 0
-        abilityStatus: 0
         AbilityTime: 3
         ModePower: 0
 --- !u!114 &6762238928665790036
@@ -483,47 +506,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ImpulseDefinition:
-    m_ImpulseChannel: 1
-    m_ImpulseShape: 2
-    m_CustomImpulseShape:
+  ImpulseDefinition:
+    ImpulseChannel: 1
+    ImpulseShape: 2
+    CustomImpulseShape:
       serializedVersion: 2
       m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    m_ImpulseDuration: 0.2
-    m_ImpulseType: 0
-    m_DissipationRate: 0.25
-    m_RawSignal: {fileID: 0}
-    m_AmplitudeGain: 1
-    m_FrequencyGain: 1
-    m_RepeatMode: 0
-    m_Randomize: 1
-    m_TimeEnvelope:
-      m_AttackShape:
+    ImpulseDuration: 0.2
+    ImpulseType: 0
+    DissipationRate: 0.25
+    RawSignal: {fileID: 0}
+    AmplitudeGain: 1
+    FrequencyGain: 1
+    RepeatMode: 0
+    Randomize: 1
+    TimeEnvelope:
+      AttackShape:
         serializedVersion: 2
         m_Curve: []
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-      m_DecayShape:
+      DecayShape:
         serializedVersion: 2
         m_Curve: []
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-      m_AttackTime: 0
-      m_SustainTime: 0.2
-      m_DecayTime: 0.7
-      m_ScaleWithImpact: 1
-      m_HoldForever: 0
-    m_ImpactRadius: 100
-    m_DirectionMode: 0
-    m_DissipationMode: 2
-    m_DissipationDistance: 100
-    m_PropagationSpeed: 343
-  m_DefaultVelocity: {x: 0, y: 0.1, z: 0}
+      AttackTime: 0
+      SustainTime: 0.2
+      DecayTime: 0.7
+      ScaleWithImpact: 1
+      HoldForever: 0
+    ImpactRadius: 100
+    DirectionMode: 0
+    DissipationMode: 2
+    DissipationDistance: 100
+    PropagationSpeed: 343
+  DefaultVelocity: {x: 0, y: 0.1, z: 0}
 --- !u!1 &1000013456519404
 GameObject:
   m_ObjectHideFlags: 0
@@ -582,6 +605,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -702,6 +728,22 @@ MonoBehaviour:
   OnEmpty:
     m_PersistentCalls:
       m_Calls: []
+  ID:
+    UseConstant: 1
+    ConstantValue: -1
+    Variable: {fileID: 0}
+  TriggerEnterReaction:
+    reactions: []
+  TriggerExitReaction:
+    reactions: []
+  TriggerStayReaction:
+    reactions: []
+  GameObjectEnterReaction:
+    reactions: []
+  GameObjectExitReaction:
+    reactions: []
+  GameObjectStayReaction:
+    reactions: []
   m_debug: 0
   useOnTriggerStay:
     UseConstant: 1
@@ -715,8 +757,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  trigger: {fileID: 0}
+  Conditions:
+    conditions: []
+    active: 0
+  ownCollider: {fileID: 0}
   Editor_Tabs1: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &7458751067517391639
 GameObject:
   m_ObjectHideFlags: 0
@@ -760,6 +808,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1

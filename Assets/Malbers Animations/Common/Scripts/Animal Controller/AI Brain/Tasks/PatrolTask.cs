@@ -143,7 +143,7 @@ namespace MalbersAnimations.Controller.AI
     [UnityEditor.CustomEditor(typeof(PatrolTask))]
     public class PatrolTaskEditor : UnityEditor.Editor
     {
-        UnityEditor.SerializedProperty Description, MessageID, patrolType, RuntimeSet, rtype, RTIndex, RTName,
+        UnityEditor.SerializedProperty Description, MessageID, patrolType, RuntimeSet, rtype, RTIndex, RTName, UpdateInterval,
             WaitForPreviousTask, LookAtOnArrival, IgnoreWaitTime;
 
         private void OnEnable()
@@ -155,6 +155,7 @@ namespace MalbersAnimations.Controller.AI
             rtype = serializedObject.FindProperty("rtype");
             RTIndex = serializedObject.FindProperty("RTIndex");
             RTName = serializedObject.FindProperty("RTName");
+            UpdateInterval = serializedObject.FindProperty("UpdateInterval");
             RuntimeSet = serializedObject.FindProperty("RuntimeSet");
             LookAtOnArrival = serializedObject.FindProperty("LookAtOnArrival");
             IgnoreWaitTime = serializedObject.FindProperty("IgnoreWaitTime");
@@ -164,6 +165,7 @@ namespace MalbersAnimations.Controller.AI
             serializedObject.Update();
             UnityEditor.EditorGUILayout.PropertyField(Description);
             UnityEditor.EditorGUILayout.PropertyField(MessageID);
+            UnityEditor.EditorGUILayout.PropertyField(UpdateInterval);
             UnityEditor.EditorGUILayout.PropertyField(WaitForPreviousTask);
             UnityEditor.EditorGUILayout.Space();
 

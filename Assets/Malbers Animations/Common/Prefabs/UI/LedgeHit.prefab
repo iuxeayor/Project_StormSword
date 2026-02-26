@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7785585432850654452}
+  - component: {fileID: 874104082340749156}
   - component: {fileID: 2225670295066746932}
   m_Layer: 20
   m_Name: LedgeHit
@@ -32,6 +33,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &874104082340749156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4388162148388746753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e0b5b9d4af0f31439aabd6b5de7b49e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: This GameObject gets active when the Ledge Grab State finds a valid Wall
+    to Ledge Grab
+  reference: {fileID: 0}
+  ShowDescription: 0
 --- !u!114 &2225670295066746932
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47,7 +64,7 @@ MonoBehaviour:
   OnActive:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400000, guid: 9b85b9985b117db4e861fc7539d2e225, type: 2}
+      - m_Target: {fileID: 11400000, guid: b0a0d05f83d960342834e5cae94bfd68, type: 2}
         m_TargetAssemblyTypeName: 
         m_MethodName: Invoke
         m_Mode: 6
@@ -59,7 +76,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 11400000, guid: 9b85b9985b117db4e861fc7539d2e225, type: 2}
+      - m_Target: {fileID: 11400000, guid: b0a0d05f83d960342834e5cae94bfd68, type: 2}
         m_TargetAssemblyTypeName: 
         m_MethodName: Invoke
         m_Mode: 2
@@ -71,7 +88,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 11400000, guid: 9b85b9985b117db4e861fc7539d2e225, type: 2}
+      - m_Target: {fileID: 11400000, guid: b0a0d05f83d960342834e5cae94bfd68, type: 2}
         m_TargetAssemblyTypeName: 
         m_MethodName: Invoke
         m_Mode: 5
@@ -80,25 +97,13 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Climb [Space]
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 11400000, guid: 9b85b9985b117db4e861fc7539d2e225, type: 2}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: Invoke
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: Climb
           m_BoolArgument: 1
         m_CallState: 2
   OnDeactive:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11400000, guid: 9b85b9985b117db4e861fc7539d2e225, type: 2}
+      - m_Target: {fileID: 11400000, guid: b0a0d05f83d960342834e5cae94bfd68, type: 2}
         m_TargetAssemblyTypeName: 
         m_MethodName: Invoke
         m_Mode: 6

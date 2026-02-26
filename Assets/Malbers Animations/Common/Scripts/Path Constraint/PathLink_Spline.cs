@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.Splines;
 
-
-#if UNITY_EDITOR
-#endif
 namespace MalbersAnimations.PathCreation
 {
     [AddComponentMenu("Malbers/Animal Controller/Path Link (Unity Spline)")]
@@ -14,11 +11,11 @@ namespace MalbersAnimations.PathCreation
         [Tooltip("Resolution to find the closest point on the path")]
         [Min(1)] public int m_SearchResolution = 50;
 
-        public Vector3 StartPath =>   spline.EvaluatePosition(0);
+        public Vector3 StartPath => spline.EvaluatePosition(0);
 
         public Vector3 EndPath => spline.EvaluatePosition(1);
 
-        public bool IsClosed => spline.Spline.Closed; 
+        public bool IsClosed => spline.Spline.Closed;
 
         public Bounds bounds => spline.Spline.GetBounds();
 
@@ -77,7 +74,7 @@ namespace MalbersAnimations.PathCreation
         private void OnDrawGizmos()
         {
             if (spline == null) { return; }
-            if (spline.Spline.Closed) { return; }   
+            if (spline.Spline.Closed) { return; }
 
             Gizmos.color = Color.green;
             Gizmos.DrawSphere(StartPath, 0.02f * transform.localScale.y);

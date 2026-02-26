@@ -15,5 +15,27 @@ namespace MalbersAnimations.Scriptables
             get => UnityEngine.Random.Range(minValue, maxValue);
             set {/*Do nothing on Set*/ }
         }
+
+        public float MaxValue => maxValue;
+        public float MinValue => minValue;
+
+
+
+        public virtual void SetMinValue(float value)
+        {
+            minValue.Value = value;
+            Value = UnityEngine.Random.Range(minValue, maxValue);
+        }
+        public virtual void SetMaxValue(float value)
+        {
+            maxValue.Value = value;
+            Value = UnityEngine.Random.Range(minValue, maxValue);
+        }
+        public virtual void SetRange(float min, float max)
+        {
+            minValue.Value = min;
+            maxValue.Value = max;
+            Value = UnityEngine.Random.Range(minValue, maxValue);
+        }
     }
 }

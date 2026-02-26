@@ -9,14 +9,16 @@ namespace MalbersAnimations.Scriptables
     {
         [RequiredField] public RuntimeGameObjects Collection;
 
-        public FloatReference delay = new ();
+        public bool evaluateOnEnable = true;
+
+        public FloatReference delay = new();
 
         public RuntimeSetTypeGameObject type = RuntimeSetTypeGameObject.Random;
         [Hide("showIndex", false)]
         public int Index = 0;
 
         [Hide("showName", false)]
-        public string m_name; 
+        public string m_name;
 
 
         public GameObjectEvent Raise = new();
@@ -25,13 +27,11 @@ namespace MalbersAnimations.Scriptables
 
         public void SetCollection(RuntimeGameObjects col) => Collection = col;
 
-        private void OnEnable()
+        public virtual void OnEnable()
         {
 
-            if (delay > 0)
-                Invoke(nameof(GetSet), delay);
-            else
-                this.Delay_Action(() => GetSet());
+            if (evaluateOnEnable) Evaluate();
+
 
             if (Collection != null)
             {
@@ -40,7 +40,17 @@ namespace MalbersAnimations.Scriptables
             }
         }
 
-        private void OnDisable()
+        public void Evaluate()
+        {
+            if (delay > 0)
+                Invoke(nameof(GetSet), delay);
+            else
+                this.Delay_Action(() => GetSet());
+        }
+
+
+
+        public virtual void OnDisable()
         {
             if (Collection != null)
             {

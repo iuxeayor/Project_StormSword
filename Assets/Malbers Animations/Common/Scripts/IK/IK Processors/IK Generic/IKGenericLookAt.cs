@@ -1,84 +1,63 @@
+using MalbersAnimations.Scriptables;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-
 
 #if UNITY_EDITOR
 #endif
 
 namespace MalbersAnimations.IK
 {
+
     [Serializable]
     [AddTypeMenu("Generic/LookAt")]
     public class IKGenericLookAt : IKProcessor
     {
         public override bool RequireTargets => true;
-
         public enum UpVectorType { VectorUp, Local, Global }
+        public Vector3 Offset;
+        public UpVectorType upVector;
+        [Hide(nameof(upVector), (int)UpVectorType.Local)]
+        public Vector3 LocalUp = Vector3.up;
+        [Hide(nameof(upVector), (int)UpVectorType.Global)]
+        public Vector3Var WorldUp;
 
-        public List<GenericIKOffset> Bones = new();
+        public Vector3 UpVector(Animator anim) => upVector switch
+        {
+            UpVectorType.Local => anim.transform.TransformDirection(LocalUp),
+            UpVectorType.Global => (Vector3)WorldUp,
+            _ => Vector3.up,
+        };
 
-        private Quaternion[] ChildRotations;
+        public override void Start(IKSet IKSet, Animator anim, int index)
+        {
+            if (index >= IKSet.Targets.Length)
+            {
+                Debug.LogWarning($"Target index  is out of range for this processor [{name}] -> [{IKSet.Owner.name}]. Disabling Processor!");
+                Active = false; // Disable this processor
+                return;
+            }
+
+            if (IKSet.aimer == null)
+            {
+                Debug.LogWarning($"There's no Aimer on the IK Set. Generic IK needs an Aimer");
+                Active = false; // Disable this processor
+                return;
+            }
+        }
 
         public override void LateUpdate(IKSet IKSet, Animator anim, int index, float weight)
         {
-            Quaternion TargetRotation = Quaternion.identity;
+            if (weight == 0) return; //Do nothing if the weight is zero
+            if (IKSet.aimer.AimDirection == Vector3.zero) return; //Do nothing if the Aim Direction is zero
 
-            foreach (var bn in Bones)
-            {
-                var FinalWeight = weight * bn.Weight;
-                if (FinalWeight <= 0) continue; //Do nothing if the weight is zero
+            Transform Bone = IKSet.Targets[index];
+            if (Bone == null) return;   //Missing Bone
 
-                var Bone = IKSet.Targets[bn.BoneIndex];
+            Quaternion TargetRotation;
+            // var BoneStartRot = IKSet.CacheTargets[index];
 
-                //Store the  bone's Child Rotation 
-                if (bn.KeepChildRot)
-                {
-                    ChildRotations = new Quaternion[Bone.Value.childCount];
-                    for (int i = 0; i < ChildRotations.Length; i++)
-                        ChildRotations[i] = Bone.Value.GetChild(i).rotation;
-                }
-
-
-                switch (bn.IK)
-                {
-                    case IKGenerigType.LookAt:
-
-                        var direction = IKSet.aimer.AimDirection;
-                        var angle = Vector3.Angle(anim.transform.forward, direction);
-
-                        if (bn.LookAtLimit.maxValue != 0 && bn.LookAtLimit.minValue != 0) //Check the Limit in case there is a limit
-                            FinalWeight *= angle.CalculateRangeWeight(bn.LookAtLimit.minValue, bn.LookAtLimit.maxValue);
-
-                        if (bn.Gizmos) MDebug.DrawRay(Bone.Value.transform.position, direction.normalized, Color.Lerp(Color.black, Color.green, FinalWeight));
-
-                        if (FinalWeight == 0) continue; //Do nothing if the weight is zero
-
-
-                        TargetRotation = Quaternion.LookRotation(IKSet.aimer.RawAimDirection, bn.UpVector) * Quaternion.Euler(bn.Offset);
-                        break;
-                    case IKGenerigType.AdditiveOffset:
-                        TargetRotation = Bone.rotation * Quaternion.Euler(bn.Offset);
-                        break;
-                    case IKGenerigType.RotationOverride:
-                        TargetRotation = Quaternion.Euler(bn.Offset);
-                        break;
-                    default:
-                        break;
-                }
-
-
-                Bone.Value.rotation = Quaternion.Lerp(Bone.rotation, TargetRotation, FinalWeight);
-
-                //Store the bone's Child Rotation
-                if (bn.KeepChildRot)
-                {
-                    for (int i = 0; i < ChildRotations.Length; i++)
-                    {
-                        Bone.Value.GetChild(i).rotation = ChildRotations[i];
-                    }
-                }
-            }
+            TargetRotation = Quaternion.LookRotation(IKSet.aimer.AimDirection, UpVector(anim)) * Quaternion.Euler(Offset);
+            Bone.rotation = Quaternion.Lerp(Bone.rotation, TargetRotation, weight);
         }
 
         public override void Validate(IKSet set, Animator animator, int index)
@@ -91,71 +70,55 @@ namespace MalbersAnimations.IK
             {
                 Debug.LogWarning($"The Target Index [{TargetIndex}] is out of range on the IK Set. The IK Set has only {set.Targets.Length} targets");
             }
+            if (set.Targets[TargetIndex].Value == null)
+            {
+                Debug.LogWarning($"The Target in Index [{TargetIndex}] is Empty. Make sure you set a proper value. in the Editor, or at Runtime");
+            }
             else
             {
                 Debug.Log($"<B>[IK Processor: {name}][IK Generic Look At]</B>  <color=yellow>[OK]</color>");
             }
         }
 
-        //        public override void OnDrawGizmos(IKSet IKSet, Animator anim, float weight)
+
+        //internal override void OnSceneGUI(IKSet set, Animator animator, UnityEngine.Object target, int index)
+        //{
+        //    if (Application.isPlaying)
+        //    {
+        //        if (Active)
         //        {
-        //#if UNITY_EDITOR && MALBERS_DEBUG
-        //            // bool AppIsPlaying = Application.isPlaying;
-        //            if (anim == null) return;
+        //            var bone = set.c[index].Value;
 
-        //            foreach (var bn in Bones)
+
+        //            if (Tools.current == Tool.Rotate)
         //            {
-        //                if (IKSet.Targets != null && IKSet.Targets.Length > 0 && IKSet.Targets.Length > bn.BoneIndex)
+        //                using (var cc = new EditorGUI.ChangeCheckScope())
         //                {
-        //                    var Bone = IKSet.Targets[bn.BoneIndex];
+        //                    Vector3 Pos = bone.position;
+        //                    // Quaternion NewRotation = Quaternion.identity;
 
-        //                    if (Bone == null || !bn.Gizmos) continue;
-
-        //                    var FinalWeight = weight * bn.Weight * GetProcessorAnimWeight(anim);
-
-        //                    Handles.color = new Color(0, 1, 0, 0.1f);
-        //                    Handles.DrawSolidArc(Bone.position, bn.UpVector,
-        //                        Quaternion.Euler(0, -bn.LookAtLimit.minValue, 0) * anim.transform.forward, bn.LookAtLimit.minValue * 2, 1);
+        //                    var TargetRotation = Quaternion.LookRotation(set.aimer.RawAimDirection, UpVector);
 
 
-
-        //                    Handles.color = Color.green;
-        //                    Handles.DrawWireArc(Bone.position,
-        //                        bn.UpVector, Quaternion.Euler(0, -bn.LookAtLimit.minValue, 0) * anim.transform.forward, bn.LookAtLimit.minValue * 2, 1);
+        //                    var rootRotation = bone.parent.rotation; //Get the Rotation before IK 
 
 
-        //                    Handles.color = new Color(0, 0.3f, 0, 0.2f);
-        //                    var Maxlimit = (bn.LookAtLimit.minValue - bn.LookAtLimit.maxValue);
-
-        //                    Handles.DrawSolidArc(Bone.position,
-        //                        bn.UpVector, Quaternion.Euler(0, -(bn.LookAtLimit.minValue), 0) * anim.transform.forward, (Maxlimit), 1);
-
-        //                    Handles.DrawSolidArc(Bone.position,
-        //                        bn.UpVector, Quaternion.Euler(0, (bn.LookAtLimit.minValue), 0) * anim.transform.forward, -(Maxlimit), 1);
+        //                    var NewRotation = Handles.RotationHandle(TargetRotation * Quaternion.Euler(Offset), Pos);
 
 
-        //                    Handles.color = Color.black;
+        //                    NewRotation = Quaternion.Inverse(rootRotation) * NewRotation; //Get the Local Rotation
 
-        //                    Handles.DrawWireArc(Bone.position,
-        //                        bn.UpVector, Quaternion.Euler(0, -(bn.LookAtLimit.minValue), 0) * anim.transform.forward, (Maxlimit), 1);
 
-        //                    Handles.DrawWireArc(Bone.position,
-        //                        bn.UpVector, Quaternion.Euler(0, (bn.LookAtLimit.minValue), 0) * anim.transform.forward, -(Maxlimit), 1);
-
+        //                    if (cc.changed)
+        //                    {
+        //                        Undo.RecordObject(target, "Change Rot");
+        //                        Offset = NewRotation.eulerAngles;
+        //                        EditorUtility.SetDirty(target);
+        //                    }
         //                }
         //            }
-        //#endif
         //        }
-    }
-
-
-
-    public enum IKGenerigLookAt
-    {
-        LookAt,
-        [InspectorName("Local Rotation Additive")]
-        AdditiveOffset,
-        [InspectorName("Local Rotation Override")]
-        RotationOverride
+        //    }
+        //}
     }
 }

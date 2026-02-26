@@ -1,10 +1,10 @@
-﻿using UnityEngine;
-using MalbersAnimations.Weapons;
+﻿using MalbersAnimations.Weapons;
+using UnityEngine;
 
 
 namespace MalbersAnimations.Controller.AI
 {
-    public enum BrainWeaponActions { Draw_Holster, Store_Weapon, Equip_Weapon,Unequip_Weapon ,Aim, Attack, Reload }
+    public enum BrainWeaponActions { Draw_Holster, Store_Weapon, Equip_Weapon, Unequip_Weapon, Aim, Attack, StopAttack, Reload }
 
     [CreateAssetMenu(menuName = "Malbers Animations/Pluggable AI/Tasks/Weapon Tasks", fileName = "new Weapon Task")]
     public class WeaponTask : MTask
@@ -14,15 +14,15 @@ namespace MalbersAnimations.Controller.AI
         public bool near = false;
         public BrainWeaponActions Actions = BrainWeaponActions.Attack;
 
-        [Hide("Actions",(int)BrainWeaponActions.Equip_Weapon)]
+        [Hide("Actions", (int)BrainWeaponActions.Equip_Weapon)]
         public MWeapon Weapon;
-        [Hide("Actions",(int)BrainWeaponActions.Draw_Holster)]
+        [Hide("Actions", (int)BrainWeaponActions.Draw_Holster)]
         public HolsterID HolsterID;
-        [Hide("Actions",(int)BrainWeaponActions.Aim)]
+        [Hide("Actions", (int)BrainWeaponActions.Aim)]
         public bool AimValue = true;
 
-        [Hide("Actions",  (int)BrainWeaponActions.Draw_Holster ,(int) BrainWeaponActions.Store_Weapon)]
-        [Tooltip("Ingore Draw and Store weapon animations")]
+        [Hide("Actions", (int)BrainWeaponActions.Draw_Holster, (int)BrainWeaponActions.Store_Weapon)]
+        [Tooltip("Ignore Draw and Store weapon animations")]
         public bool IgnoreDrawStore = false;
 
 
@@ -31,8 +31,10 @@ namespace MalbersAnimations.Controller.AI
 
         public override void StartTask(MAnimalBrain brain, int index)
         {
-          var WeaponManager = brain.Animal.GetComponentInChildren<MWeaponManager>();
-           brain.TasksVars[index].mono = WeaponManager;
+            var WeaponManager = brain.Animal.GetComponentInChildren<MWeaponManager>();
+
+            brain.TasksVars[index].mono = WeaponManager; //Store the Weapon Manager on the TaskVars
+
             if (near && !brain.AIControl.HasArrived) return; //Dont play if Play on target is true but we are not near the target.
 
             if (WeaponManager)
@@ -51,7 +53,7 @@ namespace MalbersAnimations.Controller.AI
                         WeaponManager.Aim_Set(AimValue);
                         break;
                     case BrainWeaponActions.Attack:
-                        // WeaponManager.MainAttack(); //This will be called on Update!
+                        //  WeaponManager.MainAttack(); //This will be called on Update!
                         break;
                     case BrainWeaponActions.Store_Weapon:
                         WeaponManager.IgnoreStore = IgnoreDrawStore;
@@ -64,6 +66,10 @@ namespace MalbersAnimations.Controller.AI
                     case BrainWeaponActions.Unequip_Weapon:
                         WeaponManager.UnEquip();
                         brain.TaskDone(index);
+                        break;
+                    case BrainWeaponActions.StopAttack:
+                        if (WeaponManager.Weapon && WeaponManager.WeaponIsActive)
+                            WeaponManager.MainAttackReleased();
                         break;
                     default:
                         break;
@@ -81,7 +87,7 @@ namespace MalbersAnimations.Controller.AI
             if (near && !brain.AIControl.HasArrived)
             {
                 if (Actions != BrainWeaponActions.Attack) //Attack needs to release the Attack when the Character is Far
-                return; //Dont play if Play on target is true but we are not near the target.
+                    return; //Dont play if Play on target is true but we are not near the target.
             }
 
             var WeaponManager = brain.TasksVars[index].mono as MWeaponManager;
@@ -107,7 +113,7 @@ namespace MalbersAnimations.Controller.AI
                         //    brain.TaskDone(index);
                         //    break;
                         //}
-                        //else  //Means the weapon has not being equipepd e
+                        //else  //Means the weapon has not being equipped e
                         //{
                         //    WeaponManager.IgnoreDraw = IgnoreDrawStore;
                         //    WeaponManager.Holster_Equip(HolsterID);
@@ -141,7 +147,7 @@ namespace MalbersAnimations.Controller.AI
                             if (near && !brain.AIControl.HasArrived) //meaning the target has gone far
                             {
                                 WeaponManager.MainAttackReleased();
-                            
+
                                 if (WeaponManager.Weapon) WeaponManager.Weapon.Input = false;
                                 return;
                             }
@@ -165,11 +171,15 @@ namespace MalbersAnimations.Controller.AI
                                     }
                                 }
                             }
-                           
-                          
+                            else
+                            {
+                                WeaponManager.MainAttack(); //No weapons attack
+                            }
+
+
                             //Debug.Log("ATTACK1");
                         }
-                            break;
+                        break;
                     case BrainWeaponActions.Reload:
                         if (!WeaponManager.IsReloading)
                         {
@@ -194,7 +204,7 @@ namespace MalbersAnimations.Controller.AI
         //    if (WeaponManager != null)
         //    {
 
-           
+
 
         ////    if (Actions == BrainWeaponActions.Attack) { WeaponManager.MainAttackReleased(); }
 

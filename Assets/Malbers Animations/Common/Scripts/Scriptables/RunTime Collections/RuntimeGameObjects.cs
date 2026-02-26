@@ -9,7 +9,6 @@ namespace MalbersAnimations.Scriptables
     [CreateAssetMenu(menuName = "Malbers Animations/Collections/Runtime GameObject Set", order = 1000, fileName = "New Runtime Gameobject Collection")]
     public class RuntimeGameObjects : RuntimeCollection<GameObject>
     {
-
         public GameObjectEvent OnItemAdded = new();
         public GameObjectEvent OnItemRemoved = new();
 

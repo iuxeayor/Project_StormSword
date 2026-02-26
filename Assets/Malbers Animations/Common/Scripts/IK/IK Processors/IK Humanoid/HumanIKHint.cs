@@ -22,7 +22,7 @@ namespace MalbersAnimations.IK
         {
             if (set.Targets.Length < TargetIndex)
             {
-                Debug.LogError($"The IK Set <B>[{set.name}]</B> has no Transform set on the [Targets] array - Index {TargetIndex}." +
+                Debug.LogError($"The IK Set <B>[{set.Name}]</B> has no Transform set on the [Targets] array - Index {TargetIndex}." +
                     $" <B>[IK Processor: {name}]</B> Needs an a value in Index [{TargetIndex}]." +
                     $" Please add a reference for that index in the [Targets] array", animator);
             }

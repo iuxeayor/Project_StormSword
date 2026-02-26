@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using MalbersAnimations.Scriptables;
+﻿using MalbersAnimations.Scriptables;
+using UnityEngine;
 
 namespace MalbersAnimations
 {
@@ -7,13 +7,12 @@ namespace MalbersAnimations
     public class RandomBehavior : StateMachineBehaviour
     {
         [Tooltip("Max Random Value start from 1 to <Range>")]
-        public IntReference Range = new IntReference(15);
+        public IntReference Range = new(15);
         [Tooltip("Priority of the Random Behaviour, Other Layers may be using the Random Behaviour too")]
-        public IntReference Priority = new IntReference(0);
+        public IntReference Priority = new(0);
 
         IRandomizer randomizer;
-
-        static int RandomHash = Animator.StringToHash("Random");
+        private static readonly int RandomHash = Animator.StringToHash("Random");
 
         private bool HasRandomParam = false;
         private bool checkfirstTime = false;
@@ -22,8 +21,7 @@ namespace MalbersAnimations
 
         override public void OnStateMachineEnter(Animator animator, int stateMachinePathHash)
         {
-            if (randomizer == null)
-                randomizer = animator.GetComponent<IRandomizer>();
+            randomizer ??= animator.GetComponent<IRandomizer>();
 
             var value = Random.Range(1, Range + 1);
 

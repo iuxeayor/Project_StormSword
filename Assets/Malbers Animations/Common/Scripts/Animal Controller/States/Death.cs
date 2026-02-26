@@ -3,13 +3,11 @@
 namespace MalbersAnimations.Controller
 {
     [HelpURL("https://docs.google.com/document/d/1QBLQVWcDSyyWBDrrcS2PthhsToWkOayU0HUtiiSWTF8/edit#heading=h.kraxblx9518t")]
+    [AddTypeMenu("Death/Death (Animation)")]
     public class Death : State
     {
-        public override string StateName => "Death/Death (Animation)";
-
+        // public override string StateName => "Death/Death (Animation)";
         public override string StateIDName => "Death";
-
-        [Header("Death Parameters")]
 
         [Tooltip("Disable all components when the animal dies. Use this when your animal will not respawn")]
         public bool DisableAllComponents = true;
@@ -17,7 +15,7 @@ namespace MalbersAnimations.Controller
         public bool DisableMainCollider = true;
         [Tooltip("Disable the internal collider when the animal dies. Use this when your animal will not respawn")]
         public bool DisableInternalColliders = false;
-       // public bool RemoveAllTriggers = true;
+        // public bool RemoveAllTriggers = true;
         public bool IsKinematic = true;
         //public bool DisableModes = true;
         public int DelayFrames = 2;
@@ -30,11 +28,10 @@ namespace MalbersAnimations.Controller
         [Hide("disableAnimal")]
         public float disableAnimalTime = 5f;
 
-
-
         public override void EnterCoreAnimation()
         {
             animal.Mode_Interrupt();
+            animal.Mode_Stop(true); //Stop the Animal Mode
 
             if (animal.RB && IsKinematic)
             {
@@ -43,21 +40,42 @@ namespace MalbersAnimations.Controller
             }
 
             animal.StopMoving();
-            animal.InputSource?.Enable(false); //Disable the Input Source
-            animal.Mode_Stop();
+
+            if (!animal.InputSource.IsUnityRefNull()) //CustomPatch: Fixed wrong null check for unity object
+                animal.InputSource.Enable(false); //Disable the Input Source
+
+
+            animal.Mode_Stop(true);
+            animal.SetModeStatus(0);
             animal.Delay_Action(DelayFrames, () => DisableAll()); //Wait 2 frames
+        }
+
+        public override void OnStateMove(float deltatime)
+        {
+            if (!animal.Grounded)
+            {
+                animal.CheckIfGrounded();
+                animal.UseGravity = false;
+            }
+
+            if (animal.IsPlayingMode)
+            {
+                animal.Mode_Interrupt();
+                animal.Mode_Stop(true); //Stop the Animal Mode
+            }
         }
 
         void DisableAll()
         {
             SetEnterStatus(0);
 
-            if (DisableMainCollider && animal.MainCollider != null) { animal.MainCollider.enabled = false; }
+            if (DisableMainCollider)
+                animal.MainCollider_Enable(false); //Disable the Main Collider
 
             if (DisableAllComponents)
             {
                 var AllComponents = animal.GetComponentsInChildren<MonoBehaviour>();
-                
+
                 foreach (var comp in AllComponents)
                 {
                     if (comp == animal) continue;
@@ -66,15 +84,15 @@ namespace MalbersAnimations.Controller
             }
 
             if (DisableInternalColliders)
-                foreach (var c in animal.colliders) c.SetEnable(false);
-                
+                foreach (var c in animal.colliders) c.enabled = false; //Disable all colliders
+
 
             animal.SetCustomSpeed(new MSpeed("Death")); //Clear the Current Speed
 
             if (animal.RB)
             {
-                animal.RB.drag = RigidbodyDrag;
-                animal.RB.angularDrag = RigidbodyAngularDrag;
+                animal.RB.linearDamping = RigidbodyDrag;
+                animal.RB.angularDamping = RigidbodyAngularDrag;
             }
 
             if (disableAnimal)

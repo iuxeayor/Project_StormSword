@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -33,6 +41,7 @@ MonoBehaviour:
   General:
     modify: -1
     RootMotion: 1
+    RootMotionRotation: 1
     Sprint: 1
     Gravity: 0
     Grounded: 0
@@ -51,6 +60,7 @@ MonoBehaviour:
     modifier:
       modify: -1
       RootMotion: 1
+      RootMotionRotation: 0
       Sprint: 1
       Gravity: 0
       Grounded: 0
@@ -71,10 +81,26 @@ MonoBehaviour:
   IncludeSleepState: 1
   SleepFromState: []
   SleepFromMode: []
+  DisableModes: []
+  noModes:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   QueueFrom: []
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: Preset
+    enabled: 1
+    isTrigger: 0
+    center: {x: 0, y: 0.6, z: 0.27}
+    height: 1.05
+    direction: 2
+    radius: 0.22
+    material: {fileID: 0}
+    modify: 60
   TryLoop:
     UseConstant: 1
     ConstantValue: 5
@@ -91,7 +117,7 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
-  ExitOnMain: 1
+  ExitOnMain: 0
   EnterCooldown:
     UseConstant: 1
     ConstantValue: 0
@@ -105,12 +131,22 @@ MonoBehaviour:
   MovementStrafe: 1
   IdleStrafe: 1
   m_debug: 1
-  Editor_Tabs1: 0
+  Editor_Tabs1: 4
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets: []
   ID: {fileID: 11400000, guid: 7e364e53b77644c47aa3abdaa2e2c08c, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   WaterLayer:
     serializedVersion: 2
     m_Bits: 16
+  HitTransform: SwimHit
+  waterTransform: WaterHit
   UpSearch: 3
   AlignSmooth: 5
   bounce: 2
@@ -120,15 +156,13 @@ MonoBehaviour:
   FrontRayLength: 1
   HeightMult: 0.9
   OnTouchedWaterEnter:
-    rid: -2
+    reactions: []
   OnTouchedWaterExit:
-    rid: -2
+    reactions: []
   IsInWater: 0
   PivotAboveWater: 0
   BounceUp: {x: 0, y: 0, z: 0}
   BounceDown: {x: 0, y: 0, z: 0}
   references:
     version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    RefIds: []

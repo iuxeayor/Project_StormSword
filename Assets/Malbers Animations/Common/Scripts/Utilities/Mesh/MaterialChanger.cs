@@ -1,6 +1,8 @@
 ﻿using MalbersAnimations.Events;
 using System.Collections.Generic;
 using UnityEngine;
+using MalbersAnimations.Scriptables;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -13,11 +15,16 @@ namespace MalbersAnimations.Utilities
     [AddComponentMenu("Malbers/Utilities/Mesh/Material Changer")]
     public class MaterialChanger : MonoBehaviour
     {
+        public int MaterialItemIndex;
+
         public List<MaterialItem> materialList = new();
         public bool showMeshesList = true;
         public bool changeHidden = false;
-
         public bool random;
+
+        // PlayerPrefs related variables
+        public bool usePlayerPrefs = false;
+        public StringReference playerPrefsKey = new();
 
         /// <summary>All Material Changer Index Stored on a string separated by a space ' '</summary>
         public string AllIndex
@@ -66,7 +73,7 @@ namespace MalbersAnimations.Utilities
 
         public int Count => materialList.Count;
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             foreach (var mat in materialList)
             {
@@ -76,7 +83,15 @@ namespace MalbersAnimations.Utilities
                 }
             }
 
-            if (random) Randomize();
+            // Load saved material indices if PlayerPrefs is enabled
+            if (usePlayerPrefs && !string.IsNullOrEmpty(playerPrefsKey))
+            {
+                LoadFromPlayerPrefs();
+            }
+            else if (random)
+            {
+                Randomize();
+            }
         }
 
         private void OnDisable()
@@ -90,11 +105,74 @@ namespace MalbersAnimations.Utilities
             }
         }
 
+        /// <summary>  Save the current material indices to PlayerPrefs  </summary> ****NEW****
+        public virtual void SaveToPlayerPrefs()
+        {
+            if (!usePlayerPrefs || string.IsNullOrEmpty(playerPrefsKey)) return;
+
+            string materialIndices = "";
+
+            for (int i = 0; i < materialList.Count; i++)
+            {
+                materialIndices += materialList[i].current.ToString();
+                if (i < materialList.Count - 1)
+                {
+                    materialIndices += ",";
+                }
+            }
+
+            PlayerPrefs.SetString(playerPrefsKey, materialIndices);
+            PlayerPrefs.Save();
+
+            Debug.Log($"[MaterialChanger] Saved material indices to PlayerPrefs with key: {playerPrefsKey}");
+        }
+
+        /// <summary>  Load material indices from PlayerPrefs  </summary>    ****NEW****
+        public virtual void LoadFromPlayerPrefs()
+        {
+            if (!usePlayerPrefs || string.IsNullOrEmpty(playerPrefsKey)) return;
+
+            if (PlayerPrefs.HasKey(playerPrefsKey))
+            {
+                string materialIndices = PlayerPrefs.GetString(playerPrefsKey);
+                string[] indices = materialIndices.Split(',');
+
+                for (int i = 0; i < Mathf.Min(indices.Length, materialList.Count); i++)
+                {
+                    if (int.TryParse(indices[i], out int index))
+                    {
+                        materialList[i].ChangeMaterial(index);
+                    }
+                }
+
+                Debug.Log($"[MaterialChanger] Loaded material indices from PlayerPrefs with key: {playerPrefsKey}");
+            }
+        }
+
+        /// <summary> Delete the PlayerPrefs key for this MaterialChanger </summary>   ****NEW****
+        public virtual void DeletePlayerPrefs()
+        {
+            if (!string.IsNullOrEmpty(playerPrefsKey) && PlayerPrefs.HasKey(playerPrefsKey))
+            {
+                PlayerPrefs.DeleteKey(playerPrefsKey);
+                Debug.Log($"[MaterialChanger] Deleted PlayerPrefs with key: {playerPrefsKey}");
+            }
+        }
+
         public virtual void Randomize()
         {
             foreach (var mat in materialList)
             {
                 if (!mat.Linked) mat.ChangeMaterial(UnityEngine.Random.Range(0, mat.materials.Length));
+            }
+        }
+
+        public virtual void Randomize(string name)
+        {
+            MaterialItem mat = materialList.Find(item => item.Name.ToUpper() == name.ToUpper());
+            if (mat != null && !mat.Linked)
+            {
+                mat.ChangeMaterial(UnityEngine.Random.Range(0, mat.materials.Length));
             }
         }
 
@@ -104,8 +182,11 @@ namespace MalbersAnimations.Utilities
         {
             foreach (var materialItem in materialList)
             {
-                materialItem.ChangeMaterial(Next);
+                if (!materialItem.Linked)
+                    materialItem.ChangeMaterial(Next);
             }
+
+            if (usePlayerPrefs) SaveToPlayerPrefs();
         }
 
         /// <summary> Set all the MaterialItems on the List a specific Material using an Index  </summary>
@@ -116,6 +197,8 @@ namespace MalbersAnimations.Utilities
             {
                 mat.ChangeMaterial(index);
             }
+
+            if (usePlayerPrefs) SaveToPlayerPrefs();
         }
 
         /// <summary> Set a Material from the List of material inside the materialList...   </summary>
@@ -126,8 +209,9 @@ namespace MalbersAnimations.Utilities
             if (indexList < 0) indexList = 0;
             indexList %= Count;
 
-            if (materialList[indexList] != null)
-                materialList[indexList].ChangeMaterial(nextIndex);
+            materialList[indexList]?.ChangeMaterial(nextIndex);
+
+            if (usePlayerPrefs) SaveToPlayerPrefs();
         }
 
         /// <summary>  Set a Material from the List of material inside the materialList...   </summary>
@@ -138,10 +222,9 @@ namespace MalbersAnimations.Utilities
             if (index < 0) index = 0;
             index %= Count;
 
-            if (materialList[index] != null)
-            {
-                materialList[index].ChangeMaterial(next);
-            }
+            materialList[index]?.ChangeMaterial(next);
+
+            if (usePlayerPrefs) SaveToPlayerPrefs();
         }
 
         public virtual void SetMaterial(string name, int Index)
@@ -151,6 +234,7 @@ namespace MalbersAnimations.Utilities
             if (materialItem != null)
             {
                 materialItem.ChangeMaterial(Index);
+                if (usePlayerPrefs) SaveToPlayerPrefs();
             }
             else
             {
@@ -165,6 +249,7 @@ namespace MalbersAnimations.Utilities
             if (materialItem != null)
             {
                 materialItem.ChangeMaterial(next);
+                if (usePlayerPrefs) SaveToPlayerPrefs();
             }
             else
             {
@@ -180,6 +265,8 @@ namespace MalbersAnimations.Utilities
             {
                 MaterialItem.ChangeMaterial(mat);
             }
+
+            if (usePlayerPrefs) SaveToPlayerPrefs();
         }
 
 
@@ -191,6 +278,8 @@ namespace MalbersAnimations.Utilities
             index %= Count;
 
             materialList[index].NextMaterial();
+
+            if (usePlayerPrefs) SaveToPlayerPrefs();
         }
 
         /// <summary> Swap to the Next material on a specific Material Item on the List using the Name  </summary>
@@ -199,7 +288,11 @@ namespace MalbersAnimations.Utilities
         {
             MaterialItem mat = materialList.Find(item => item.Name.ToUpper() == name.ToUpper());
 
-            if (mat != null) mat.NextMaterial();
+            if (mat != null)
+            {
+                mat.NextMaterial();
+                if (usePlayerPrefs) SaveToPlayerPrefs();
+            }
         }
 
         /// <summary>  Returns the Current Index on the material list using the index of the slot  </summary>
@@ -219,9 +312,11 @@ namespace MalbersAnimations.Utilities
         [ContextMenu("Create Event Listeners")]
         void CreateListeners()
         {
-            MEventListener listener = this.FindComponent<MEventListener>();
-            if (listener == null) listener = transform.root.gameObject.AddComponent<MEventListener>();
-            if (listener.Events == null) listener.Events = new List<MEventItemListener>();
+            MEventListener listener =
+                 (this.FindComponent<MEventListener>()
+                 ?? transform.root.GetComponentInChildren<MEventListener>())
+                 ?? transform.root.gameObject.AddComponent<MEventListener>();
+            listener.Events ??= new List<MEventItemListener>();
 
             MEvent BlendS = MTools.GetInstance<MEvent>("Material Changer");
 
@@ -279,7 +374,7 @@ namespace MalbersAnimations.Utilities
         [Tooltip("Material ID (Used when a mesh have multiple materials) Default 0")]
         public int indexM = 0;
 
-        public IntEvent OnMaterialChanged = new IntEvent();
+        public IntEvent OnMaterialChanged = new();
 
         #region Constructors
         public MaterialItem()
@@ -358,7 +453,10 @@ namespace MalbersAnimations.Utilities
                 if (mesh == null) break;
 
                 Material[] currentMaterial = mesh.sharedMaterials;
-                currentMaterial[indexM] = materials[current];
+
+                var clampIndex = Mathf.Clamp(indexM, 0, currentMaterial.Length - 1);
+
+                currentMaterial[clampIndex] = materials[current];
                 if (materials[current] != null)
                     mesh.sharedMaterials = currentMaterial;
             }
@@ -463,10 +561,11 @@ namespace MalbersAnimations.Utilities
     public class MaterialChangerEditor : Editor
     {
         private ReorderableList list;
-        private SerializedProperty materialList, showMeshesList, random, changeHidden;
+        private SerializedProperty materialList, showMeshesList, random, changeHidden, MaterialItemIndex;
+        private SerializedProperty usePlayerPrefs, playerPrefsKey;
         private MaterialChanger M;
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             M = ((MaterialChanger)target);
 
@@ -474,19 +573,57 @@ namespace MalbersAnimations.Utilities
             showMeshesList = serializedObject.FindProperty("showMeshesList");
             changeHidden = serializedObject.FindProperty("changeHidden");
             random = serializedObject.FindProperty("random");
+            usePlayerPrefs = serializedObject.FindProperty("usePlayerPrefs");
+            playerPrefsKey = serializedObject.FindProperty("playerPrefsKey");
+            MaterialItemIndex = serializedObject.FindProperty("MaterialItemIndex");
 
             list = new ReorderableList(serializedObject, materialList, true, true, true, true)
             {
                 drawElementCallback = DrawElementCallback,
                 drawHeaderCallback = HeaderCallbackDelegate,
-                onAddCallback = OnAddCallBack
+                onAddCallback = OnAddCallBack,
+                onSelectCallback = (ReorderableList l) =>
+                {
+                    MaterialItemIndex.intValue = l.index;
+                    serializedObject.ApplyModifiedProperties();
+                }
             };
+
+            list.index = MaterialItemIndex.intValue;
         }
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
 
             MalbersEditor.DrawDescription("Swap Materials");
+
+            // Add PlayerPrefs section
+            EditorGUILayout.Space();
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Player Preferences", EditorStyles.boldLabel);
+
+                EditorGUILayout.PropertyField(usePlayerPrefs, new GUIContent("Use PlayerPrefs", "Save and load material states using PlayerPrefs"));
+
+                if (usePlayerPrefs.boolValue)
+                {
+                    EditorGUILayout.PropertyField(playerPrefsKey, new GUIContent("PlayerPrefs Key", "Unique key to identify this MaterialChanger in PlayerPrefs"));
+
+                    EditorGUILayout.Space();
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        if (GUILayout.Button("Save")) M.SaveToPlayerPrefs();
+                        if (GUILayout.Button("Load")) M.LoadFromPlayerPrefs();
+                        if (GUILayout.Button("Delete")) M.DeletePlayerPrefs();
+                    }
+
+                    if (string.IsNullOrEmpty(M.playerPrefsKey.Value) && usePlayerPrefs.boolValue)
+                    {
+                        EditorGUILayout.HelpBox("Please provide a unique PlayerPrefs key to use PlayerPrefs functionality.", MessageType.Warning);
+                    }
+                }
+            }
+            EditorGUILayout.Space();
 
             using (var cc = new EditorGUI.ChangeCheckScope())
             {
@@ -510,6 +647,21 @@ namespace MalbersAnimations.Utilities
                                 {
                                     using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                                     {
+                                        using (var aa = new EditorGUI.ChangeCheckScope())
+                                        {
+                                            var current = Element.FindPropertyRelative("current");
+
+                                            EditorGUILayout.PropertyField(current, new GUIContent("Current Index", "Current Index of the Selected material"));
+                                            current.intValue = Mathf.Clamp(current.intValue, 0, Element.FindPropertyRelative("materials").arraySize - 1);
+
+                                            if (aa.changed)
+                                            {
+                                                serializedObject.ApplyModifiedProperties();
+                                                ToggleButton(list.index);
+                                                Undo.RecordObject(target, "Move Handles");
+                                            }
+                                        }
+
                                         EditorGUILayout.PropertyField(Element.FindPropertyRelative("mesh"), new GUIContent("Mesh", "Mesh object to apply the Materials"));
                                         EditorGUILayout.PropertyField(Element.FindPropertyRelative("indexM"), new GUIContent("ID", "Material ID"));
                                     }
@@ -607,10 +759,9 @@ namespace MalbersAnimations.Utilities
 
             if (e.mesh != null)
             {
-
                 using (new EditorGUI.DisabledGroupScope(!changeHidden.boolValue && !e.mesh.gameObject.activeSelf || e.materials.Length == 0 || e.Linked))
                 {
-                    if (e.materials.Length > e.current)
+                    if (e.materials.Length > e.current && e.current >= 0)
                     {
                         buttonCap = /*e.mesh.gameObject.activeSelf ? */
                             (e.materials[e.current] == null ? "None" : e.materials[e.current].name) + " (" + (e.Linked ? "L" : e.current.ToString()) + ")";//: "Is Hidden";
@@ -634,7 +785,7 @@ namespace MalbersAnimations.Utilities
 
                 M.materialList[index].ChangeMaterial();
 
-                //Check for linked Mateeriials
+                //Check for linked Materials
 
                 foreach (var mat in M.materialList)
                 {
@@ -644,6 +795,13 @@ namespace MalbersAnimations.Utilities
                         mat.ChangeMaterial(M.materialList[mat.Master].current);
                     }
                 }
+
+                // Save to PlayerPrefs if enabled
+                if (M.usePlayerPrefs)
+                {
+                    M.SaveToPlayerPrefs();
+                }
+
                 serializedObject.ApplyModifiedProperties();
                 //UnityEditor.EditorUtility.SetDirty(M.materialList[index].mesh);
             }
@@ -651,14 +809,10 @@ namespace MalbersAnimations.Utilities
 
         void OnAddCallBack(ReorderableList list)
         {
-            if (M.materialList == null)
-            {
-                M.materialList = new System.Collections.Generic.List<MaterialItem>();
-            }
+            M.materialList ??= new();
             M.materialList.Add(new MaterialItem());
         }
     }
 #endif
     #endregion
 }
-

@@ -40,7 +40,7 @@ namespace MalbersAnimations
         void ResetStoppingDistance();
 
         /// <summary>Local Additive Stopping distance added to the current Stop Distance</summary>
-        float AdditiveStopDistance { get; set; }
+        float SelfRadius { get; set; }
 
         /// <summary>Current Slowing Distance for the Destination</summary>
         float CurrentSlowingDistance { get; set; }
@@ -49,7 +49,7 @@ namespace MalbersAnimations
         /// <summary>Returns the Height of the AI Agent</summary>
         float Height { get; }
 
-        /// <summary>Stores the Remainin distance to the Target's Position</summary>
+        /// <summary>Stores the Remaining distance to the Target's Position</summary>
         float RemainingDistance { get; set; }
 
         /// <summary>Set the next Target, and set if the Agent will move or not to that target</summary>  
@@ -82,13 +82,16 @@ namespace MalbersAnimations
         /// <summary>Has the Agent Arrived to the Target Position?</summary>
         bool HasArrived { get; set; }
 
+        /// <summary>The Agent has a Target but is waiting because other AI are targeting the same target and the limits is full</summary>
+        bool IsWaitingOnTarget { get; set; }
+
         /// <summary>The Animal is moving</summary>
         bool IsMoving { get; }
 
         /// <summary>Is the Agent in a OffMesh Link</summary>       
         bool InOffMeshLink { get; set; }
 
-        /// <summary>Do the necesary logic to complete all the Off mesh link traversal</summary>
+        /// <summary>Do the necessary logic to complete all the Off mesh link traversal</summary>
         void CompleteOffMeshLink();
 
         /// <summary>Is the target moving, changed position?</summary>
@@ -116,14 +119,21 @@ namespace MalbersAnimations
         Events.TransformEvent OnArrived { get; }
     }
 
+
+    public interface IStopDistance
+    {
+        /// <summary>Stopping Distance Radius used for the Targeting</summary>
+        float StopDistance();
+
+        /// <summary>Returns the Center on an Target (World)</summary>
+        Vector3 GetCenterPosition();
+    }
+
     /// <summary>Interface used to know if Target used on the AI Movement is and AI Target</summary>
-    public interface IAITarget
+    public interface IAITarget : IStopDistance
     {
         /// <summary> Reference for the Target's Transform</summary>
         Transform transform { get; }
-
-        /// <summary> Stopping Distance Radius used for the AI</summary>
-        float StopDistance();
 
         /// <summary> Default Height for the ahi Target</summary>
         float Height { get; }
@@ -137,19 +147,13 @@ namespace MalbersAnimations
         /// <summary>Returns the AI Destination on an AI Target</summary>
         Vector3 GetCenterPosition(int index);
 
-
-
-
-        /// <summary>Returns the AI Destination on an AI Target</summary>
-        Vector3 GetCenterPosition();
-
         /// <summary>Returns the AI Destination + the Height</summary>
         Vector3 GetCenterY();
 
         /// <summary>Where is the Target Located, Ground, Water, Air? </summary>
         WayPointType TargetType { get; }
 
-        /// <summary>Call this method when someones arrives to the Waypoint</summary>
+        /// <summary>Call this method when someone arrives to the Waypoint</summary>
         void TargetArrived(GameObject target);
     }
 
@@ -157,11 +161,14 @@ namespace MalbersAnimations
     /// <summary> Allows the Target to have a better distribution when AI characters targeting this gameObject  </summary>
     public interface IAITargeterTarget : IAITarget
     {
-        /// <summary> Stopping Distance when multiple targets are added to the AI Target</summary>
-        float TargeterStopDistance { get; }
+        ///// <summary> Stopping Distance when multiple targets are added to the AI Target</summary>
+        //float TargeterStopDistance { get; }
 
-        /// <summary>Ammount of AI that have this object  as their target</summary>
+        /// <summary>Amount of AI that have this object  as their target</summary>
         int Targeters { get; }
+
+        /// <summary>Is the AI Target using Targeters (if the value is greater than 0)</summary>
+        int TargetsLimits { get; }
 
         /// <summary>True if the AI Target has reached the max targeters it can have</summary>
         bool FullTargeters { get; }
@@ -171,7 +178,7 @@ namespace MalbersAnimations
 
         UnityEvent TargetersRefresh { get; set; }
 
-        /// <summary>Get the Stopping Disatance from an AI Target using the Targeter Index</summary>
+        /// <summary>Get the Stopping Distance from an AI Target using the Targeter Index</summary>
         float GetTargeterStoppingDistance(int index);
 
         /// <summary>Return if the Targeter is off the limits so it should be waiting</summary>

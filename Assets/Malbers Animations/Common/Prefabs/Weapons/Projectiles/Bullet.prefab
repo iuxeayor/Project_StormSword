@@ -58,6 +58,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -138,7 +141,7 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue:
       serializedVersion: 2
-      m_Bits: 4294967295
+      m_Bits: 1083211776
     Variable: {fileID: 0}
   Tags: []
   AttackDirection: 0
@@ -148,28 +151,24 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: {fileID: 190716, guid: 58b3b7a5c5273e24aa8931f09e57c303, type: 3}
     Variable: {fileID: 0}
-  hitEffects: []
+  hitEffects: {fileID: 11400000, guid: 220c73a9e3ca0da4cb3f996ef7a2f1a4, type: 2}
   hitSound:
     UseConstant: 1
     ConstantValue: {fileID: 8300000, guid: 6fa6f8e3d0b17884588ddd02f9b6cd09, type: 3}
     Variable: {fileID: 0}
-  DestroyHitEffect: 10
+  DestroyHitEffect: 2
   dontHitOwner:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
   CustomReaction:
-    rid: -2
+    reactions: []
   element: {fileID: 0}
   interactorID:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
   interact:
-    UseConstant: 1
-    ConstantValue: 1
-    Variable: {fileID: 0}
-  react:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
@@ -192,6 +191,11 @@ MonoBehaviour:
       UseConstant: 1
       ConstantValue: 1
       Variable: {fileID: 0}
+    Base: {fileID: 0}
+  m_MissChance:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_cChance:
     UseConstant: 1
     ConstantValue: 0
@@ -209,6 +213,7 @@ MonoBehaviour:
     ConstantValue: 20
     Variable: {fileID: 0}
   forceMode: 0
+  preventDuplicateDamage: 0
   OnHit:
     m_PersistentCalls:
       m_Calls: []
@@ -219,6 +224,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnProfileChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAttackMissed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCritical:
     m_PersistentCalls:
       m_Calls: []
   animator: {fileID: 0}
@@ -265,7 +276,12 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 1
         Variable: {fileID: 0}
+      Base: {fileID: 0}
     m_cChance:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    m_MissChance:
       UseConstant: 1
       ConstantValue: 0
       Variable: {fileID: 0}
@@ -291,7 +307,7 @@ MonoBehaviour:
     element: {fileID: 0}
   debug: 0
   m_audio: {fileID: 0}
-  impactBehaviour: 2
+  impactBehaviour: 4
   rotation: 1
   TrajectoryRoll: 0
   Penetration: 0.002
@@ -309,7 +325,7 @@ MonoBehaviour:
     Variable: {fileID: 0}
   Life:
     UseConstant: 1
-    ConstantValue: 10
+    ConstantValue: 2
     Variable: {fileID: 0}
   LifeImpact:
     UseConstant: 1
@@ -349,7 +365,11 @@ MonoBehaviour:
         m_CallState: 2
   rb: {fileID: 0}
   m_collider: {fileID: 0}
+  m_trail: {fileID: 0}
   DragOnImpact: 1
+  OnRayCastHit:
+    m_PersistentCalls:
+      m_Calls: []
   Editor_Tabs1: 2
   references:
     version: 2
@@ -406,6 +426,9 @@ TrailRenderer:
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:

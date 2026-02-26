@@ -33,8 +33,16 @@ namespace MalbersAnimations.Controller
         public FloatReference EnterAceleration = new(5);
         [Tooltip("Exit Acceleration of the force")]
         public FloatReference ExitAceleration = new(5);
-        [Tooltip("When the Force is applied the Gravity will be Reseted")]
+        [Tooltip("Gravity will be Reseted at start")]
         public BoolReference ResetGravity = new(true);
+
+        [Tooltip("When the Force is applied the Gravity will be Reseted")]
+        public BoolReference ResetGravityDuring = new(true);
+
+        [Tooltip("Interrupt the Jump Height when the Force is applied")]
+        public BoolReference InterruptJumpHeight = new(true);
+
+
         [Tooltip("Remove Y value from the Additive position")]
         public BoolReference NoY = new();
         [Header("Check States")]
@@ -60,24 +68,45 @@ namespace MalbersAnimations.Controller
 
             mode.Animal.Force_Add(mode.Animal.transform.TransformDirection(Direction), Force * multiplier, EnterAceleration, ResetGravity);
 
+
+
+            mode.Animal.UpInertia_Clear();
+
+            if (InterruptJumpHeight.Value)
+            {
+                var Jump = mode.Animal.State_Get<JumpBasic>();
+                if (Jump != null) Jump.NoJumpHeight();
+            }
         }
 
         public override void OnModeMove(Mode mode)
         {
-            if (m_Time > 0 &&
-                m_Time < Time.time - mode.ActivationTime &&
-                mode.Animal.ExternalForce != Vector3.zero)
+            if (m_Time > 0 && MTools.ElapsedTime(mode.ActivationTime, m_Time))
             {
-                mode.Animal.Force_Remove(ExitAceleration);
+                if (mode.Animal.ExternalForce != Vector3.zero)
+                    mode.Animal.Force_Remove(ExitAceleration);
             }
             else
             {
-                if (NoY) mode.Animal.additivePosition.y = 0; ;
+                if (ResetGravityDuring)
+                {
+                    mode.Animal.GravityOffset = Vector3.zero;
+                    mode.Animal.GravityTime--;
+                }
+
+                if (NoY) mode.Animal.additivePosition.y = 0;
             }
 
-            if (ResetGravity) { mode.Animal.GravityOffset = Vector3.zero; }
-        }
 
+            //if (ResetGravity)
+            //{
+            //    // mode.Animal.GravityTime = mode.Animal.StartGravityTime;
+
+            //    mode.Animal.GravityOffset = Vector3.zero;
+            //    mode.Animal.GravityTime--;
+            //}
+
+        }
         public override void OnModeExit(Mode mode) => mode.Animal.Force_Remove(ExitAceleration);
 
     }

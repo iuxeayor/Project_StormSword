@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.Events;
+using System.Collections.Generic;
+
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -25,13 +28,13 @@ namespace MalbersAnimations.Controller
         bool crack_egg;
 
         [HideInInspector]
-        public InputRow input = new InputRow("CrackEgg", KeyCode.Alpha0, InputButton.Down);
+        public KeyCode input = KeyCode.Alpha0;
 
         [HideInInspector] public float seconds;
 
         public HatchType hatchtype;
 
-        public UnityEvent OnEggCrack = new UnityEvent();
+        public UnityEvent OnEggCrack = new();
 
 
         private void Awake()
@@ -82,22 +85,15 @@ namespace MalbersAnimations.Controller
 
 
 
+#if ENABLE_LEGACY_INPUT_MANAGER
         void Update()
         {
-            switch (hatchtype)
-            {
-                case HatchType.Input:
-                    if (input.GetValue) crack_egg = true;
-                    break;
-                default:
-                    break;
-            }
+            if (hatchtype == HatchType.Input && Input.GetKeyDown(input))
+                crack_egg = true;
 
-            if (crack_egg)
-            {
-                CrackEgg();
-            }
+            if (crack_egg) CrackEgg();
         }
+#endif
 
 
         public void CrackEgg()
@@ -114,7 +110,10 @@ namespace MalbersAnimations.Controller
                 animal.State_Force(StateEnum.Idle);
                 animal.EnableColliders(true);
 
-                var skinnedMeshes = animal.GetComponentsInChildren<Renderer>();
+                List<Renderer> skinnedMeshes = new();
+
+                animal.GetComponentsInChildren<Renderer>(true, skinnedMeshes);
+
                 foreach (var item in skinnedMeshes) item.enabled = true; //Show again the Meshes on the Animal
 
                 animal.SetModeStatus(Random.Range(1, 4)); //Set a random Out of the Egg animation
@@ -122,7 +121,7 @@ namespace MalbersAnimations.Controller
 
             OnEggCrack.Invoke();
 
-            StartCoroutine(EggDisapear(removeShells));
+            StartCoroutine(EggDisappear(removeShells));
         }
 
         void EnableAnimalScript()
@@ -131,7 +130,7 @@ namespace MalbersAnimations.Controller
         }
 
         //Destroy the Game Object
-        IEnumerator EggDisapear(float seconds)
+        IEnumerator EggDisappear(float seconds)
         {
             yield return null;
             if (seconds > 0)

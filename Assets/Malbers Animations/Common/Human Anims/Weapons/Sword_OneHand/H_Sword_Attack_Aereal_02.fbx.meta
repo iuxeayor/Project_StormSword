@@ -859,3 +859,10 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Common/Human Anims/Weapons/Sword_OneHand/H_Sword_Attack_Aereal_02.fbx
+  uploadId: 848732

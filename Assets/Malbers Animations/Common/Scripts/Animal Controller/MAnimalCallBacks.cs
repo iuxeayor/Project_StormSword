@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace MalbersAnimations.Controller
 {
@@ -17,10 +18,12 @@ namespace MalbersAnimations.Controller
             UpdateInputSource(true); //Reconnect
         }
 
-        /// <summary>Updates all the Input from Malbers Input in case needed (Rewired conextion(</summary>
+        /// <summary>Updates all the Input from Malbers Input in case needed (Rewired connection(</summary>
         public virtual void UpdateInputSource(bool connect)
         {
-            InputSource ??= gameObject.FindInterface<IInputSource>(); //Find if we have a InputSource
+            //CustomPatch: corrected null check for possible Unity object type
+            if (InputSource.IsUnityRefNull())
+                InputSource = gameObject.FindInterface<IInputSource>(); //Find if we have a InputSource
 
             if (InputSource != null)
             {
@@ -43,7 +46,7 @@ namespace MalbersAnimations.Controller
         /// <summary>Set an Animal as the Main Player and remove the otherOne</summary>
         public virtual void SetMainPlayer()
         {
-            if (MainAnimal) //if there's a main animal already seted
+            if (MainAnimal) //if there's a main animal already set
             {
                 MainAnimal.isPlayer.Value = false;
             }
@@ -62,12 +65,17 @@ namespace MalbersAnimations.Controller
         /// <summary>Teleports the Animal to a Transform position </summary>
         public virtual void Teleport(Transform newPos)
         {
+            if (JustTeleported) return; //If the Animal was just teleported then do nothing
+            if (Sleep) return;
             if (newPos) Teleport(newPos.position);
         }
 
         /// <summary>Teleports the Animal to a Transform Position, It also Rotates the Animal to that transform Rotation</summary>
         public virtual void TeleportRot(Transform newPos)
         {
+            if (Sleep) return;
+            if (JustTeleported) return; //If the Animal was just teleported then do nothing
+
             if (newPos)
             {
                 Rotation = newPos.rotation; //Rotation First then the position
@@ -78,69 +86,51 @@ namespace MalbersAnimations.Controller
 
         public virtual void Teleport(Vector3 newPos)
         {
+            if (JustTeleported) return; //If the Animal was just teleported then do nothing
+
             OnPreTeleport.Invoke(newPos); //Invoke the Pre Teleport Event
             Teleport_Internal(newPos);
             OnTeleport.Invoke(newPos);
         }
 
-        /// <summary>Used by the States to Teleport withouth sending the Event </summary>
+        /// <summary>Used by the States to Teleport without sending the Event </summary>
         internal void Teleport_Internal(Vector3 newPos)
         {
+            if (JustTeleported) return; //If the Animal was just teleported then do nothing
+
             Position = newPos;
             LastPosition = Position;
-            SetPlatform(null);
-            //if (debugStates) Debugging($"{name}: Teleported to {newPos}");
+            Reset_Platform(); //Reset any platform the animal was on
+
+            JustTeleported = true; //Set the Just Teleported to true for a short time
+            this.Delay_Action(5, () => JustTeleported = false); //Give a cooldown of 5 Update cycles
         }
+
+        private bool JustTeleported { get; set; } = false;
+
+
 
 
         private void Debuging(string value, string color1 = "white")
         {
 #if UNITY_EDITOR
-            Debug.Log($"<B>[{name}]</B> → <color={color1}>{value}</color>", this);
+            MDebug.Log($"<B>[{name}]</B> → <color={color1}>{value}</color>", this);
 #endif
         }
 
         #endregion
 
         #region Gravity
+
         /// <summary>Resets the gravity to the default Vector.Down value</summary>
-        public virtual void ResetGravityDirection()
-        {
-            GroundChangesGravity(false);
-        }
+        public virtual void Gravity_ResetDirection() => Gravity_DirectionFromGround(false);
 
-        /// <summary>Clears the Gravity Logic</summary>
-        internal void ResetGravityValues()
-        {
-            GravityTime = m_gravityTime;
-            GravityStoredVelocity = Vector3.zero;
-            GravityOffset = Vector3.zero;
-            // GravityResult = Vector3.zero;
-            //GravityExtraPower = 1;
-            //Debug.Log($"animal.GravityExtraPower  REAER{GravityExtraPower}");
-
-        }
-        internal void ResetUPVector()
-        {
-            if (RB && !RB.isKinematic)
-                RB.velocity = Vector3.ProjectOnPlane(RB.velocity, UpVector);
-
-            AdditivePosition = Vector3.ProjectOnPlane(AdditivePosition, UpVector);
-            DeltaPos = Vector3.ProjectOnPlane(DeltaPos, UpVector);
-
-            InertiaPositionSpeed = Vector3.ProjectOnPlane(InertiaPositionSpeed, UpVector); //Remove the UpDown Inertia
-
-            DeltaVelocity = Vector3.ProjectOnPlane(DeltaVelocity, UpVector);
-
-            ResetGravityValues();
-        }
-
-        /// <summary> IDeltaRootMotiom  </summary>
-        public virtual void ResetDeltaRootMotion() => Reset_Movement();
+        /// <summary>Resets the gravity power to the default value</summary>
+        public virtual void Gravity_ResetPower() => GravityPower = defaultGravityPower;
 
         /// <summary>The Ground will change the Gravity Direction. Using the ground Normal as reference</summary>
         /// <param name="value"> Enable/Disable the logic</param>
-        public virtual void GroundChangesGravity(bool value)
+        public virtual void Gravity_DirectionFromGround(bool value)
         {
             ground_Changes_Gravity.Value = value;
             OnGroundChangesGravity.Invoke(value);
@@ -153,6 +143,40 @@ namespace MalbersAnimations.Controller
             }
         }
 
+        /// <summary>Clears the Gravity Logic</summary>
+        internal virtual void Gravity_ResetValues()
+        {
+            GravityTime = m_gravityTime;
+            GravityStoredVelocity = Vector3.zero;
+            GravityOffset = Vector3.zero;
+        }
+
+        internal void ResetUPVector()
+        {
+            if (RB && !RB.isKinematic)
+                RB.linearVelocity = Vector3.ProjectOnPlane(RB.linearVelocity, UpVector);
+
+            AdditivePosition = Vector3.ProjectOnPlane(AdditivePosition, UpVector);
+            DeltaPos = Vector3.ProjectOnPlane(DeltaPos, UpVector);
+
+
+
+            InertiaPositionSpeed = Vector3.ProjectOnPlane(InertiaPositionSpeed, UpVector); //Remove the UpDown Inertia
+
+            DeltaVelocity = Vector3.ProjectOnPlane(DeltaVelocity, UpVector);
+
+            Gravity_ResetValues();
+        }
+
+
+        /// <summary>Clears the Gravity Logic</summary>
+        public virtual void ResetGravityValues() => Gravity_ResetValues();
+
+
+        /// <summary> IDeltaRootMotion  </summary>
+        public virtual void ResetDeltaRootMotion() => Reset_Movement();
+
+
 
         /// <summary>Aling the character instantly to the Gravity Direction</summary>
         public virtual void AlignToGravity()
@@ -160,6 +184,11 @@ namespace MalbersAnimations.Controller
             Quaternion AlignRot = Quaternion.FromToRotation(t.up, UpVector) * Rotation;  //Calculate the orientation to Terrain 
             Rotation = AlignRot;
         }
+
+        /// <summary>The Ground will change the Gravity Direction. Using the ground Normal as reference</summary>
+        /// <param name="value"> Enable/Disable the logic</param>
+        public virtual void GroundChangesGravity(bool value) => Gravity_DirectionFromGround(value);
+
         #endregion
 
         #region Stances
@@ -173,6 +202,7 @@ namespace MalbersAnimations.Controller
         }
 
         public virtual void Stance_Set(StanceID id) => Stance = id;
+
 
         public virtual void Stance_SetPersistent(StanceID ID)
         {
@@ -197,9 +227,13 @@ namespace MalbersAnimations.Controller
         public virtual void Stance_Activate(StanceID id) => Stance = id;
 
         /// <summary>  Change the Default Stance to another ID  </summary>
-        public virtual void Stance_SetDefault(StanceID id) => DefaultStanceID = id;
-
-
+        public virtual void Stance_SetDefault(StanceID id)
+        {
+            if (Stance_Get(id) != null) //Find if the stance exist!! important
+            {
+                DefaultStanceID = id;
+            }
+        }
 
         public Stance Pin_Stance { get; set; }
 
@@ -228,13 +262,12 @@ namespace MalbersAnimations.Controller
                 Pin_Stance.SetPersistent(true);
             }
         }
+
         public virtual void Stance_ResetPersistent()
         {
             ActiveStance.SetPersistent(false);
             Stance_Reset();
         }
-
-
         /// <summary>Changes the Last Stance on the Animator</summary>
         public virtual void Stance_SetLast(int id)
         {
@@ -245,7 +278,6 @@ namespace MalbersAnimations.Controller
         /// <summary>Changes the Last State on the Animator</summary>
         public virtual void LastState_Reset() => TryAnimParameter(hash_LastState, -1);   //Sent to the Animator the previews Active State
 
-
         /// <summary> Set the Current State to be the Default Stance </summary>
         public virtual void Stance_Reset() => Stance = defaultStance;
 
@@ -253,7 +285,24 @@ namespace MalbersAnimations.Controller
 
         /// <summary> Restore the Default Stance to the starting Default Stance value</summary>
         public virtual void Stance_ResetDefaultValue() => DefaultStanceID = StartingStance;
-        public virtual void Stance_RestoreDefault() => DefaultStanceID = StartingStance;
+
+        /// <summary> Restore the Default Stance to the starting Default Stance value</summary>
+        public virtual void Stance_RestoreDefaultValue() => DefaultStanceID = StartingStance;
+
+        public virtual void Stance_RestoreDefault() => Stance_ResetDefaultValue();
+
+
+        /// <summary>Add a listener to the stance Enter Event </summary>
+        public virtual void Stance_EnterEvent_AddListener(StanceID stanceID, UnityAction action) => Stance_Get(stanceID)?.events.OnEnter.AddListener(action);
+
+        /// <summary>Remove a listener to the stance Enter Event </summary>
+        public virtual void Stance_EnterEvent_RemoveListener(StanceID stanceID, UnityAction action) => Stance_Get(stanceID)?.events.OnEnter.RemoveListener(action);
+
+        /// <summary>Add a listener to the stance Exit Event </summary>
+        public virtual void Stance_ExitEvent_AddListener(StanceID stanceID, UnityAction action) => Stance_Get(stanceID)?.events.OnExit.AddListener(action);
+
+        /// <summary>Remove a listener to the stance Exit Event </summary>
+        public virtual void Stance_ExitEvent_RemoveListener(StanceID stanceID, UnityAction action) => Stance_Get(stanceID)?.events.OnExit.RemoveListener(action);
 
         #endregion
 
@@ -273,7 +322,11 @@ namespace MalbersAnimations.Controller
 
 
         /// <summary>Set a Int on the Animator</summary>
-        public virtual void SetAnimParameter(int hash, int value) => Anim.SetInteger(hash, value);
+        public virtual void SetAnimParameter(int hash, int value)
+        {
+            // Debug.Log($"SetAnimParameter hash {hash} value{value}");
+            Anim.SetInteger(hash, value);
+        }
 
         /// <summary>Set a float on the Animator</summary>
         public virtual void SetAnimParameter(int hash, float value) => Anim.SetFloat(hash, value);
@@ -296,23 +349,25 @@ namespace MalbersAnimations.Controller
 
         public virtual void TryAnimParameter(int Hash, float value)
         {
-            if (Hash != 0) SetFloatParameter(Hash, value);
+            if (Hash != 0) SetFloatParameter?.Invoke(Hash, value);
         }
+        public virtual void TryModeOn() => TryAnimParameter(hash_ModeOn);
 
         public virtual void TryAnimParameter(int Hash, int value)
         {
             // Debug.Log($"ANIMAL Int hash:{Hash}, value{value}");
-            if (Hash != 0) SetIntParameter(Hash, value);
+            if (Hash != 0)
+                SetIntParameter?.Invoke(Hash, value);
         }
 
         public virtual void TryAnimParameter(int Hash, bool value)
         {
-            if (Hash != 0) SetBoolParameter(Hash, value);
+            if (Hash != 0) SetBoolParameter?.Invoke(Hash, value);
         }
 
         public virtual void TryAnimParameter(int Hash)
         {
-            if (Hash != 0) SetTriggerParameter(Hash);
+            if (Hash != 0) SetTriggerParameter?.Invoke(Hash);
         }
 
         /// <summary> Set the Parameter Random to a value and pass it also to the Animator </summary>
@@ -345,7 +400,7 @@ namespace MalbersAnimations.Controller
         {
             // Debug.Log($"State_Float: {value:F3}");
             State_Float = value;
-            SetFloatParameter(hash_StateFloat, State_Float);
+            SetFloatParameter?.Invoke(hash_StateFloat, State_Float);
         }
 
 
@@ -354,7 +409,7 @@ namespace MalbersAnimations.Controller
         {
             // Debug.Log($"State_Float: {value:F3}");
             State_Float = Mathf.Lerp(State_Float, value, smoothValue * DeltaTime);
-            SetFloatParameter(hash_StateFloat, State_Float);
+            SetFloatParameter?.Invoke(hash_StateFloat, State_Float);
         }
 
 
@@ -394,6 +449,7 @@ namespace MalbersAnimations.Controller
                 oldState.InitializeState();
                 // oldState.ExitState();
 
+
                 states[index] = oldState; //Replace the list Item
 
                 UpdateInputSource(true); //Need to Update the Sources
@@ -402,6 +458,8 @@ namespace MalbersAnimations.Controller
                 {
                     oldState.ForceActivate();
                     AnimStateTag = -1;
+                    OnStateChange.Invoke(oldState.ID);//Invoke the Event only when the State is no longer Pending
+                    OnState?.Invoke(oldState.ID);
                     //  StartCoroutine(C_EnterCoreAnim(oldState));  //Little Hack! 
                 }
             }
@@ -412,13 +470,15 @@ namespace MalbersAnimations.Controller
 
         /// <summary>Returns if the Animal has a state by its ID</summary>
         public bool HasState(StateID ID) => HasState(ID.ID);
+        public bool HasState<T>() where T : State => states.Exists(s => s is T);
+
 
 
         /// <summary>Returns if the Animal has a state by its int ID value</summary>
         public bool HasState(int ID) => State_Get(ID) != null;
 
         /// <summary>Returns if the Animal has a state by its name</summary>
-        public bool HasState(string statename) => states.Exists(s => s.name == statename);
+        public bool HasState(string stateName) => states.Exists(s => s.name == stateName);
 
         public int StateEnterStatus { get; set; }
         public int StateExitStatus { get; set; }
@@ -427,9 +487,9 @@ namespace MalbersAnimations.Controller
         public virtual void State_SetEnterStatus(int status)
         {
             StateEnterStatus = status;
-            SetIntParameter(hash_StateEnterStatus, status);
+            SetIntParameter?.Invoke(hash_StateEnterStatus, status);
             //if (debugStates)
-            //  Debuging($"StateEnterStatus [{status}]");
+            // Debuging($"StateEnterStatus [{status}]");
         }
 
         /// <summary>Set the State Status on the Animator</summary>
@@ -442,7 +502,7 @@ namespace MalbersAnimations.Controller
             StateExitStatus = ExitStatus;
             TryAnimParameter(hash_StateExitStatus, ExitStatus);
 
-            // Debuging($"State_SetExitStatus [{StateExitStatus}]");
+            //  Debuging($"State_SetExitStatus [{StateExitStatus}]");
         }
 
         public virtual void State_Enable(StateID ID) => State_Enable(ID.ID);
@@ -464,7 +524,7 @@ namespace MalbersAnimations.Controller
             if (cache != null) cache.active = true;
         }
 
-        public virtual void ActiveState_Persisent(bool value) => ActiveState.IsPersistent = value;
+        public virtual void ActiveState_Persistent(bool value) => ActiveState.IsPersistent = value;
 
 
         /// <summary>Force the Activation of an state regarding if is enable or not</summary>
@@ -474,7 +534,12 @@ namespace MalbersAnimations.Controller
         /// <summary>Force the Activation of an state regarding if is enable or not</summary>
         public virtual void State_Force(int ID, int enterStatus)
         {
-            State_Get(ID)?.ForceActivate(enterStatus);
+            //Do nothing if is the same state and cannot transition to itself
+            if (ActiveState != null && ActiveState.ID == ID && !ActiveState.CanTransitionToItself) return;
+
+            var state = State_Get(ID);
+
+            if (state != null) state.ForceActivate(enterStatus);
         }
 
         /// <summary>  Allow Lower States to be activated </summary>
@@ -505,8 +570,7 @@ namespace MalbersAnimations.Controller
         public virtual void State_InputFalse(StateID ID) => State_Get(ID)?.SetInput(false);
 
 
-
-        /// <summary>Try to Activate a State direclty from the Animal Script </summary>
+        /// <summary>Try to Activate a State directly from the Animal Script </summary>
         public virtual void State_Activate(StateID ID) => State_Activate(ID.ID);
 
         /// <summary>Try to Activate a State by its ID, Checking the necessary conditions for activation (NO Returns)</summary>
@@ -520,12 +584,12 @@ namespace MalbersAnimations.Controller
 
             if (NewState && NewState.CanBeActivated)
             {
-                return NewState.TryActivate() && NewState.TryOverride;
+                return NewState.InternalTryActivate() && NewState.TryOverride;
             }
             return false;
         }
 
-        /// <summary>Try to Activate a State direclty from the Animal Script </summary>
+        /// <summary>Try to Activate a State directly from the Animal Script </summary>
         public virtual void State_Activate(int ID)
         {
             State NewState = State_Get(ID);
@@ -539,13 +603,13 @@ namespace MalbersAnimations.Controller
                 else CanActivateState(NewState);
             }
 
-            void CanActivateState(State newState)
+            static void CanActivateState(State newState)
             {
                 if (newState.CanBeActivated) newState.Activate();
             }
         }
 
-        /// <summary>Try to Activate a State direclty from the Animal Script </summary>
+        /// <summary>Try to Activate a State directly from the Animal Script </summary>
         public virtual void State_Activate(int ID, int StateStatus)
         {
             State NewState = State_Get(ID);
@@ -601,6 +665,8 @@ namespace MalbersAnimations.Controller
         ///<summary> Send to the Possible State (PreState) the value of the Input</summary>
         public virtual void State_Activate_by_Input(int stateID, bool input)
         {
+            Debug.Log("BY INTPUS");
+
             State_Pin(stateID);
             State_Pin_ByInput(input);
         }
@@ -612,12 +678,49 @@ namespace MalbersAnimations.Controller
                 State_SetExitStatus(stateExitStatus);
         }
 
+        #region State Enter Exit Events Listeners
+
+        /// <summary>  Adds a Listener to the Enter Event of a State  </summary>
+        public virtual void State_EnterEvent_AddListener(StateID stateID, UnityAction action)
+        {
+            var state = State_Get(stateID);
+
+            if (state != null)
+                state.EnterExitEvent.OnEnter.AddListener(action);
+        }
+
+        /// <summary>  Removes a Listener to the Enter Event of a State  </summary>
+        public virtual void State_EnterEvent_RemoveListener(StateID stateID, UnityAction action)
+        {
+            var state = State_Get(stateID);
+
+            if (state != null)
+                state.EnterExitEvent.OnEnter.RemoveListener(action);
+        }
+
+        /// <summary>  Adds a Listener to the Exit Event of a State  </summary>
+        public virtual void State_ExitEvent_AddListener(StateID stateID, UnityAction action)
+        {
+            var state = State_Get(stateID);
+            if (state != null)
+                state.EnterExitEvent.OnExit.AddListener(action);
+        }
+
+        /// <summary>  Removes a Listener to the Exit Event of a State  </summary>
+        public virtual void State_ExitEvent_RemoveListener(StateID stateID, UnityAction action)
+        {
+            var state = State_Get(stateID);
+            if (state != null)
+                state.EnterExitEvent.OnExit.RemoveListener(action);
+        }
+        #endregion
+
         #endregion
 
         #region Modes
 
-        /// <summary> Returns if the Animal has a mode By its Type</summary>
-        public virtual T Mode_Get<T>() where T : Mode => modes.Find(s => s is T) as T;
+        ///// <summary> Returns if the Animal has a mode By its Type</summary>
+        //public virtual T Mode_Get<T>() where T : Mode => modes.Find(s => s is T) as T;
 
 
         /// <summary> Returns if the Animal has a mode By its ID</summary>
@@ -719,7 +822,6 @@ namespace MalbersAnimations.Controller
             }
         }
 
-
         public virtual bool Mode_ForceActivate(ModeID ModeID, int AbilityIndex) => Mode_ForceActivate(ModeID.ID, AbilityIndex);
 
         public virtual void Mode_ForceActivate(ModeID ModeID) => Mode_ForceActivate(ModeID.ID, 0);
@@ -803,30 +905,37 @@ namespace MalbersAnimations.Controller
             if (mode != null)
             {
                 Pin_Mode = mode;
+
                 return Pin_Mode.TryActivate(AbilityIndex, status, time);
             }
             return false;
         }
 
+        public virtual void Mode_Stop() => Mode_Stop(false);
+
 
         /// <summary>Stop all modes </summary>
-        public virtual void Mode_Stop()
+        public virtual void Mode_Stop(bool ResetModeStatus)
         {
             if (IsPlayingMode)
             {
-                activeMode.InputValue = false;
-                ActiveMode.ResetMode();
+                activeMode.InputValue = false; //Set the Input to false
+
+                ActiveMode.Reset();
                 Mode_Interrupt();
             }
             else
             {
                 ModeAbility = 0; //Reset Mode 
                 SetModeStatus(0);
-
-                // Debug.Log("SSTRANGE RESET");
-
                 return;
             }
+
+            if (ResetModeStatus)
+            {
+                SetModeStatus(0);
+            }
+
 
 
 
@@ -834,22 +943,45 @@ namespace MalbersAnimations.Controller
             ActiveMode = null;
             ModeTime = 0;
             IsPreparingMode = false;
+
+            if (debugModes) Debuging($"Mode Stopped. [Ability] and [Mode] Set to Null");
         }
 
+
+
+
         /// <summary> Re-Check all the Sprint conditions and Invoke the Sprint Event </summary>
-        public virtual void SprintUpdate() => Sprint = sprint; //Check Again the sprint everytime a new state is active IMPORTANT
+        public virtual void SprintUpdate() => Sprint = sprint; //Check Again the sprint every time a new state is active IMPORTANT
         public virtual void Sprint_Set(bool value) => Sprint = value;
 
-
-
-        /// <summary>Set IntID to -2 to exit the Mode Animation</summary>
+        /// <summary>Set ModeStatus to -2 to Interrupt the mode animations (Only interrupt when there's a mode playing)</summary>
         public virtual void Mode_Interrupt()
         {
+            if (IsPlayingMode)
+            {
+                IsPreparingMode = false;
+
+                ModeAbility = 0;
+                SetModeStatus(Int_ID.Interrupted);
+
+                ResetModeOn();
+                //if (debugModes) Debuging($"Mode Interrupted");
+
+            }
+        }
+
+
+        /// <summary>Set ModeStatus to 0 to Interrupt the mode animations</summary>
+        public virtual void Mode_Interrupt_Forced()
+        {
             IsPreparingMode = false;
-
             ModeAbility = 0;
-            SetModeStatus(Int_ID.Interrupted);
+            SetModeStatus(0); //Important. Mode Status needs to be zero so Empty Mode states can be activated
+            ResetModeOn();
+        }
 
+        private void ResetModeOn()
+        {
             if (hash_ModeOn != 0) Anim.ResetTrigger(hash_ModeOn); //Reset the MODE ON Parameter
         }
 
@@ -934,7 +1066,6 @@ namespace MalbersAnimations.Controller
 
         /// <summary>Set the Active Ability Index of a Mode</summary>
         public virtual void Mode_ActiveAbilityIndex(int Mode, int ActiveAbility) => Mode_Get(Mode).SetAbilityIndex(ActiveAbility);
-
 
 
         /// <summary>Pin a mode to Activate later</summary>
@@ -1098,6 +1229,7 @@ namespace MalbersAnimations.Controller
             RawRotateDirAxis = Vector3.zero;
             DeltaAngle = 0;
         }
+        public virtual void Stop() => StopMoving();
 
         /// <summary>Stop the animal from moving,Cleans all movement values</summary>
         public virtual void Reset_Movement()
@@ -1114,6 +1246,7 @@ namespace MalbersAnimations.Controller
             HorizontalVelocity =
             DeltaRootMotion = Vector3.zero;
             LastPosition = Position;
+            //Debug.Log("ResetMov");
         }
 
         public virtual void Lock(bool value)
@@ -1174,7 +1307,8 @@ namespace MalbersAnimations.Controller
             {
                 SetTargetSpeed(); //Important needs to calculate the Target Speed again
                 InertiaPositionSpeed = TargetSpeed; //Set the Target speed to the Fall Speed so there's no Lerping when the speed changes\
-                                                    //  Debug.Log("KEEPINERTIA");
+
+                //  Debug.Log("KEEPINERTIA");
             }
         }
 
@@ -1230,6 +1364,12 @@ namespace MalbersAnimations.Controller
                     CurrentSpeedIndex = activeIndex;
                     speedSet.StartVerticalIndex = activeIndex; //Set the Start Vertical Index as the new Speed 
                 }
+            }
+            else
+            {
+                CurrentSpeedIndex = activeIndex; //Change the current active speed to the first index
+
+                //Debug.Log($"SpeedSet_Set_Active: {activeIndex}");
             }
         }
 
@@ -1293,43 +1433,48 @@ namespace MalbersAnimations.Controller
 
         /// <summary> Adds a Custom Force to the Animal </summary>
         /// <param name="Direction">Direction of the Force Applied to the Animal</param>
-        /// <param name="Force"> Amount of Force aplied to the Direction</param>
-        /// <param name="Aceleration">Smoothens value to apply the force. Higher values faster the force is appled</param>
-        /// <param name="ResetGravity">Every time a force is applied, the Gravity Aceleration will be reseted</param>
+        /// <param name="Force"> Amount of Force applied to the Direction</param>
+        /// <param name="Acceleration">Smoothens value to apply the force. Higher values faster the force is applied</param>
+        /// <param name="ResetGravity">Every time a force is applied, the Gravity Acceleration will be reset</param>
         /// <param name="ForceAirControl">The animal can move while is been pushed by the force if this parameter is true. </param>
         /// <param name="LimitForce">Limits the magnitude of the Force to a value </param>
         public virtual void Force_Add(
-            Vector3 Direction, float Force, float Aceleration,
+            Vector3 Direction, float Force, float Acceleration,
             bool ResetGravity, bool ForceAirControl = true, float LimitForce = 0)
         {
-            var CurrentForce = CurrentExternalForce + GravityStoredVelocity; //Calculate the Starting force
+            var CurrentForce = CurrentExternalForce;// + GravityStoredVelocity; //Calculate the Starting force
 
             if (LimitForce > 0 && CurrentForce.magnitude > LimitForce)
                 CurrentForce = CurrentForce.normalized * LimitForce; //Add the Bounce
 
             CurrentExternalForce = CurrentForce;
             ExternalForce = Direction.normalized * Force;
-            ExternalForceAcel = Aceleration;
+            ExternalForceAcel = Acceleration;
 
-            if (ActiveState.ID == StateEnum.Fall) //If we enter to a zone from the Fall state.. Reset the Fall Current Distance
+            if (ActiveState is Fall fall) //If we enter to a zone from the Fall state.. Reset the Fall Current Distance
             {
-                var fall = ActiveState as Fall;
                 fall.FallCurrentDistance = 0;
             }
 
-            if (ResetGravity) ResetGravityValues();
+            if (ResetGravity) Gravity_ResetValues();
 
             ExternalForceAirControl = ForceAirControl;
+
+            if (Acceleration == 0) Acceleration = 1;
+
+            CurrentExternalForce = Vector3.Lerp(CurrentExternalForce, ExternalForce, Acceleration * DeltaTime); //one step
+
+            //Debug.Log($"Force Added {CurrentExternalForce}", this);
         }
 
         /// <summary> Removes the current active force applied to the animal  </summary>
-        /// <param name="Aceleration"> Current aceleration to remove the force. When set to Zero then the force will be removed instantly</param>
-        public virtual void Force_Remove(float Aceleration = 0)
+        /// <param name="Acceleration"> Current acceleration to remove the force. When set to Zero then the force will be removed instantly</param>
+        public virtual void Force_Remove(float Acceleration = 0)
         {
             //if (debugStates)
-            //    Debug.Log("Force Removed", this);
+            //  Debug.Log("Force Removed", this);
 
-            ExternalForceAcel = Aceleration;
+            ExternalForceAcel = Acceleration;
             ExternalForce = Vector3.zero;
         }
 
@@ -1337,12 +1482,29 @@ namespace MalbersAnimations.Controller
         internal void Force_Reset()
         {
             //if (debugStates)
-            //    Debug.Log("Force Reset", this);
 
             CurrentExternalForce = Vector3.zero;
             ExternalForce = Vector3.zero;
             ExternalForceAcel = 0;
         }
+
+
+        /// <summary> This is used to add an External force to </summary>
+        private void ApplyExternalForce()
+        {
+            //if (CurrentExternalForce.CloseToZero()) return;
+
+            var Acel = ExternalForceAcel > 0 ? (DeltaTime * ExternalForceAcel) : 1; //Use Full for changing
+
+            CurrentExternalForce = Vector3.Lerp(CurrentExternalForce, ExternalForce, Acel);
+
+            if (CurrentExternalForce.sqrMagnitude <= 0.001f) CurrentExternalForce = Vector3.zero; //clean Tiny forces
+
+            if (CurrentExternalForce != Vector3.zero)
+                AdditivePosition += CurrentExternalForce * DeltaTime;
+
+        }
+
 
         /// <summary> Disable the animal Component after a time  </summary>
         public virtual void DisableSelf(float time) => this.Delay_Action(time, () => enabled = false);
@@ -1352,7 +1514,7 @@ namespace MalbersAnimations.Controller
         public bool CheckIfGrounded()
         {
             AlignRayCasting();
-            if (MainRay && FrontRay && !DeepSlope)
+            if (MainRay || FrontRay && !DeepSlope)
             {
                 hit_Hip.distance = Height * 2f; //?!??!?
                 return Grounded = true;   //Activate the Grounded Parameter so the Idle and the Locomotion State can be activated
@@ -1360,6 +1522,26 @@ namespace MalbersAnimations.Controller
 
             return false;
         }
+
+
+        public virtual void UpInertia_Store()
+        {
+            UpInertia = Vector3.Project(Inertia, UpVector); //Store the Up Vector
+
+            //  Debug.Log($"UpInertia {UpInertia} ... DeltaPlatformPos{DeltaPlatformPos}");
+        }
+
+        public virtual void UpInertia_Apply()
+        {
+            if (UpInertia == Vector3.zero) return;
+
+            Position += UpInertia * DeltaTime;
+            //AdditivePosition += UpInertia * DeltaTime;
+
+            //  Debug.Log($"Apply!!! UpInertia {UpInertia}");
+        }
+
+        public virtual void UpInertia_Clear() => UpInertia = Vector3.zero;
 
         /// <summary> Use the height for aligning to the ground not the Pivots  </summary>
         public bool CheckIfGrounded_Height()
@@ -1406,19 +1588,17 @@ namespace MalbersAnimations.Controller
         /// <summary>Store all the Animal Colliders </summary>
         public void FindInternalColliders()
         {
-            if (colliders == null || colliders.Count == 0)
+            var colls = GetComponentsInChildren<Collider>(true).ToList();      //Get all the Active colliders
+            colliders = new List<Collider>();
+
+            foreach (var item in colls)
             {
+                if (item.gameObject == gameObject) continue; //Do not Find the Main Collider here
 
-                var colls = GetComponentsInChildren<Collider>(true).ToList();      //Get all the Active colliders
-
-                colliders = new List<Collider>();
-
-                foreach (var item in colls)
+                if (!item.isTrigger)
                 {
-                    if (item.gameObject == gameObject) continue; //Do not Find the Main Collider here
-
-                    if (!item.isTrigger)
-                        colliders.Add(item);        //Add the Animal Colliders Only
+                    colliders.Add(item);        //Add the Animal Colliders Only
+                    item.sharedMaterial = AnimalMaterial; //Set the Physics Material
                 }
             }
 
@@ -1443,15 +1623,17 @@ namespace MalbersAnimations.Controller
 
         private void SetDefaultMainColliderValues()
         {
-            if (MainCollider)
-                MainCapsuleDefault = new OverrideCapsuleCollider(MainCollider);
+            if (MainCollider) MainCapsuleDefault = new(MainCollider);
+
+            MainCapsuleDefault.modify = (CapsuleModifier)(-1);
         }
 
         /// <summary>  Resets the MainCollider of the Animal Controller  </summary>
-        public void Reset_MainCollider() => MainCapsuleDefault.Modify(MainCollider);
-
-
-
+        public void Reset_MainCollider()
+        {
+            MainCapsuleDefault.Modify(MainCollider);
+            //  Debug.Log("Mood MainCol");
+        }
 
         /// <summary>Enable/Disable All Colliders on the animal. Avoid the Triggers </summary>
         public virtual void EnableColliders(bool active)
@@ -1465,31 +1647,34 @@ namespace MalbersAnimations.Controller
                 }
             }
         }
-
         #endregion
-
 
         /// <summary>Disable this Script and MalbersInput Script if it has it.</summary>
         public virtual void DisableAnimal()
         {
             enabled = false;
+            //CustomPatch: corrected null check for possible Unity object type
             IInputSource MI = GetComponent<IInputSource>();
-            MI?.Enable(false); //Disable the Input source
+            if (!MI.IsUnityRefNull())
+                MI.Enable(false); //Disable the Input source
         }
 
-        public void SetTimeline(bool isonTimeline)
+        public void SetTimeline(bool isOnTimeline)
         {
-            if (debugStates) Debug.Log($"[{name}] Set Timeline {isonTimeline}", this);
+#if UNITY_EDITOR
+            if (debugStates || debugStances || debugModes)
+                MDebug.Log($"[{name}] Set Timeline {isOnTimeline}", this);
+#endif
 
-            Sleep = isonTimeline;
-            InTimeline = isonTimeline;
-            RB.isKinematic = isonTimeline; //Make Sure the Animal is set to Kinematic\
+            Sleep = isOnTimeline;
+            InTimeline = isOnTimeline;
+            RB.isKinematic = isOnTimeline; //Make Sure the Animal is set to Kinematic\
 
-            //  RB.collisionDetectionMode = isonTimeline ? CollisionDetectionMode.ContinuousSpeculative : CollisionDetectionMode.Discrete;
+            //  RB.collisionDetectionMode = isOnTimeline ? CollisionDetectionMode.ContinuousSpeculative : CollisionDetectionMode.Discrete;
 
             Mode_Stop();
 
-            if (!isonTimeline)
+            if (!isOnTimeline)
             {
                 //Reset all State,Stance and Mode Inputs
                 foreach (var m in modes)
@@ -1501,10 +1686,16 @@ namespace MalbersAnimations.Controller
                 foreach (var m in Stances)
                     m.InputValue = false;
             }
+            else
+            {
+                ResetInputSource();
+            }
         }
 
         /// <summary>InertiaPositionSpeed = TargetSpeed</summary>
         public void ResetInertiaSpeed() => InertiaPositionSpeed = TargetSpeed;
+
+        public void ResetInertiaSpeed(Vector3 newTargetSpeed) => InertiaPositionSpeed = TargetSpeed = newTargetSpeed;
 
         public void UseCameraBasedInput() => UseCameraInput = true;
 

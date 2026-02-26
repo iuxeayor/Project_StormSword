@@ -10,7 +10,7 @@ namespace MalbersAnimations.Scriptables
         [SerializeField] private bool value;
 
         /// <summary>Invoked when the value changes </summary>
-        public Action<bool> OnValueChanged = delegate { };
+        public Action<bool> OnValueChanged;
 
         /// <summary> Value of the Bool variable</summary>
         public virtual bool Value
@@ -21,7 +21,7 @@ namespace MalbersAnimations.Scriptables
                 //if (this.value != value)                  //If the value is diferent change it
                 {
                     this.value = value;
-                    OnValueChanged(value);         //If we are using OnChange event Invoked
+                    OnValueChanged?.Invoke(value);         //If we are using OnChange event Invoked
 #if UNITY_EDITOR
                     if (debug) Debug.Log($"<B>{name} -> [<color=blue> {value} </color>] </B>", this);
 #endif
@@ -41,7 +41,7 @@ namespace MalbersAnimations.Scriptables
 
     [System.Serializable]
     public class BoolReference : ReferenceVar
-    { 
+    {
         public bool ConstantValue;
         [RequiredField] public BoolVar Variable;
 
@@ -66,6 +66,14 @@ namespace MalbersAnimations.Scriptables
 
         #region Operators
         public static implicit operator bool(BoolReference reference) => reference.Value;
+        //: fixed bug here: caused StackOverflow (circular implicit operator usage because of wrong return value) =>
+        //HIGHLY recommended to NOT "mask" reference types u     sage with value types usage by using implicit conversion
+        // from value types to reference types. This is an anti-coding pattern that can easily cause performance impact
+        // (redundant memory allocations with each implicit conversion),  unexpected behaviour (think about what happens if you accidently assign a value type to a reference
+        // , but you stored the previous reference to propagate a value change in multiple places and the value type you just assigned creates a whole
+        // new reference and overwrites the one you registered to?) =>
+        // also code readability is heavily affected because of this implicit conversion from a value type to a reference type
+        public static implicit operator BoolReference(bool value) => new(value);
         #endregion
     }
 

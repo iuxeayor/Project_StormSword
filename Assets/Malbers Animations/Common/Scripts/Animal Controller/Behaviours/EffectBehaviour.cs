@@ -8,7 +8,7 @@ namespace MalbersAnimations.Utilities
     {
         [Tooltip("Re-check If there any new Effect Manager on the Character (Use this when the Weapons are added or Removed and you want to add effect to them")]
         public bool DynamicManagers = false;
-        public List<EffectItem> effects = new List<EffectItem>();
+        public List<EffectItem> effects = new();
         private EffectManager[] effectManagers = null;
         private bool HasEfM = false;
 
@@ -52,13 +52,13 @@ namespace MalbersAnimations.Utilities
             if (HasEfM)
             {
                 var NextAnim = anim.GetNextAnimatorStateInfo(layer).shortNameHash;
-                var InTransition = anim.IsInTransition(layer) && state.shortNameHash != NextAnim; //Check only the Exit Transition not the Start Transsition
+                var InTransition = anim.IsInTransition(layer) && state.shortNameHash != NextAnim; //Check only the Exit Transition not the Start Transition
                 var time = state.normalizedTime % 1;
 
                 foreach (var e in effects)
                 {
                     if (e.sent) continue; //If the effect was already sent keep looking for the next one
-                  
+
                     if (InTransition)
                     {
                         if (e.IgnoreInTransitionHash.Contains(NextAnim))
@@ -81,14 +81,14 @@ namespace MalbersAnimations.Utilities
             }
         }
 
-      
+
 
         override public void OnStateExit(Animator anim, AnimatorStateInfo state, int layer)
         {
             if (HasEfM)
             {
                 //means is transitioning to it self
-                if (anim.GetCurrentAnimatorStateInfo(layer).fullPathHash == state.fullPathHash) return; 
+                if (anim.GetCurrentAnimatorStateInfo(layer).fullPathHash == state.fullPathHash) return;
 
                 foreach (var e in effects)
                 {
@@ -96,7 +96,7 @@ namespace MalbersAnimations.Utilities
 
                     //Ignore the Effect action if the Next Animation is on the list
                     if (e.IgnoreInTransitionHash.Contains(anim.GetCurrentAnimatorStateInfo(layer).shortNameHash))
-                    { 
+                    {
                         return;
                     }
 

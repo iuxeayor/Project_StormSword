@@ -18,7 +18,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   affect: 0
   stanceOnEnter: {fileID: 11400000, guid: 5338df2a5c63c6b4a8049349b3eb0171, type: 2}
@@ -43,7 +46,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   task: 0
   distance:
@@ -86,8 +92,13 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.5
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
+  affect: 0
+  Play: 1
   modeID: {fileID: 11400000, guid: 1286867ad3c4cdd4baacac3373aff92c, type: 2}
   AbilityID:
     UseConstant: 1
@@ -98,8 +109,10 @@ MonoBehaviour:
     ConstantValue: 0
     Variable: {fileID: 0}
   near: 1
-  affect: 0
-  Play: 1
+  ActivateDistance:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   CoolDown:
     UseConstant: 1
     ConstantValue: 1.5
@@ -109,6 +122,40 @@ MonoBehaviour:
   IgnoreFirstCoolDown: 1
   StopModeOnExit: 1
   alignTime: 0.3
+  SetInputTrue: 0
+--- !u!114 &-6396719275025420983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5aaefcc8cb0c31046bdac1700fd93837, type: 3}
+  m_Name: Look At Target Head
+  m_EditorClassIdentifier: 
+  active: 1
+  Description: 'Find a child gameObject with the name given on the Target and set
+    it as the Target for the Look At and the Aim Component on the Animal '
+  MessageID:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
+  WaitForPreviousTask: 0
+  SetAimOn: 0
+  LookAtTargetS: 0
+  LookAtTargetT: 0
+  TargetVar: {fileID: 0}
+  UseTag: 0
+  BoneName: Head
+  tag: {fileID: 0}
+  DisableOnExit: 1
+  showTransformVar: 0
 --- !u!114 &-3742761694754523325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,7 +174,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   affect: 0
   SpeedSet: Ground
@@ -135,6 +185,8 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 3
     Variable: {fileID: 0}
+  Sprint: 0
+  ResetSprintOnExit: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -156,6 +208,7 @@ MonoBehaviour:
   - {fileID: -6682966666410970486}
   - {fileID: -3742761694754523325}
   - {fileID: -8424466867942724737}
+  - {fileID: -6396719275025420983}
   transitions:
   - decision: {fileID: 2943419024565079828}
     trueState: {fileID: 0}
@@ -166,7 +219,7 @@ MonoBehaviour:
   GizmoStateColor: {r: 0, g: 1, b: 0.1323154, a: 1}
   CreateTaskAsset: 1
   CreateDecisionAsset: 1
-  TasksIndex: 1
+  TasksIndex: 3
   DecisionIndex: -1
 --- !u!114 &2943419024565079828
 MonoBehaviour:
@@ -214,12 +267,19 @@ MonoBehaviour:
   transform: {fileID: 0}
   gameObject: {fileID: 0}
   gameObjectSet: {fileID: 0}
-  tags: []
   zoneType: 0
   AllZones: 1
   ZoneID: 0
   ZoneModeAbility: -1
+  tags: []
+  ReactionOnSelf:
+    reactions: []
+  ReactionOnTarget:
+    reactions: []
   debugColor: {r: 0.5849056, g: 0.041297972, b: 0, a: 0.039215688}
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &5589015711575567537
 MonoBehaviour:
   m_ObjectHideFlags: 0

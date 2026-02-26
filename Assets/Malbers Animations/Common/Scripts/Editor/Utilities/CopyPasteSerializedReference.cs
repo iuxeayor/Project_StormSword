@@ -14,7 +14,7 @@ namespace MalbersAnimations
     {
         private static (string json, Type type) lastObject;
 
-        private static SerializedProperty copyArray;
+        // private static SerializedProperty copyArray;
 
         static CopyPasteSerializedReference()
         {

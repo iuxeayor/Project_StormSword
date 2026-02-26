@@ -21,11 +21,8 @@ namespace MalbersAnimations.UI
 
         [Tooltip("Runtime Set that store all the Stat you want to monitor")]
         [RequiredField] public RuntimeStats Set;
-        [Tooltip("Slider used to Represet the Stat on the UI")]
+        [Tooltip("Slider used to Represent the Stat on the UI")]
         [RequiredField] public Slider UIPrefab;
-
-        //[Tooltip("Prefab Floating Number Prefab to show the damage done")]
-        //[RequiredField] public UIFollowTransform FloatingNumber;
 
         [Tooltip("What stat inside the Stat Manager you want to monitor")]
         public StatID statID;
@@ -67,31 +64,19 @@ namespace MalbersAnimations.UI
         }
 
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             Set.OnItemAdded.AddListener(OnAddedStat);
             Set.OnItemRemoved.AddListener(OnRemovedStat);
         }
 
-        private void OnDisable()
+        protected virtual void OnDisable()
         {
             Set.OnItemAdded.RemoveListener(OnAddedStat);
             Set.OnItemRemoved.RemoveListener(OnRemovedStat);
         }
 
-
-        ///// <summary>  Track if the Stat change value  </summary>
-        //private void OnStatValueChanged(float value, StatUI item)
-        //{
-        //    Debug.Log("value = " + value);
-
-        //    if (item != null)
-        //    {
-        //        item.slider.value = Normalized ? item.stat.NormalizedValue : item.stat.Value;
-        //    }
-        //}
-
-        private void OnAddedStat(Stats stats)
+        protected virtual void OnAddedStat(Stats stats)
         {
             var stat = stats.Stat_Get(statID);
 
@@ -100,8 +85,7 @@ namespace MalbersAnimations.UI
             //  Debug.Log($"Added From Stat {stats}");
 
 
-            var item = new StatUI();
-            item.stat = stats.Stat_Get(statID);
+            StatUI item = new() { stat = stats.Stat_Get(statID) };
 
             var child = stats.transform.FindGrandChild(FollowTransform);
 
@@ -119,25 +103,10 @@ namespace MalbersAnimations.UI
             {
                 item.slider.value = Normalized ? item.stat.NormalizedValue : item.stat.Value;
 
-                //if (FloatingNumber != null)
-                //{
-                //    var FU =  Instantiate(FloatingNumber);
-                //    FU.SetTransform( item.followTransform);
-                //    FU.transform.SetParent( transform);
-
-                //    var text = FU.GetComponentInChildren<Text>();
-
-                //    if (text)
-                //    text.text = (item.lastValue - floatValue).ToString("F0");
-
-                //    item.lastValue = floatValue;
-                //   // FU.transform.localScale = Scale;
-                //}
-
-                if (RemoveOnEmpty && item.stat.Value == item.stat.MinValue)
-                    RemoveFromGroup(item); //Meaning that when the stat is empty, remove the stat from the set.
+                //Meaning that when the stat is empty, remove the stat from the set.
+                if (RemoveOnEmpty && item.stat.Value <= item.stat.MinValue)
+                    RemoveFromGroup(item);
             };
-
 
             item.slider.value = Normalized ? item.stat.NormalizedValue : item.stat.Value; //First value.
 
@@ -155,10 +124,17 @@ namespace MalbersAnimations.UI
 
         private void RemoveFromGroup(StatUI item)
         {
-            //Debug.Log($"Removed From Group {item.slider}", item.slider );
+            //Weird error that sometimes happens
+            try
+            {
+                item.stat.OnValueChange.RemoveListener(item.OnStatValueChange);
+            }
+            catch
+            { }
 
-            item.stat.OnValueChange.RemoveListener(item.OnStatValueChange);
+
             item.OnStatValueChange = null;
+
 
             Destroy(item.slider.gameObject);
 

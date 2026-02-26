@@ -18,7 +18,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.5
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   near: 1
   Actions: 5
@@ -44,7 +47,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   affect: 0
   stanceOnEnter: {fileID: 11400000, guid: 5338df2a5c63c6b4a8049349b3eb0171, type: 2}
@@ -69,7 +75,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   task: 0
   distance:
@@ -112,7 +121,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   affect: 0
   SpeedSet: Ground
@@ -120,6 +132,8 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 3
     Variable: {fileID: 0}
+  Sprint: 0
+  ResetSprintOnExit: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199,12 +213,19 @@ MonoBehaviour:
   transform: {fileID: 0}
   gameObject: {fileID: 0}
   gameObjectSet: {fileID: 0}
-  tags: []
   zoneType: 0
   AllZones: 1
   ZoneID: 0
   ZoneModeAbility: -1
+  tags: []
+  ReactionOnSelf:
+    reactions: []
+  ReactionOnTarget:
+    reactions: []
   debugColor: {r: 0.5849056, g: 0.041297972, b: 0, a: 0.039215688}
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &5589015711575567537
 MonoBehaviour:
   m_ObjectHideFlags: 0

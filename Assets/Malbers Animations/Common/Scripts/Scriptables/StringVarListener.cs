@@ -38,11 +38,35 @@ namespace MalbersAnimations
         }
 
         public virtual void Invoke(string value)
-        { if (Enable) Raise.Invoke(value);}
+        { if (Enable) Raise.Invoke(value); }
 
         public virtual void Invoke(Object value) => Invoke(value.name);
 
         public virtual void Invoke() => Invoke(Value);
+
+        #region String Operations
+        public virtual void _Add(string var) => Value += var;
+        public virtual void _Add(StringVar var) => Value += var.Value;
+        public virtual void _Add(char var) => Value += var;
+        public virtual void _Clear() => Value = string.Empty;
+
+        public virtual void _RemoveFirst()
+        {
+            if (!string.IsNullOrEmpty(Value))
+            {
+                Value = Value[1..];
+            }
+        }
+
+        public virtual void _RemoveLast()
+        {
+            if (!string.IsNullOrEmpty(Value))
+            {
+                Value = Value[..^1];
+            }
+        }
+        #endregion
+
 
 #if UNITY_EDITOR
         [ContextMenu("Connect To Text")]
@@ -74,7 +98,7 @@ namespace MalbersAnimations
                 stringVar = test.gameObject.AddComponent<StringVarListener>();
             stringVar.ShowEvents = true;
             var method = MTools.Property_Set_UnityAction<string>(test, "text");
-            if (method != null) UnityEditor.Events.UnityEventTools.AddPersistentListener(stringVar.Raise, method); 
+            if (method != null) UnityEditor.Events.UnityEventTools.AddPersistentListener(stringVar.Raise, method);
         }
     }
 
@@ -90,10 +114,10 @@ namespace MalbersAnimations
             Raise = serializedObject.FindProperty("Raise");
         }
 
-        protected override void DrawEvents()
+        protected override void DrawElements()
         {
             UnityEditor.EditorGUILayout.PropertyField(Raise);
-            base.DrawEvents();
+            base.DrawElements();
         }
     }
 #endif

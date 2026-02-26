@@ -8,7 +8,14 @@ namespace MalbersAnimations.Reactions
 
     public class MDamageableReaction : Reaction
     {
-        [Tooltip("Changes the Profile of the Main Damageable Component of a Character. Leave it null to Restore to the Defaul Profile")]
+        public override string DynamicName =>
+            $"Set Damageable Profile [{(RestoreDefault ? "Default" : Profile.Value)}]";
+
+        [Tooltip("Restore the Default Profile of the Main Damageable Component of a Character")]
+        public bool RestoreDefault = false;
+
+        [Tooltip("Changes the Profile of the Main Damageable Component of a Character")]
+        [Hide(nameof(RestoreDefault), true)]
         public StringReference Profile = new();
 
         public override System.Type ReactionType => typeof(MDamageable);
@@ -17,7 +24,7 @@ namespace MalbersAnimations.Reactions
         {
             var damageable = reactor as MDamageable;
 
-            if (string.IsNullOrEmpty(Profile.Value))
+            if (RestoreDefault)
                 damageable.Profile_Restore();
             else
                 damageable.Profile_Set(Profile);

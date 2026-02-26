@@ -154,6 +154,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Object: {fileID: 8714559848609571298}
   loopType: 1
+  endType: 0
+  update: 1
+  UnScaleTime: 0
   StartDelay:
     UseConstant: 1
     ConstantValue: 2
@@ -190,19 +193,21 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  CannotBeInterrupted: 1
+  events: 0
+  WaitStart:
+    m_PersistentCalls:
+      m_Calls: []
   OnStart:
     m_PersistentCalls:
       m_Calls: []
   OnEnd:
     m_PersistentCalls:
       m_Calls: []
-  onEnable:
+  EndWait:
     m_PersistentCalls:
       m_Calls: []
-  onDisable:
-    m_PersistentCalls:
-      m_Calls: []
-  previewPosition: 0
+  preview: 0
   axis:
     UseConstant: 1
     ConstantValue: {x: 0, y: 0, z: 1}
@@ -229,6 +234,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Object: {fileID: 8714559848609571298}
   loopType: 1
+  endType: 0
+  update: 1
+  UnScaleTime: 0
   StartDelay:
     UseConstant: 1
     ConstantValue: 2
@@ -265,19 +273,21 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  CannotBeInterrupted: 1
+  events: 0
+  WaitStart:
+    m_PersistentCalls:
+      m_Calls: []
   OnStart:
     m_PersistentCalls:
       m_Calls: []
   OnEnd:
     m_PersistentCalls:
       m_Calls: []
-  onEnable:
+  EndWait:
     m_PersistentCalls:
       m_Calls: []
-  onDisable:
-    m_PersistentCalls:
-      m_Calls: []
-  previewPosition: 0
+  preview: 0
   start:
     UseConstant: 1
     ConstantValue: {x: 0, y: 0, z: 0}
@@ -286,3 +296,4 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: {x: 0, y: -10.497437, z: 9.297908}
     Variable: {fileID: 0}
+  Gizmos: 1

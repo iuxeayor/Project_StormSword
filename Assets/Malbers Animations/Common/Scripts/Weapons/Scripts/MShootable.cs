@@ -2,10 +2,10 @@
 using UnityEngine.Events;
 using MalbersAnimations.Events;
 using MalbersAnimations.Scriptables;
-using System;
 using MalbersAnimations.Utilities;
 using System.Collections;
-
+using UnityEngine.Pool;
+using MalbersAnimations.Reactions;
 
 
 #if UNITY_EDITOR
@@ -17,7 +17,6 @@ namespace MalbersAnimations.Weapons
     [AddComponentMenu("Malbers/Weapons/Shootable")]
     public class MShootable : MWeapon, IShootableWeapon, IThrower
     {
-
         #region Enums
         public enum Release_Projectile
         {
@@ -39,8 +38,6 @@ namespace MalbersAnimations.Weapons
         #endregion 
 
         #region Variables
-
-
         //public enum Cancel_Aim { ReleaseProjectile, ResetWeapon }
 
         [Tooltip("When the projectile will be released")]
@@ -53,7 +50,7 @@ namespace MalbersAnimations.Weapons
         [Tooltip("How the weapon will handle aiming")]
         public AimingAction aimAction = AimingAction.Manual;
 
-        [Tooltip("Delay to release the projectile after the Attack is Played. E.g. the Trhow animation is played but the projectile will be released a seconds after")]
+        [Tooltip("Delay to release the projectile after the Attack is Played. E.g. the Throw animation is played but the projectile will be released a seconds after")]
         public FloatReference releaseDelay = new();
 
         /////<summary> When Aiming is Cancel what the Weapon should do? </summary>
@@ -66,13 +63,130 @@ namespace MalbersAnimations.Weapons
 
         [Tooltip("Projectile prefab the weapon fires")]
         public GameObjectReference m_Projectile = new();                                //Arrow to Release Prefab
+
+
+        [Tooltip("Spread Angle for the Projectile")]
+        public FloatReference spreadAngle = new(0);
+        [Tooltip("Spread Multiplier the spread angle")]
+        public Vector3Reference spreadMult = new(Vector3.one);
+
+        [Tooltip("Spread Angle for the Projectile when there's a missAttack")]
+        public FloatReference spreadMiss = new(5);
+
+        //[Tooltip("Amount of projectiles to fire at the same time")]
+        //public FloatReference amount = new(1);
+
+        /// <summary>  Pool </summary>        
+        [Tooltip("Initial number of Projectiles in Projectile Pool")]
+        public IntReference m_ProjectileInitialPoolSize = new(10); // Initial size of pool
+        [Tooltip("Max number of Projectiles in Projectile Pool")]
+        public IntReference m_ProjectileMaxPoolSize = new(1000); // Max size of pool
+
+        // Define Projectile Pool
+        protected IObjectPool<GameObject> m_ProjectilePool; // This is pool that is used
+
+        // Set public IObjectPool that returns Projectile Pool or creates one if not existing
+        public virtual IObjectPool<GameObject> ProjectilePool // this is returning m_ProjectilePool and create it if that is null
+        {
+            get
+            {
+                if (m_ProjectilePool == null && ProjectileInitialPoolSize > 0 && ProjectileMaxPoolSize > 0)
+                {
+                    m_ProjectilePool = new ObjectPool<GameObject>
+                        (CreatePooledItem, OnTakeFromPool, OnReturnedToPool, OnDestroyPoolObject, collectionCheck: false,
+                        m_ProjectileInitialPoolSize.Value, m_ProjectileMaxPoolSize.Value);
+                }
+
+                return m_ProjectilePool;
+            }
+        }
+
+        protected virtual GameObject CreatePooledItem()
+        {
+            // This is used to return Projectile to the pool when they have stopped.
+            // Create instance of Projectile
+            GameObject projectileInstance = Instantiate(m_Projectile.Value);
+            projectileInstance.SetActive(false); // Disable it
+#if UNITY_EDITOR || MALBERS_DEBUG || DEVELOPMENT_BUILD //CustomPatch: avoided redundant renaming operation and allocations for each created pooled item in non-dev builds
+            projectileInstance.name = projectileInstance.name.Replace("(Clone)", "(Pool)"); // Remove (Clone) from the name
+#endif
+            // NOTE - Implemented as property in IProjectile and Prepare_Projectile but also in MProjectile and Prepare
+            // Add ReturnToPool to Projectile - NOT NEEDED, IMPLEMENTED INTO PROJECTILE
+            //ProjectileReturnToPool returnToPool = projectileInstance.AddComponent<ProjectileReturnToPool>();
+            // Define which Pool is for this Projectile
+            //returnToPool.thisProjectilePool = ProjectilePool; - NOT NEEDED, IMPLEMENTED INTO PROJECTILE
+
+            // Return prefab to be added to Pool
+            return projectileInstance;
+        }
+
+        /// <summary> Called when an item is returned to the pool using Release Used by Destroy from Projectile and ProjectileReturnToPool component </summary>
+        void OnReturnedToPool(GameObject Go)
+        {
+            if (Go == null) return;
+
+            if (m_ProjectileParent != null) // Check parent 
+            {
+                Go.transform.SetParent(m_ProjectileParent, false); // Set as Child to Projectile Parent
+            }
+            else
+            {
+                Go.transform.SetParent(this.transform, false); // or to Weapon 
+            }
+            Go.transform.ResetLocal(); //Restore the position
+            Go.SetActive(false);       // Disable, Hide it!
+                                       // Debug.Log("Projectile returned to pool, left: " + ProjectilePool.CountInactive);
+        }
+
+        // Called when an item is taken from the pool using Get 
+        // like ProjectilePool.Get()
+        void OnTakeFromPool(GameObject Go)
+        {
+            Go.transform.SetParent(null, true); // Unparent projectile
+            Go.SetActive(true); // Activate 
+
+            //  Debug.Log("Projectile taken from pool, left: " + ProjectilePool.CountInactive);
+        }
+
+        // If the pool capacity is reached then any items returned will be destroyed.
+        // We can control what the destroy behavior does, here we destroy the GameObject.
+        void OnDestroyPoolObject(GameObject Go)
+        {
+#if UNITY_EDITOR //CustomPatch: removed redundant check for builds
+            if (Application.isPlaying)
+#endif
+                Destroy(Go); // When pool size exceeds max size destroy projectile
+            //Debug.Log("Projectile taken from pool, left: " + ProjectilePool.CountInactive);
+        }
+
+        protected virtual void PopulatePool()
+        {
+            if (m_ProjectileInitialPoolSize > 0)
+            {
+                for (int i = 0; i < m_ProjectileInitialPoolSize; i++)
+                {
+                    ProjectilePool.Release(CreatePooledItem());
+                }
+            }
+        }
+
+        /// <summary>  If the projectile value has changed then reset the pool </summary>
+        public virtual void OnProjectileChanged(GameObject newProjectile)
+        {
+            if (newProjectile != m_Projectile)
+            {
+                //Reset pool
+                ProjectilePool.Clear();
+                PopulatePool();
+            }
+        }
+        /// <summary> End Pool  </summary>
+
         [Tooltip("Parent of the Projectile")]
         public Transform m_ProjectileParent;
         public Vector3Reference gravity = new(Physics.gravity);
 
         public BoolReference UseAimAngle = new(false);
-
-
 
         [Tooltip("Does the weapon has Fire Animation? if not then does not require to exit Aim Animation")]
         public BoolReference HasFireAnim = new(true);
@@ -81,22 +195,16 @@ namespace MalbersAnimations.Weapons
 
         /// <summary>This Curve is for Limiting the Bow Animations while the Character is on weird/hard Positions</summary>
         [MinMaxRange(-180, 180)]
-        [Tooltip("Value to limit firing projectiles when the Character is on weird or dificult Positions. E.g. Firing Arrows on impossible angles")]
+        [Tooltip("Value to limit firing projectiles when the Character is on weird or difficult Positions. E.g. Firing Arrows on impossible angles")]
         public RangedFloat AimLimit = new(-180, 180);
-
-
 
         /// <summary>Can the Weapon be Charged? Meaning Charge time is greater than 0</summary>
         public override bool CanCharge => releaseProjectile == Release_Projectile.OnAttackReleased && ChargeTime > 0;
 
         //Make sure the weapon can unequip on aim
-        public override bool CanUnequip => !IsAiming || UnequipOnAim;
+        public override bool CanUnequip => UnequipOnAim || !IsAiming;
 
         #region Reload and Ammo
-
-
-
-
         [Tooltip("Ignore Completely the Reload Logic")]
         public BoolReference noReload = new(false);
 
@@ -121,15 +229,24 @@ namespace MalbersAnimations.Weapons
         #endregion
 
         #region Events
+        public GameObjectEvent OnBeforeFireProjectile = new();
         public GameObjectEvent OnLoadProjectile = new();
         public GameObjectEvent OnFireProjectile = new();
         public UnityEvent OnReloadStart = new();
         public UnityEvent OnReload = new();
         #endregion
 
+
+        #region Events
+        [Tooltip("Reaction to Execute before the projectile is fired. Dynamic Target (Weapon Owner)")]
+        public Reaction2 BeforeFireProjectileReaction;
+        public Reaction2 LoadProjectileReaction;
+        public Reaction2 FireProjectileReaction;
+        public Reaction2 ReloadStartReaction;
+        public Reaction2 ReloadReaction;
+        #endregion
+
         #region Properties
-
-
         public override bool CanAttack
         {
             get => canAttack;
@@ -138,9 +255,6 @@ namespace MalbersAnimations.Weapons
                 if (Rate <= 0) { canAttack = true; return; } //Restore Can Attack if the weapon has no Rate
 
                 canAttack = value;
-
-
-                // Debug.Log($"CAN ATTACK {value}");
 
                 if (!canAttack)
                 {
@@ -158,7 +272,29 @@ namespace MalbersAnimations.Weapons
         }
         private IEnumerator iCanAttack;
 
-        public virtual GameObject Projectile { get => m_Projectile.Value; set => m_Projectile.Value = value; }
+        public virtual GameObject Projectile
+        {
+            get => m_Projectile.Value;
+            set
+            {
+                //Verify the if the projectile value has changed
+                if (value != m_Projectile.Value && m_Projectile.UseConstant)
+                {
+                    OnProjectileChanged(value);
+                }
+
+                m_Projectile.Value = value;
+            }
+        }
+
+
+
+
+        /// <summary> Pool - Added 2 new int values as InitialPoolSize and MaxPoolSize </summary> 
+        public virtual int ProjectileInitialPoolSize { get => m_ProjectileInitialPoolSize.Value; set => m_ProjectileInitialPoolSize.Value = value; }
+        public virtual int ProjectileMaxPoolSize { get => m_ProjectileMaxPoolSize.Value; set => m_ProjectileMaxPoolSize.Value = value; }
+        /// <summary>  Pool - End  </summary> 
+
         public virtual float AutoReloadTime { get => m_AutoReloadTime.Value; set => m_AutoReloadTime.Value = value; }
 
         /// <summary> Delay to release the projectile after the Attack is Played  </summary>
@@ -174,7 +310,7 @@ namespace MalbersAnimations.Weapons
         public virtual bool HasReload => !NoReload;
 
 
-        /// <summary>The weapon is playing autoreload Time</summary>
+        /// <summary>The weapon is playing auto reload Time</summary>
         public virtual bool InAutoReloadTime { get; protected set; }
 
         /// <summary> Projectile Instance to launch from the weapon</summary>
@@ -193,7 +329,7 @@ namespace MalbersAnimations.Weapons
         /// <summary> Adds a Throw Angle to the Aimer Direction </summary>
         public float AimAngle { get => m_AimAngle.Value; set => m_AimAngle.Value = value; }
         public Vector3 Velocity { get; set; }
-        public Action<bool> Predict { get; set; }
+        public System.Action<bool> Predict { get; set; }
 
         /// <summary> Total Ammo of the Weapon</summary>
         public int TotalAmmo { get => m_Ammo.Value; set => m_Ammo.Value = value; }
@@ -226,12 +362,12 @@ namespace MalbersAnimations.Weapons
         public bool UnequipOnAim { get => m_UnequipOnAim.Value; set => m_UnequipOnAim.Value = value; }
 
 
-        public override bool IsEquiped
+        public override bool IsEquipped
         {
-            get => base.IsEquiped;
+            get => base.IsEquipped;
             set
             {
-                base.IsEquiped = value;
+                base.IsEquipped = value;
 
                 if (value)
                 {
@@ -285,30 +421,39 @@ namespace MalbersAnimations.Weapons
         //    if (AutoReload) TryReload();
         //}
 
-        void Awake()
+        protected virtual void Awake()
         {
             Initialize();
 
             if (AimOrigin == null) AimOrigin = transform;
 
             if (ChamberSize < 0) ChamberSize = 1; //Bug Fix
-
             if (ReleaseDelay < 0) releaseDelay = 0; //Clamp to zero
+
+            /// <summary>
+            /// Pool - Fill Pool with gameObjects
+            /// </summary>
+            // We need to populate Pool manually because of Unity
+            // New ObjectPool does have min value but it does not populate pool
+            //PopulatePool();
+            //Debug.Log("ProjectilePool has instances: " + ProjectilePool.CountInactive);
+            /// <summary> Pool - End </summary>
         }
 
-        //private void OnEnable()
-        //{
-        //    if (!m_Ammo.UseConstant && m_Ammo.Variable != null) //Listen the Total ammo in case it changes
-        //        m_Ammo.Variable.OnValueChanged += SetTotalAmmo;
-        //}
 
-        //private void OnDisable()
-        //{
-        //    if (!m_Ammo.UseConstant && m_Ammo.Variable != null)
-        //        m_Ammo.Variable.OnValueChanged -= SetTotalAmmo;
-        //}
+        protected virtual void OnEnable()
+        {
+            if (m_Projectile.Variable != null)
+                m_Projectile.Variable.OnValueChanged += OnProjectileChanged;
+        }
 
-        internal override void MainAttack_Start(IMWeaponOwner RC)
+        private void OnDisable()
+        {
+            if (m_Projectile.Variable != null)
+                m_Projectile.Variable.OnValueChanged -= OnProjectileChanged;
+        }
+
+        public override void MainAttack_Start(IMWeaponOwner RC)
         {
             Input = true;
 
@@ -319,7 +464,7 @@ namespace MalbersAnimations.Weapons
                 return; //Do not fire if is reloading
             }
 
-            // Calculate is there's an Imposible range to shoot 
+            // Calculate is there's an Impossible range to shoot 
             CanShootWithAimLimit = (AimLimit.IsInRange(RC.HorizontalAngle));
 
             if (!RC.Aim && aimAction == AimingAction.Automatic)
@@ -338,7 +483,7 @@ namespace MalbersAnimations.Weapons
             {
                 if (HasAmmo)                                                                  //If there's Ammo on the chamber
                 {
-                    //Equip the projectile if its set to intantiate on start
+                    //Equip the projectile if its set to instantiate on start
                     if ((equipProjectile & Equip_Projectile.OnAttackStart) == Equip_Projectile.OnAttackStart)
                         EquipProjectile();
 
@@ -362,12 +507,11 @@ namespace MalbersAnimations.Weapons
             }
         }
 
-        internal override void MainAttack_Released(IMWeaponOwner RC)
+        public override void MainAttack_Released(IMWeaponOwner RC)
         {
             Input = false;
 
             Debugging($"Main Attack Released", this);
-
 
             AttackFromAutomatic = false;
 
@@ -387,11 +531,8 @@ namespace MalbersAnimations.Weapons
                     FireAnim_ReleaseProjectile();
                 }
             }
-
             // ResetCharge();
         }
-
-
 
 
         private void FireAnim_ReleaseProjectile()
@@ -408,7 +549,6 @@ namespace MalbersAnimations.Weapons
             CanAttack = false;
             IsAttacking = true;
         }
-
 
 
         //IEnumerator I_AutoRelease;
@@ -508,7 +648,7 @@ namespace MalbersAnimations.Weapons
 
         internal override void Weapon_LateUpdate(IMWeaponOwner RC)
         {
-            CanShootWithAimLimit = (AimLimit.IsInRange(RC.HorizontalAngle)); // Calculate is there's an Imposible range to shoot 
+            CanShootWithAimLimit = (AimLimit.IsInRange(RC.HorizontalAngle)); // Calculate is there's an Impossible range to shoot 
         }
 
         public override void ResetCharge()
@@ -516,12 +656,11 @@ namespace MalbersAnimations.Weapons
             base.ResetCharge();
             Predict?.Invoke(false);
             Velocity = Vector3.zero; //Reset Velocity
-                                     // Debug.Log("RESET CHARGE!!!");
         }
 
         public override void Charge(float time)
         {
-            //No Charge while the projectile is release on Start ??? is this neeeded?
+            //No Charge while the projectile is release on Start ??? is this needed?
             if (releaseProjectile == Release_Projectile.OnAttackStart) return;
 
             if (!MaxCharged) base.Charge(time);
@@ -530,7 +669,7 @@ namespace MalbersAnimations.Weapons
         }
 
 
-        /// <summary> Create an arrow ready to shooot CALLED BY THE ANIMATOR </summary>
+        /// <summary> Create an arrow ready to shoot CALLED BY THE ANIMATOR </summary>
         public virtual void EquipProjectile()
         {
             if (!HasAmmo) return;                                           //means there's no Ammo so no equipping!
@@ -540,32 +679,64 @@ namespace MalbersAnimations.Weapons
                 var Pos = ProjectileParent ? ProjectileParent.position : AimOriginPos;
                 var Rot = ProjectileParent ? ProjectileParent.rotation : AimOrigin.rotation;
 
+                if (Projectile == null)
+                {
+                    Debugging($"◘ [Projectile is Null] Cannot Equip Projectile", this, "red");
+                    return; //No Projectile to Equip
+                }
+
                 //If the Projectile is a prefab
                 if (Projectile.IsPrefab())
                 {
-                    //Instantiate the Arrow in the Parent Object of the Shooteable Weapon
-                    ProjectileInstance = Instantiate(Projectile, Pos, Rot, ProjectileParent);
-                    //Debugging($"◘ [Projectile Instantiated] [{ProjectileInstance.name}] ", ProjectileInstance);
+                    if (ProjectilePool != null)
+                    {
+                        ///<summary>  Pool - Get Projectile from Pool and reset its position and rotation </summary>
+                        ProjectileInstance = ProjectilePool.Get();
+                        ///<summary>  Pool - End </summary>
+                    }
+                    else
+                    {
+                        //Instantiate the Arrow in the Parent Object of the Shootable Weapon
+                        ProjectileInstance = Instantiate(Projectile, Pos, Rot, ProjectileParent);
+                        Debugging($"◘ [Projectile Instantiated] [{ProjectileInstance.name}] ", ProjectileInstance);
+                    }
                 }
                 else
                 {
-                    ProjectileInstance = Projectile;
+                    if (ProjectilePool != null)
+                    {
+                        ///<summary>  Pool - Get Projectile from Pool </summary>
+                        ProjectileInstance = ProjectilePool.Get();
+                        ///<summary>  Pool - End  </summary>
+                    }
+                    else
+                    {
+                        ProjectileInstance = Projectile;
+                    }
                 }
+
+                ProjectileInstance.transform.SetPositionAndRotation(Pos, Rot);
+                ProjectileInstance.transform.parent = ProjectileParent;
 
                 if (ProjectileInstance.TryGetComponent<MProjectile>(out var projectile))
                 {
                     MProjectile = projectile; //Safe in a variable
 
+                    MProjectile.Owner = Owner;
+
+                    MProjectile.Gravity = Gravity; //Set the Gravity of the Projectile 
+
                     ProjectileInstance.transform.Translate(MProjectile.PosOffset, Space.Self);   //Translate in the offset of the arrow to put it on the hand
                     ProjectileInstance.transform.Rotate(MProjectile.RotOffset, Space.Self);      //Rotate in the offset of the arrow to put it on the hand
+
                     //ProjectileInstance.transform.localScale = (projectile.ScaleOffset);       //Scale in the offset of the arrow to put it on the hand
 
+                    MProjectile.transform.localScale = Vector3.one; //Reset the Scale of the projectile
 
-                    //Use Weapon Effects on the projectiles
-                    if (MProjectile.hitEffects == null || MProjectile.hitEffects.Count == 0)
-                    { MProjectile.hitEffects = hitEffects; }
-                    if (MProjectile.HitEffect == null)
-                    { MProjectile.HitEffect = HitEffect; }
+
+                    //Use  Effects on the projectiles
+                    if (MProjectile.hitEffects == null) { MProjectile.hitEffects = hitEffects; }
+                    if (MProjectile.HitEffect == null) { MProjectile.HitEffect = HitEffect; }
                     if (MProjectile.hitSound == null || MProjectile.hitSound.Value == null)
                     { MProjectile.hitSound = hitSound; }
                 }
@@ -586,14 +757,15 @@ namespace MalbersAnimations.Weapons
 
 
                 OnLoadProjectile.Invoke(ProjectileInstance);
+                LoadProjectileReaction.React(Owner); //React to the Load Projectile
 
                 // ProjectIsReleased = false;
 
-                Debugging($"◘ [Projectile Equiped] [{ProjectileInstance.name}] ", ProjectileInstance);
+                Debugging($"◘ [Projectile Equipped] [{ProjectileInstance.name}] ", ProjectileInstance);
             }
             else
             {
-                Debugging($"◘ [Projectile Already Equipped] Skip", ProjectileInstance, "gray");
+                Debugging($"◘ [Projectile Already Equipped] Skip", ProjectileInstance, "cyan");
             }
         }
 
@@ -601,7 +773,10 @@ namespace MalbersAnimations.Weapons
         /// <param name="projectile"></param>
         public virtual void SetProjectile(GameObject projectile) => Projectile = projectile;
 
-        public virtual void Fire() => ReleaseProjectile();
+        public virtual void Fire()
+        {
+            ReleaseProjectile();
+        }
 
         public virtual void ReleaseProjectile()
         {
@@ -632,32 +807,55 @@ namespace MalbersAnimations.Weapons
             }
         }
 
-
-
-        public void FireProjectile()
+        public virtual void FireProjectile()
         {
             if (ProjectileInstance == null) return;
 
-            ProjectileInstance.transform.parent = null; //Unparent the projectile
+            //CustomPatch: Added useful OnBeforeFireProjectile event (TODO: this event property needs to be added in inspector like the other events)
+            OnBeforeFireProjectile.Invoke(ProjectileInstance);
 
+            BeforeFireProjectileReaction.React(Owner);
+
+            ProjectileInstance.transform.parent = null; //Unparent the projectile
 
             if (MProjectile != null)
             {
                 ProjectileInstance.transform.position = AimOrigin.position;                 //Put the Correct position to Throw the projectile IMPORTANT!!!!!
 
+                var spread = spreadAngle.Value;
+                var MissedAttack = MissChance >= UnityEngine.Random.value;  //Calculate if is critical  
+
+                if (MissedAttack)
+                {
+                    spread = spreadMiss.Value;
+                    OnAttackMissed.Invoke(owner);
+                }
+
                 CalculateVelocity();
+                //Calculate the Spread Angle after calculate velocity
+                if (spread > 0)
+                {
+                    Quaternion spreadRotation =
+                    Quaternion.Euler(
+                    Random.Range(-spread * spreadMult.x, spread * spreadMult.x),
+                    Random.Range(-spread * spreadMult.y, spread * spreadMult.y),
+                    Random.Range(-spread * spreadMult.z, spread * spreadMult.z));
+                    Velocity = spreadRotation * Velocity;
+                }
 
                 ProjectileInstance.transform.forward = Velocity.normalized;                 //Align the Projectile to the velocity
 
-                ProjectileInstance.transform.Translate(MProjectile.PosOffset, Space.Self); //Translate in the offset of the arrow to put it on the hand
+                /// <summary> Pool - Added ProjectilePool to Prepare  </summary>
+                MProjectile.Prepare(Owner, Gravity, Velocity, Layer, TriggerInteraction, ProjectilePool);
+                MProjectile.Thrower = this; //Set the Thrower
+                /// <summary> Pool - End </summary>
 
-                MProjectile.Prepare(Owner, Gravity, Velocity, Layer, TriggerInteraction);
-                MProjectile.AfterDistance = AfterDistance;
+                MProjectile.AfterDistance = AfterDistance; //Set the After Distance in the Projectile
 
                 if (HitEffect != null) MProjectile.HitEffect = HitEffect;                  //Send the Hit Effect too
 
                 var newDamage = new StatModifier(statModifier)
-                { Value = Mathf.Lerp(MinDamage, MaxDamage, ChargedNormalized) };
+                { Value = Mathf.Lerp(MinDamage, MaxDamage, ChargedNormalized) }; //Change the Damage of the Projectile
 
                 MProjectile.PrepareDamage(newDamage, CriticalChance, CriticalMultiplier, element);
 
@@ -666,10 +864,10 @@ namespace MalbersAnimations.Weapons
             }
 
             OnFireProjectile.Invoke(ProjectileInstance);
-            ProjectileInstance = null;
-            MProjectile = null;
+            FireProjectileReaction.React(Owner); //React to the Fire Projectile
 
-            // WeaponReady(false); //Tell the weapon cannot be Ready until Somebody set it ready again
+            ProjectileInstance = null;
+            MProjectile = null; //Clear the reference
 
             PlaySound(WSound.Fire); //Play the Release Projectile Sound
 
@@ -698,8 +896,17 @@ namespace MalbersAnimations.Weapons
             //Destroy the Projectile instance if the Projectile is not the weapon itself
             if (ProjectileInstance != null && ProjectileInstance != gameObject)
             {
-                Destroy(ProjectileInstance);
-                Debugging("[Destroy Projectile Instance]", this);
+                if (ProjectileInitialPoolSize > 0)
+                {
+                    ProjectilePool.Release(ProjectileInstance);
+                    Debugging("[Return Projectile to Pool]", this);
+                }
+                else
+                {
+                    Destroy(ProjectileInstance);
+                    Debugging("[Destroy Projectile Instance]", this);
+                }
+
 
             }
             ProjectileInstance = null; //Clean the Projectile Instance
@@ -725,9 +932,10 @@ namespace MalbersAnimations.Weapons
 
                     IsReloading = true; //Do Reload Animations
                     OnReloadStart.Invoke();
+                    ReloadStartReaction.React(Owner); //React to the Reload Start
                     this.Delay_Action(m_ReloadTime.Value, () => ReloadWeapon()); //Do the actual reloading of the weapon
 
-                    IsAttacking = false; //No Longer Attaking
+                    IsAttacking = false; //No Longer Attacking
 
                     return true;
                 }
@@ -824,6 +1032,7 @@ namespace MalbersAnimations.Weapons
             {
                 AmmoInChamber = ChamberSize;
                 OnReload.Invoke();
+                ReloadReaction.React(Owner); //React to the Reload
                 return true;
             }
 
@@ -858,17 +1067,19 @@ namespace MalbersAnimations.Weapons
             //    AmmoInChamber = 0;
             //    return false;
             //}
+
             Debugging($"[Reloading Ammo!: <B>[{ReloadAmount}]]</B>", this);
 
-
             OnReload.Invoke();
+            ReloadReaction.React(Owner); //React to the Reload
+
             return true;
         }
 
         /// <summary> If finish reload but is still aiming go to the Aiming animation **CALLED BY THE ANIMATOR**</summary>
         public virtual void FinishReload()
         {
-            if (!IsEquiped) return; //Make sure it cannot be reload when its not equipped.
+            if (!IsEquipped) return; //Make sure it cannot be reload when its not equipped.
             if (CurrentOwner.DrawWeapon || CurrentOwner.StoreWeapon) return; //Do nothing also if the weapon is being stored
 
             IsReloading = false;
@@ -902,16 +1113,32 @@ namespace MalbersAnimations.Weapons
         SerializedProperty m_AmmoInChamber, m_Ammo, m_ChamberSize,
             releaseProjectile, releaseDelay, releaseByAnimation,
             equipProjectile,
-            m_Projectile, AimLimit,
+            /// <summary>
+            /// Pool - Added InitialPoolSize and MaxPoolSize
+            /// </summary> 
+            m_Projectile, m_ProjectileInitialPoolSize, m_ProjectileMaxPoolSize, AimLimit,
+            /// <summary>
+            /// Pool - End
+            /// </summary> 
             m_AutoReload, m_AutoReloadTime, m_ReloadTime, NoReload, HasReloadAnim, m_UnequipOnAim, m_AfterDistance,
             //  InstantiateProjectileOfFire, 
-            ProjectileParent, HasFireAnim, aimAction,
-            //  AimID, FireID, ReloadID,
-            OnReload, OnReloadStart, OnLoadProjectile, OnFireProjectile, gravity, UseAimAngle, m_AimAngle;
+            ProjectileParent, HasFireAnim, aimAction, spreadAngle, spreadMult, spreadMiss, //amount,
+                                                                                           //  AimID, FireID, ReloadID,
+            OnReload, OnReloadStart, OnLoadProjectile, OnFireProjectile, gravity, UseAimAngle, m_AimAngle,
+
+
+             BeforeFireProjectileReaction,
+             LoadProjectileReaction,
+             FireProjectileReaction,
+             ReloadStartReaction,
+             ReloadReaction
+
+            ;
+
 
         protected MShootable mShoot;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
             SetOnEnable();
             mShoot = (MShootable)target;
@@ -929,6 +1156,19 @@ namespace MalbersAnimations.Weapons
             HasFireAnim = serializedObject.FindProperty("HasFireAnim");
             aimAction = serializedObject.FindProperty("aimAction");
 
+            spreadAngle = serializedObject.FindProperty("spreadAngle");
+            spreadMult = serializedObject.FindProperty("spreadMult");
+            spreadMiss = serializedObject.FindProperty("spreadMiss");
+
+            //amount = serializedObject.FindProperty("amount");
+
+            BeforeFireProjectileReaction = serializedObject.FindProperty("BeforeFireProjectileReaction");
+            LoadProjectileReaction = serializedObject.FindProperty("LoadProjectileReaction");
+            FireProjectileReaction = serializedObject.FindProperty("FireProjectileReaction");
+            ReloadStartReaction = serializedObject.FindProperty("ReloadStartReaction");
+            ReloadReaction = serializedObject.FindProperty("ReloadReaction");
+
+
 
             m_ReloadTime = serializedObject.FindProperty("m_ReloadTime");
             m_AutoReload = serializedObject.FindProperty("m_AutoReload");
@@ -945,6 +1185,14 @@ namespace MalbersAnimations.Weapons
 
             equipProjectile = serializedObject.FindProperty("equipProjectile");
             m_Projectile = serializedObject.FindProperty("m_Projectile");
+            /// <summary>
+            /// Pool - Define InitialPoolSize and MaxPoolSize
+            /// </summary> 
+            m_ProjectileInitialPoolSize = serializedObject.FindProperty("m_ProjectileInitialPoolSize");
+            m_ProjectileMaxPoolSize = serializedObject.FindProperty("m_ProjectileMaxPoolSize");
+            /// <summary>
+            /// Pool - End
+            /// </summary> 
             ProjectileParent = serializedObject.FindProperty("m_ProjectileParent");
             m_AfterDistance = serializedObject.FindProperty("m_AfterDistance");
 
@@ -970,6 +1218,17 @@ namespace MalbersAnimations.Weapons
             serializedObject.ApplyModifiedProperties();
         }
 
+        protected override void DrawReactions()
+        {
+            base.DrawReactions();
+
+            EditorGUILayout.PropertyField(BeforeFireProjectileReaction);
+            EditorGUILayout.PropertyField(LoadProjectileReaction);
+            EditorGUILayout.PropertyField(FireProjectileReaction);
+            EditorGUILayout.PropertyField(ReloadStartReaction);
+            EditorGUILayout.PropertyField(ReloadReaction);
+        }
+
         protected override void UpdateSoundHelp()
         {
             SoundHelp = "0:Draw   1:Store   2:Shoot   3:Reload   4:Empty  5:Charge";
@@ -977,20 +1236,19 @@ namespace MalbersAnimations.Weapons
 
         protected override string CustomEventsHelp()
         {
-            return "\n\n On Fire Gun: Invoked when the weapon is fired \n(Vector3: the Aim direction of the rider), \n\n On Hit: Invoked when the Weapon Fired and hit something \n(Transform: the gameobject that was hitted) \n\n On Aiming: Invoked when the Rider is Aiming or not \n\n On Reload: Invoked when Reload";
+            return "\n\n On Fire Gun: Invoked when the weapon is fired \n(Vector3: the Aim direction of the rider), \n\n On Hit: Invoked when the Weapon Fired and hit something \n(Transform: the gameobject that was hit) \n\n On Aiming: Invoked when the Rider is Aiming or not \n\n On Reload: Invoked when Reload";
         }
 
         protected override void DrawExtras()
         {
-
             using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 minForce.isExpanded = MalbersEditor.Foldout(minForce.isExpanded, "Projectile Speed and Physics");
 
                 if (minForce.isExpanded)
                 {
-                    EditorGUILayout.PropertyField(minForce, new GUIContent("Min", "Minimun Force Speed of the Projectile and force to apply to a hitted rigid body"));
-                    EditorGUILayout.PropertyField(Force, new GUIContent("Max", "Maximun Force Speed of the Projectile and force to apply to a hitted rigid body"));
+                    EditorGUILayout.PropertyField(minForce, new GUIContent("Min", "Minimun Force Speed of the Projectile and force to apply to a hit rigid body"));
+                    EditorGUILayout.PropertyField(Force, new GUIContent("Max", "Maximum Force Speed of the Projectile and force to apply to a hit rigid body"));
                     EditorGUILayout.PropertyField(forceMode);
                     EditorGUILayout.PropertyField(gravity);
                     EditorGUILayout.PropertyField(m_AfterDistance);
@@ -1004,6 +1262,10 @@ namespace MalbersAnimations.Weapons
 
         protected override void DrawAdvancedWeapon()
         {
+            if (Application.isPlaying)
+                using (new EditorGUI.DisabledGroupScope(true))
+                    EditorGUILayout.ObjectField("Projectile Instance", mShoot.ProjectileInstance, typeof(GameObject), false);
+
             DrawDamage();
 
             var dc = GUI.backgroundColor;
@@ -1050,9 +1312,20 @@ namespace MalbersAnimations.Weapons
 
                 if (releaseProjectile.isExpanded)
                 {
+                    EditorGUILayout.PropertyField(spreadAngle);
+
+                    if (mShoot.spreadAngle.Value != 0)
+                    {
+                        EditorGUILayout.PropertyField(spreadMult);
+                        EditorGUILayout.PropertyField(spreadMiss);
+                    }
+
+
                     EditorGUILayout.PropertyField(HasFireAnim);
                     EditorGUILayout.PropertyField(equipProjectile);
                     EditorGUILayout.PropertyField(releaseProjectile);
+
+
                     EditorGUILayout.PropertyField(releaseByAnimation);
 
                     using (new EditorGUI.DisabledGroupScope(mShoot.ReleaseByAnimation))
@@ -1063,9 +1336,17 @@ namespace MalbersAnimations.Weapons
                     if (releaseProjectile.intValue != 0)
                     {
                         //EditorGUILayout.PropertyField(InstantiateProjectileOfFire,
-                        //    new GUIContent("Inst Projectile on Fire", "Instanciate the Projectile when Firing the weapon." +
+                        //    new GUIContent("Inst Projectile on Fire", "Instantiate the Projectile when Firing the weapon." +
                         //    "\n E.g The Pistol Instantiate the projectile on Firing. The bow Instantiate the Arrow Before Firing"));
                         EditorGUILayout.PropertyField(m_Projectile);
+                        /// <summary>
+                        /// Pool - Define GUI for InitialPoolSize and MaxPoolSize
+                        /// </summary> 
+                        EditorGUILayout.PropertyField(m_ProjectileInitialPoolSize);
+                        EditorGUILayout.PropertyField(m_ProjectileMaxPoolSize);
+                        /// <summary>
+                        /// Pool - End
+                        /// </summary> 
                         EditorGUILayout.PropertyField(ProjectileParent);
                     }
                 }

@@ -1,4 +1,6 @@
-﻿namespace MalbersAnimations 
+﻿using UnityEngine;
+
+namespace MalbersAnimations
 {
     /// <summary> Interface used to Identify the Riding Component </summary>
     public interface IRider
@@ -15,15 +17,15 @@
         bool CanDismount { get; }
         /// <summary>Returns true if the Rider is between the Start and the End of the Mount Animations</summary>
         bool IsMounting { get; }
-       
+
         /// <summary>Returns true if the Rider is between the Start and the End of the Dismount Animations</summary>
         bool IsDismounting { get; }
 
         /// <summary>Is the Rider using Aiming (Used for the Straight Spine Option)</summary>
-        bool IsAiming { get; set; } 
+        bool IsAiming { get; set; }
 
-        /// <summary>Animal Input Script</summary>
-        IInputSource MountInput { get; }
+        ///// <summary>Animal Input Script</summary>
+        //IInputSource MountInput { get; }
 
         /// <summary>Notify everyone listening what the rider has been doing</summary>
         System.Action<RiderAction> RiderStatus { get; set; }
@@ -33,9 +35,12 @@
 
         /// <summary>Set the Rein to the Left Hand. True: Rein in Hand, False: Rein is not in Hand (Using a Weapon)</summary>
         void ReinLeftHand(bool value);
+
+        /// <summary>Reference for the Mount Animal GameObject</summary>
+        GameObject Mount { get; }
     }
 
-    public enum RiderAction 
+    public enum RiderAction
     {
         StartMount,
         EndMount,

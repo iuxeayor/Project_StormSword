@@ -1,4 +1,8 @@
 ﻿using UnityEngine;
+#if UNITY_EDITOR
+//CustomPatch: added extra custom editor code logic
+using UnityEditor;
+#endif
 
 namespace MalbersAnimations
 {
@@ -7,15 +11,18 @@ namespace MalbersAnimations
     [AddComponentMenu("Malbers/AI/AI Wander Area")]
     public class AIWanderArea : MWayPoint
     {
+#if UNITY_EDITOR
+        //CustomPatch: added toggle to optionally persist the gizmos drawing of this wander area and all its children
+        public bool debugPersistentGizmos;
+#endif
         public enum AreaType { Circle, Box };
-
 
         [Tooltip("Type of Area to wander")]
         public AreaType m_AreaType = AreaType.Circle;
 
         [Min(0)] public float radius = 5;
 
-        public Vector3 BoxArea = new Vector3(10, 1, 10);
+        public Vector3 BoxArea = new(10, 1, 10);
 
 
         [Range(0, 1), Tooltip("Probability of keep wandering on this WayPoint Area")]
@@ -41,7 +48,46 @@ namespace MalbersAnimations
             currentNextTarget = MainArea.transform; //Store the current next target as this transform
         }
 
-        private void FindWanderAreas()
+        //CustomPatch: added function to calculate bounds
+        public Bounds CalculateEnclosingBounds()
+        {
+            if (MainArea == null)
+            {
+                Debug.LogError("Main wander area is null.");
+                return new Bounds(); // Return an empty Bounds if invalid data
+            }
+
+#if UNITY_EDITOR
+            if (Application.isEditor && !Application.isPlaying)
+                FindWanderAreas(); // Make sure the wander areas are up to date
+#endif
+
+            // Start with the bounds of the main area itself
+            Bounds enclosingBounds = CalculateAreaBounds(MainArea);
+
+            // If the area has child wander areas, include their bounds as well
+            foreach (AIWanderArea childArea in ChildWanderAreas)
+            {
+                Bounds childBounds = CalculateAreaBounds(childArea);
+                enclosingBounds.Encapsulate(childBounds);  // Expand the bounds to include the child's bounds
+            }
+
+            return enclosingBounds;
+        }
+
+        private Bounds CalculateAreaBounds(AIWanderArea area)
+        {
+            // Start with the bounds of the current area
+            Vector3 center = area.transform.position;
+            float radius = area.radius;
+            Vector3 minPoint = center - Vector3.one * radius;
+            Vector3 maxPoint = center + Vector3.one * radius;
+
+            Bounds areaBounds = new Bounds(center, maxPoint - minPoint);
+            return areaBounds;
+        }
+
+        public virtual void FindWanderAreas()
         {
             MainArea = transform.parent != null ? (transform.parent.GetComponentInParent<AIWanderArea>()) : this;
             if (MainArea == null) MainArea = this; //Re-check in case this wander area is child of something else
@@ -59,11 +105,11 @@ namespace MalbersAnimations
             }
         }
 
-        public Vector3 GetNextDestination()
+        public virtual Vector3 GetNextDestination()
         {
             if (!IsChild && ChildWanderAreas != null && ChildWanderAreas.Length > 1) //Means this area has multiple areas inside
             {
-                return ChildWanderAreas[Random.Range(0, ChildWanderAreas.Length)].GetNextDestinationArea(); //Get a random point inlcuding the Main Wander Area
+                return ChildWanderAreas[Random.Range(0, ChildWanderAreas.Length)].GetNextDestinationArea(); //Get a random point including the Main Wander Area
             }
             else
             {
@@ -71,7 +117,7 @@ namespace MalbersAnimations
             }
         }
 
-        private Vector3 GetNextDestinationArea()
+        public virtual Vector3 GetNextDestinationArea()
         {
             switch (m_AreaType)
             {
@@ -89,7 +135,7 @@ namespace MalbersAnimations
 
             MainArea.Destination = Destination; //Super Important
 
-            MDebug.DrawWireSphere(Destination, Color.red, 0.1f, 2);
+            //  MDebug.DrawCircle(Destination,transform.rotation , 0.1f, Color.red, 2);
 
             return MainArea.Destination;
         }
@@ -107,6 +153,7 @@ namespace MalbersAnimations
         public override void TargetArrived(GameObject target)
         {
             MainArea.OnTargetArrived.Invoke(target);
+            MainArea.TargetArrivedReaction.React(target);
             FindNextTarget();
         }
 
@@ -159,8 +206,16 @@ namespace MalbersAnimations
         }
 
 #if UNITY_EDITOR
+        //CustomPatch: added toggle to optionally persist the gizmos drawing of this wander area and all its children
+        private bool isGizmoSelected = true;
+
+
         private void OnDrawGizmos()
         {
+            //CustomPatch: added toggle to optionally persist the gizmos drawing of this wander area and all its children
+            if (!isGizmoSelected && !debugPersistentGizmos)
+                return;
+
             var DebugColorWire = DebugColor;
             DebugColorWire.a = 1;
 
@@ -192,11 +247,17 @@ namespace MalbersAnimations
                     Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
                     break;
             }
+
+            //CustomPatch: added toggle to optionally persist the gizmos drawing of this wander area and all its children
+            isGizmoSelected = false;
         }
 
 
         private void OnDrawGizmosSelected()
         {
+            //CustomPatch: added toggle to optionally persist the gizmos drawing of this wander area and all its children
+            isGizmoSelected = true;
+
             var DebugColorWire = DebugColor;
             DebugColorWire.a = 1;
             Gizmos.color = DebugColorWire;
@@ -228,14 +289,20 @@ namespace MalbersAnimations
     public class AIWanderAreaEditor : UnityEditor.Editor
     {
         UnityEditor.SerializedProperty
-            pointType, stoppingDistance, slowingDistance, m_AreaType, m_height,
-            radius, BoxArea, WaitTime, WanderWeight, nextWayPoints, DebugColor, OnTargetArrived;
+            pointType, stoppingDistance, slowingDistance, m_AreaType, m_height, MainArea,
+            radius, BoxArea, WaitTime, WanderWeight, nextWayPoints, DebugColor, OnTargetArrived, TargetArrivedReaction;
+
+        //CustomPatch: added toggle to optionally persist the gizmos drawing of this wander area and all its children
+        SerializedProperty debugPersistentGizmosProperty;
         AIWanderArea M;
 
         private bool isChild;
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
+            //CustomPatch: added toggle to optionally persist the gizmos drawing of this wander area and all its children
+            debugPersistentGizmosProperty = serializedObject.FindProperty(nameof(M.debugPersistentGizmos));
+
             M = (AIWanderArea)target;
             pointType = serializedObject.FindProperty("pointType");
             stoppingDistance = serializedObject.FindProperty("stoppingDistance");
@@ -248,7 +315,9 @@ namespace MalbersAnimations
             nextWayPoints = serializedObject.FindProperty("nextWayPoints");
             DebugColor = serializedObject.FindProperty("DebugColor");
             OnTargetArrived = serializedObject.FindProperty("OnTargetArrived");
+            TargetArrivedReaction = serializedObject.FindProperty("TargetArrivedReaction");
             m_height = serializedObject.FindProperty("m_height");
+            MainArea = serializedObject.FindProperty("MainArea");
 
             isChild = M.transform.parent != null && (M.transform.parent.GetComponentInParent<AIWanderArea>() != null);
         }
@@ -258,27 +327,39 @@ namespace MalbersAnimations
             serializedObject.Update();
 
             MalbersEditor.DrawDescription("Type of Waypoint that uses an Area to get the Destination point");
+
             if (!isChild)
             {
-                UnityEditor.EditorGUILayout.BeginVertical(UnityEditor.EditorStyles.helpBox);
+                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                 {
-                    UnityEditor.EditorGUILayout.BeginHorizontal();
-                    UnityEditor.EditorGUILayout.PropertyField(pointType);
-                    UnityEditor.EditorGUILayout.PropertyField(DebugColor, GUIContent.none, GUILayout.Width(40));
-                    UnityEditor.EditorGUILayout.EndHorizontal();
-                    UnityEditor.EditorGUILayout.PropertyField(m_height);
-                    UnityEditor.EditorGUILayout.PropertyField(stoppingDistance);
-                    UnityEditor.EditorGUILayout.PropertyField(slowingDistance);
-                    UnityEditor.EditorGUILayout.PropertyField(WaitTime);
-                }
-                UnityEditor.EditorGUILayout.EndVertical();
-            }
-            UnityEditor.EditorGUILayout.BeginVertical(UnityEditor.EditorStyles.helpBox);
-            {
-                UnityEditor.EditorGUILayout.PropertyField(m_AreaType);
-                var aretype = (AIWanderArea.AreaType)m_AreaType.intValue;
+                    EditorGUILayout.PropertyField(debugPersistentGizmosProperty);
 
-                switch (aretype)
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        EditorGUILayout.PropertyField(pointType);
+                        EditorGUILayout.PropertyField(DebugColor, GUIContent.none, GUILayout.Width(40));
+                    }
+
+                    EditorGUILayout.PropertyField(m_height);
+                    EditorGUILayout.PropertyField(stoppingDistance);
+                    EditorGUILayout.PropertyField(slowingDistance);
+                    EditorGUILayout.PropertyField(WaitTime);
+                }
+
+            }
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                //CustomPatch: added toggle to optionally persist the gizmos drawing of this wander area and all its children
+                if (isChild)
+                {
+                    UnityEditor.EditorGUILayout.PropertyField(debugPersistentGizmosProperty);
+                    EditorGUILayout.PropertyField(MainArea);
+                }
+                UnityEditor.EditorGUILayout.PropertyField(m_AreaType);
+
+                var areaType = (AIWanderArea.AreaType)m_AreaType.intValue;
+
+                switch (areaType)
                 {
                     case AIWanderArea.AreaType.Circle:
                         UnityEditor.EditorGUILayout.PropertyField(radius);
@@ -292,7 +373,6 @@ namespace MalbersAnimations
                 }
 
             }
-            UnityEditor.EditorGUILayout.EndVertical();
 
             if (isChild)
             {
@@ -301,7 +381,7 @@ namespace MalbersAnimations
             }
             else
             {
-                UnityEditor.EditorGUILayout.BeginVertical(UnityEditor.EditorStyles.helpBox);
+                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                 {
                     UnityEditor.EditorGUILayout.LabelField("Next Destination", UnityEditor.EditorStyles.boldLabel);
                     UnityEditor.EditorGUILayout.PropertyField(WanderWeight);
@@ -309,8 +389,9 @@ namespace MalbersAnimations
                     UnityEditor.EditorGUILayout.PropertyField(nextWayPoints, true);
                     UnityEditor.EditorGUI.indentLevel--;
                 }
-                UnityEditor.EditorGUILayout.EndVertical();
+
                 UnityEditor.EditorGUILayout.PropertyField(OnTargetArrived);
+                UnityEditor.EditorGUILayout.PropertyField(TargetArrivedReaction);
             }
             serializedObject.ApplyModifiedProperties();
         }

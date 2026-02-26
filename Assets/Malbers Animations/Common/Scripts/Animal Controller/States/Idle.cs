@@ -3,17 +3,16 @@
 namespace MalbersAnimations.Controller
 {
     /// <summary>Idle Should be the Last State on the Queue, when nothing is moving Happening </summary>
+    [AddTypeMenu("Ground/Idle")]
     public class Idle : State
     {
-        public override string StateName => "Idle";
+        //  public override string StateName => "Idle";
         public override string StateIDName => "Idle";
 
         public bool HasLocomotion { get; private set; }
 
-        public override void InitializeState()
-        {
-            HasLocomotion = animal.HasState(StateEnum.Locomotion); //Check if the animal has Idle State if it does not have then Locomotion is IDLE TOO
-        }
+        //Check if the animal has Idle State if it does not have then Locomotion is IDLE TOO
+        public override void InitializeState() => HasLocomotion = animal.HasState(StateEnum.Locomotion);
 
         public override void Activate()
         {
@@ -24,7 +23,7 @@ namespace MalbersAnimations.Controller
         public override bool TryActivate()
         {
             //Activate when the animal is not moving and is grounded
-            if (HasLocomotion) //Default IDLE!!!! IMPORTANT
+            if (HasLocomotion) //If the animal has Locomotion then check if the animal is not moving
             {
                 return (
                     animal.MovementAxisSmoothed == Vector3.zero &&
@@ -33,12 +32,26 @@ namespace MalbersAnimations.Controller
                     General.Grounded == animal.Grounded
                     );
             }
-            else  //Meaning the Idle works as locomotino too
+            else  //Meaning the Idle works as locomotino too so only check if the animal is grounded
             {
-                return (General.Grounded == animal.Grounded); //This enables that you can be on idle if you are not grounded too
+                return (General.Grounded == animal.Grounded);
             }
         }
 
+
+        /// <summary>
+        /// Make sure RootMotion Root is enable on Idle and Locomotion last changes
+        /// </summary>
+        [SerializeField, HideInInspector] private bool noRMRot = false;
+        private void OnValidate()
+        {
+            if (!noRMRot)   //If the RootMotion is not set then set it to true
+            {
+                noRMRot = true;
+                General.RootMotionRotation = true;
+                MTools.SetDirty(this);
+            }
+        }
 
 #if UNITY_EDITOR
         internal override void Reset()
@@ -61,11 +74,8 @@ namespace MalbersAnimations.Controller
                 modify = (modifier)(-1),
             };
         }
-
-        public override void SetSpeedSets(MAnimal animal)
-        {
-            //Do nothing... the Animal Controller already does it on Start
-        }
+        //Do nothing... the Animal Controller already does it on Start
+        public override void SetSpeedSets(MAnimal animal) { }
 #endif
     }
 }

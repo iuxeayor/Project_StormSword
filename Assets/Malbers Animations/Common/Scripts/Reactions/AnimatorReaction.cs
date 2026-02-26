@@ -10,6 +10,19 @@ namespace MalbersAnimations.Reactions
 
     public class AnimatorReaction : Reaction
     {
+
+        public override string DynamicName
+        {
+            get
+            {
+                var display = $"Set Animator Parameters ({parameters.Count})"; //Name of the Reaction
+                foreach (var param in parameters)
+                    display += $"[{param.param} {param.type} param {param.Value.Value}]";
+                return display;
+            }
+        }
+
+
         public override System.Type ReactionType => typeof(Animator);
 
         public List<MAnimatorParameter> parameters = new();

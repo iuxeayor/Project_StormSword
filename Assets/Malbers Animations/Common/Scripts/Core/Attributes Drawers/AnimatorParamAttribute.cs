@@ -23,6 +23,12 @@ namespace MalbersAnimations
             AnimatorParamType = null;
         }
 
+        public AnimatorParamAttribute(AnimatorControllerParameterType animatorParamType)
+        {
+            AnimatorName = string.Empty;
+            AnimatorParamType = null;
+        }
+
         public AnimatorParamAttribute(string animatorName, AnimatorControllerParameterType animatorParamType)
         {
             AnimatorName = animatorName;
@@ -35,22 +41,26 @@ namespace MalbersAnimations
     [CustomPropertyDrawer(typeof(AnimatorParamAttribute))]
     public class AnimatorParamPropertyDrawer : PropertyDrawer
     {
+        private AnimatorController animatorController;
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
 
             AnimatorParamAttribute animatorParamAttribute = PropertyUtility.GetAttribute<AnimatorParamAttribute>(property);
 
-            AnimatorController animatorController = GetAnimatorController(property, animatorParamAttribute.AnimatorName);
+
+            if (animatorController == null)
+                animatorController = GetAnimatorController(property, animatorParamAttribute.AnimatorName);
 
             if (animatorController == null)
             {
-                UnityEditor.EditorGUI.PropertyField(position, property, label);
+                UnityEditor.EditorGUI.PropertyField(position, property, label); //Draw the default property field (String or Int)
                 return;
             }
 
             int parametersCount = animatorController.parameters.Length;
-            List<AnimatorControllerParameter> animatorParameters = new List<AnimatorControllerParameter>(parametersCount);
+            List<AnimatorControllerParameter> animatorParameters = new(parametersCount);
             for (int i = 0; i < parametersCount; i++)
             {
                 AnimatorControllerParameter parameter = animatorController.parameters[i];
@@ -141,6 +151,18 @@ namespace MalbersAnimations
         private static AnimatorController GetAnimatorController(SerializedProperty property, string animatorName)
         {
             object target = PropertyUtility.GetTargetObjectWithProperty(property);
+
+            if (string.IsNullOrEmpty(animatorName))
+            {
+                if (property.serializedObject.targetObject is MonoBehaviour carrier)
+                {
+                    if (carrier.TryGetComponent<Animator>(out var animator))
+                    {
+                        return animator.runtimeAnimatorController as AnimatorController;
+                    }
+                }
+                return null;
+            }
 
             FieldInfo animatorFieldInfo = ReflectionUtility.GetField(target, animatorName);
             if (animatorFieldInfo != null &&

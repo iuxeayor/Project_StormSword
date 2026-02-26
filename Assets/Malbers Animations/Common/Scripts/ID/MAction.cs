@@ -9,7 +9,7 @@
         private void Reset() => GetID();
 
         [UnityEngine.ContextMenu("Get ID")]
-        private void GetID() => FindID<MAction>();
+        public void GetID() => FindID<MAction>();
 #endif
         #endregion 
     }

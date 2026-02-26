@@ -38,7 +38,7 @@
 
     public enum ComparerBool { Equal = 0, NotEqual = 1, }
 
-    public enum ComparerString { Equal = 0, NotEqual = 1, Empty = 2, }
+    public enum ComparerString { Equal = 0, NotEqual = 1, Empty = 2, Contains, DoesNotContains }
 
     public enum EEnterExit { Enter = 1, Exit = 2, }
 

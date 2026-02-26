@@ -21,11 +21,13 @@ MonoBehaviour:
   send: 0
   interval:
     UseConstant: 1
-    ConstantValue: 0
+    ConstantValue: 1
     Variable: {fileID: 0}
   WaitForAllTasks: 0
   waitForTask: -1
-  TargetName: 
+  CheckBy: 2
+  TargetName: Ball
+  ReferenceTransform: {fileID: 11400000, guid: 0c45a2c5e368c004eb9efaa6152aa0ea, type: 2}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0

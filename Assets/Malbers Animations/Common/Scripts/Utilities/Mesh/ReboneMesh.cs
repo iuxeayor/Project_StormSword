@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using MalbersAnimations.Scriptables;
+
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -10,30 +13,30 @@ namespace MalbersAnimations.Utilities
     [AddComponentMenu("Malbers/Utilities/Mesh/Rebone Mesh")]
     public class ReboneMesh : MonoBehaviour
     {
-
-        //[ContextMenuItem("Transfer Bones From Skin", "DuplicateBones")]
-        //public GameObject _sourceSkinMesh;
-
         [ContextMenuItem("Transfer Bones From Root", "TransferRootBone")]
-        public Transform RootBone;
+        public TransformReference RootBone = new();
+        public SkinnedMeshRenderer thisRenderer;
+
+        public virtual void Rebone(Transform root)
+        {
+            RootBone = root;
+            CopyBonesSameBones();
+        }
 
 
         [ContextMenu("Transfer Bones From Root")]
         public void TransferRootBone()
         {
-            if (RootBone != null)
-            {
-                CopyBonesSameBones();
-            }
+            if (RootBone != null) CopyBonesSameBones();
         }
 
         private void CopyBonesSameBones()
         {
-            if (TryGetComponent<SkinnedMeshRenderer>(out var thisRenderer))
+            if (thisRenderer != null || TryGetComponent(out thisRenderer))
             {
                 var OldRootBone = thisRenderer.rootBone;
 
-                Transform[] rootBone = RootBone.GetComponentsInChildren<Transform>();
+                Transform[] rootBone = RootBone.Value.GetComponentsInChildren<Transform>();
 
                 Dictionary<string, Transform> boneMap = new();
 
@@ -67,11 +70,11 @@ namespace MalbersAnimations.Utilities
 
         private void Reset()
         {
+            thisRenderer = this.FindComponent<SkinnedMeshRenderer>();
             if (RootBone == null)
             {
                 var AllSkinMeshes = transform.root.GetComponentsInChildren<SkinnedMeshRenderer>(true);
 
-                var thisRenderer = GetComponent<SkinnedMeshRenderer>();
 
                 SkinnedMeshRenderer Old = AllSkinMeshes.ToList().Find(x => x.name == name && x != thisRenderer);
 

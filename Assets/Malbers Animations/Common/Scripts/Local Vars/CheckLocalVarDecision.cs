@@ -52,7 +52,6 @@ namespace MalbersAnimations.Controller.AI
 
         public override bool Decide(MAnimalBrain brain, int Index)
         {
-            Debug.Log($"CheckLocalVarDecision: {brain.ExtraLocalVars}");
             if (brain.ExtraLocalVars != null)
             {
                 return brain.ExtraLocalVars.Compare(value, compare);

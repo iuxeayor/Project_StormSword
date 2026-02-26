@@ -1,34 +1,41 @@
-﻿using UnityEngine;
-using UnityEngine.EventSystems;
-using MalbersAnimations.Events;
+﻿using MalbersAnimations.Events;
+using MalbersAnimations.Scriptables;
+using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Serialization; 
+using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
-namespace MalbersAnimations 
+namespace MalbersAnimations
 {
     [AddComponentMenu("Malbers/AI/Point Click")]
     public class PointClick : MonoBehaviour
     {
         public PointClickData pointClickData;
-        [Tooltip ("UI to intantiate on the Hit Point ")]
+        [Tooltip("UI to instantiate on the Hit Point")]
         public GameObject PointUI;
 
-        [Tooltip ("What mouse button to use for the joystick ")]
+        [Tooltip("What mouse button to use for the joystick ")]
         public PointerEventData.InputButton Button = PointerEventData.InputButton.Left;
 
-        [Tooltip ("Radius to find <AI Targets> on the Hit Point")]
+        [Tooltip("Radius to find <AI Targets> on the Hit Point")]
         public float radius = 0.2f;
         private const float navMeshSampleDistance = 4f;
-       
+
         [Tooltip("If its hit a point on an empty space, it will clear the Current Target")]
         public bool ClearTarget = true;
 
+        [Tooltip("How many AI Targets can be found on the SphereCast ")]
+        [Min(2)] public int AITargetsSize = 10;
+        public LayerReference FindTargets = new(-1);
+
         [Header("Events")]
-        public Vector3Event OnPointClick = new Vector3Event();
+        public Vector3Event OnPointClick = new();
         [FormerlySerializedAs("OnInteractableClick")]
-        public TransformEvent OnAITargetClick = new TransformEvent();
+        public TransformEvent OnAITargetClick = new();
 
         protected Collider[] AITargets;
+
+
 
         public IAIControl AIControl;
 
@@ -36,7 +43,12 @@ namespace MalbersAnimations
         {
             if (pointClickData) pointClickData.baseDataPointerClick += OnGroundClick;
 
-            AIControl = GetComponent<IAIControl>();
+            var ObjectCore = this.FindInterface<IObjectCore>();
+
+            if (ObjectCore != null)
+                AIControl = ObjectCore.transform.FindInterface<IAIControl>();
+
+            AITargets = new Collider[AITargetsSize];
         }
 
 
@@ -51,6 +63,8 @@ namespace MalbersAnimations
         {
             PointerEventData pData = (PointerEventData)data;
 
+            if (ClearTarget) AIControl?.SetTarget(null, true);
+
             if (pData == null) return;
 
             if (pData.button == Button)
@@ -64,28 +78,37 @@ namespace MalbersAnimations
 
                 MDebug.DrawWireSphere(destinationPosition, Color.red, radius, 1);
 
-                AITargets = Physics.OverlapSphere(destinationPosition, radius); //Find all the AI TARGETS on a Radius
+                // AITargets = new Collider[AITargetsSize]; //Clear the colliders!!!
 
-                foreach (var inter in AITargets)
+                var found = Physics.OverlapSphereNonAlloc(destinationPosition, radius, AITargets, FindTargets.Value); //Find all the AI TARGETS on a Radius
+
+                if (found > 0)
                 {
-                    if (inter.transform.SameHierarchy(transform)) continue; //Don't click on yourself
-
-                    if (inter.transform.FindInterface<IAITarget>() != null)
+                    for (int i = 0; i < found; i++)
                     {
-                        OnAITargetClick.Invoke(inter.transform); //Invoke only the first interactable found
-                        
-                        if (PointUI)
-                            Instantiate(PointUI, inter.transform.position, Quaternion.FromToRotation(PointUI.transform.up, pData.pointerCurrentRaycast.worldNormal));
+                        var col = AITargets[i];
 
-                        return;
+                        if (col == null) break; //If there's no more colliders break the loop
+
+                        if (col.transform.SameHierarchy(transform)) continue; //Don't click on yourself
+
+                        var AITarget = col.transform.GetComponentInParent<IAITarget>(false);
+
+                        if (AITarget != null) //: fixed wrong null check for unity object interface type
+                        {
+                            OnAITargetClick.Invoke(AITarget.transform); //Invoke only the first interactable found
+
+                            if (PointUI)
+                                Instantiate(PointUI, col.transform.position, Quaternion.FromToRotation(PointUI.transform.up, pData.pointerCurrentRaycast.worldNormal));
+
+                            return;
+                        }
                     }
                 }
 
                 if (PointUI)
                     Instantiate(PointUI, destinationPosition, Quaternion.FromToRotation(PointUI.transform.up, pData.pointerCurrentRaycast.worldNormal));
 
-
-                if (ClearTarget) AIControl?.SetTarget(null, true);
                 OnPointClick.Invoke(destinationPosition);
             }
         }
@@ -105,13 +128,13 @@ namespace MalbersAnimations
         {
             pointClickData = MTools.GetInstance<PointClickData>("PointClickData");
             PointUI = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Malbers Animations/Common/Prefabs/Interactables/ClickPoint.prefab");
-            MTools.SetDirty(this); 
+            MTools.SetDirty(this);
 
             var SetDestination = this.GetUnityAction<Vector3>("MAnimalAIControl", "SetDestination");
             if (SetDestination != null) UnityEditor.Events.UnityEventTools.AddPersistentListener(OnPointClick, SetDestination);
 
             var SetTarget = this.GetUnityAction<Transform>("MAnimalAIControl", "SetTarget");
-            if (SetTarget != null) UnityEditor.Events.UnityEventTools.AddPersistentListener(OnAITargetClick, SetTarget);  
+            if (SetTarget != null) UnityEditor.Events.UnityEventTools.AddPersistentListener(OnAITargetClick, SetTarget);
         }
 
 #endif

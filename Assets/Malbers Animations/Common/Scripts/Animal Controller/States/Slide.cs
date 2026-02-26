@@ -3,18 +3,25 @@ using UnityEngine;
 
 namespace MalbersAnimations.Controller
 {
+    [AddTypeMenu("Ground/Slide")]
     public class Slide : State
     {
-        public override string StateName => "Slide";
+        //public override string StateName => "Slide";
         public override string StateIDName => "Slide";
 
         [Header("Slide Movement & Rotation")]
 
-        [Tooltip("Lerp value for the Aligment to the surface")]
+        [Tooltip("Check if the Ground Changer include any of Malbers Tag")]
+        public Tag[] tags;
+
+
+        [Tooltip("Lerp value for the Alignment to the surface")]
         public FloatReference OrientLerp = new(10f);
 
-        [Tooltip("The rotation of the character while sliding will be ignored. This value is overriden by the Ground Slide Data")]
-        public BoolReference ignoreRotation = new();
+        [Tooltip("If the current Slope of the character is greater than this value, the state can be activated\n" +
+         "If the current Slope of the character is lower than this value. The state will exit.")]
+        public FloatReference MinSlopeAngle = new(0);
+
         private bool IgnoreRotation;
 
         [Tooltip("When Sliding the Animal will be able to orient towards the direction of this given angle")]
@@ -22,20 +29,30 @@ namespace MalbersAnimations.Controller
         [Tooltip("When Sliding the Animal will be able to Move horizontally with this value")]
         public FloatReference SideMovement = new(5f);
 
-
-        [Header("Enter Conditions")]
-        [Tooltip("If the Slope of the Slide ground is greater that this value, the Slide State be Activated. Zero value will ignore Enter by Slope")]
-        public FloatReference EnterAngleSlope = new(0);
-
         [Header("Exit Conditions")]
         [Tooltip("If the Speed is lower than this value the Slide state will end.")]
         public FloatReference ExitSpeed = new(0.5f);
 
-        [Tooltip("If the Slope of the Slide ground is greater that this value, the Slide State will exit")]
-        public FloatReference ExitAngleSlope = new(60f);
+        [Tooltip("If the Slope of the Slide ground is greater that this value, the Slide State will exit to Fall")]
+        public FloatReference ExitSlopeAngleFall = new(60f);
 
         [Tooltip("When a Flat terrain is reached. it will wait this time to transition to Locomotion or Idle")]
         public FloatReference ExitWaitTime = new(0.5f);
+
+        [Space]
+        [Tooltip("Activate the Sliding state if the character is on a slope")]
+        public bool AutoSlope = false;
+        [Tooltip("If the Slope of the Slide ground is greater that this value, the Slide State be Activated. Zero value will ignore Enter by Slope")]
+        [Hide(nameof(AutoSlope))] public FloatReference EnterAngleSlope = new(0);
+        [Tooltip("If the Slope of the Slide ground is greater that this value, the Slide State be Activated. Zero value will ignore Enter by Slope")]
+        [Hide(nameof(AutoSlope))] public FloatReference EnterMaxAngleSlope = new(70);
+
+        [Tooltip("Enter the Slide state if the Character is facing the slope.. Default value 90")]
+        [Hide(nameof(AutoSlope))]
+        public FloatReference FacingAngleSlope = new(90);
+        [Tooltip("The rotation of the character while sliding will be ignored")]
+        [Hide(nameof(AutoSlope))]
+        public BoolReference ignoreRotation = new();
 
         private float currentExitTime;
 
@@ -44,9 +61,6 @@ namespace MalbersAnimations.Controller
         //public IntReference ExitSpeedStatus = new(1);
         //[Tooltip("The Exit Status will be set to 2 if the Exit Condition was that there's no longer a Ground Changer")]
         //public IntReference NoChangerStatus = new(2);
-
-
-
 
         public override bool TryActivate()
         {
@@ -70,13 +84,10 @@ namespace MalbersAnimations.Controller
             //}
         }
 
-
-        /// <summary>  The State moves always forward  </summary>
-        public override bool KeepForwardMovement => true;
-
         public override void Activate()
         {
             base.Activate();
+            KeepForwardMovement = true;
             IgnoreRotation = ignoreRotation.Value; //Set the default value
             additiveSide = 0;  //Set the default value
             //Add the additional Speed
@@ -93,11 +104,20 @@ namespace MalbersAnimations.Controller
 
         private bool TrySlideGround()
         {
+            if (tags.Length > 0 && !animal.platform.HasMalbersTag(tags)) return false; //Check if the Ground Changer include any of Malbers Tag
+
+
+            if (m_debug && animal.debugGizmos && animal.Grounded)
+            {
+                MDebug.Draw_Arrow(Position, Vector3.ProjectOnPlane(animal.SlopeDirection, Up), Color.white);
+            }
+
+
             if (animal.InGroundChanger
-                && animal.GroundChanger.SlideData.Slide                                     //Meaning the terrain is set to slide
-                && animal.SlopeDirectionAngle > animal.GroundChanger.SlideData.MinAngle     //The character is looking at the Direction of the slope
-                && animal.SlopeDirectionAngle < ExitAngleSlope     //The Slope is too deep to enter the slide
-                )
+            && animal.GroundChanger.SlideData.Slide                                     //Meaning the terrain is set to slide
+            && animal.SlopeDirectionAngle >= animal.GroundChanger.SlideData.MinAngle     //The character is looking at the Direction of the slope
+            && animal.SlopeDirectionAngle > MinSlopeAngle     //The Slope greater that the min angle
+            )
             {
                 //CHECK THE DIRECTION OF THE SLIDE
                 if (Vector3.Angle(animal.Forward, animal.SlopeDirection) < animal.GroundChanger.SlideData.ActivationAngle / 2)
@@ -105,21 +125,21 @@ namespace MalbersAnimations.Controller
                     return true;
                 }
             }
-            else //When is not using GroundChanger use the Enter AngleSlope
+            //When is not using GroundChanger use the Enter AngleSlope
+            else if (AutoSlope && EnterAngleSlope > 0 && animal.Grounded
+                    && animal.SlopeDirectionAngle > EnterAngleSlope.Value
+                    && animal.SlopeDirectionAngle < EnterMaxAngleSlope.Value
+                    && (Vector3.Angle(animal.Forward, Vector3.ProjectOnPlane(animal.SlopeDirection, Up)) < (FacingAngleSlope.Value / 2))
+                )
             {
-                if (animal.Grounded && EnterAngleSlope > 0 && animal.SlopeDirectionAngle > EnterAngleSlope)
-                {
-                    return true;
-                }
+                return true;
             }
 
             return false;
         }
 
 
-        /// <summary>
-        /// Override the Input Axis to match the State movement 
-        /// </summary>
+        /// <summary> Override the Input Axis to match the State movement   </summary>
         public override void InputAxisUpdate()
         {
             var move = animal.RawInputAxis;
@@ -164,14 +184,24 @@ namespace MalbersAnimations.Controller
 
         public override Vector3 Speed_Direction()
         {
-            var NewInputDirection = animal.SlopeDirection;
+            var speedDir = animal.SlopeDirection;
 
             if (!IgnoreRotation) //Use the Slope Direction to move the state
             {
-                NewInputDirection = Quaternion.AngleAxis(RotationAngle * DeltaAngle, animal.Up) * NewInputDirection;
+                speedDir = Quaternion.AngleAxis(RotationAngle * DeltaAngle, animal.Up) * speedDir;
             }
 
-            return NewInputDirection;
+            if (speedDir == Vector3.zero)
+            {
+                KeepForwardMovement = false;
+                speedDir = animal.Forward * animal.RawInputAxis.z; //If there's no direction use the forward direction
+            }
+            else
+            {
+                KeepForwardMovement = true;
+            }
+
+            return speedDir;
         }
 
 
@@ -206,52 +236,51 @@ namespace MalbersAnimations.Controller
 
         public override void TryExitState(float DeltaTime)
         {
-            if (animal.SlopeDirectionAngle > ExitAngleSlope || !animal.MainRay)
+            if (!animal.InGroundChanger)
             {
-                animal.Grounded = false;
-                Debugging("[Allow Exit] Exit to Fall. Terrain Slope is too deep");
-                AllowExit(3, 0); //Exit to Fall!!!
+                if (!AutoSlope) AllowExit();
             }
-            //if we are on a ground changer
-            else if (animal.InGroundChanger)
+            else  //if we are on a ground changer
             {
-                if (!animal.GroundChanger.SlideData.Slide)
+                if (animal.SlopeDirectionAngle > ExitSlopeAngleFall || !animal.MainRay)
+                {
+                    animal.Grounded = false;
+                    Debugging("[Allow Exit] Exit to Fall. Terrain Slope is too deep");
+                    AllowExit(3, 0); //Exit to Fall!!!
+                }
+                else if (!animal.GroundChanger.SlideData.Slide)
                 {
                     Debugging("[Allow Exit] No longer in a Slide Ground Changer");
-                    //SetExitStatus(NoChangerStatus);
                     AllowExit();
+                }
+            }
+
+            //There's no an angle slope
+            if (/*animal.HorizontalSpeed < ExitSpeed && */animal.SlopeDirectionAngle <= MinSlopeAngle)
+            {
+                currentExitTime += DeltaTime;
+
+                if (currentExitTime > ExitWaitTime)
+                {
+                    Debugging("[Allow Exit] No longer in a slope angle");
+                    // SetExitStatus(ExitSpeedStatus);
+                    AllowExit();
+                    currentExitTime = 0;
                 }
             }
             else
             {
-                //There's no an angle slope
-                if (EnterAngleSlope > 0 && animal.SlopeDirectionAngle < EnterAngleSlope)
-                {
-                    currentExitTime += DeltaTime;
-
-                    if (currentExitTime > ExitWaitTime)
-                    {
-                        Debugging("[Allow Exit] No longer in a slope angle");
-                        // SetExitStatus(ExitSpeedStatus);
-                        AllowExit();
-                        currentExitTime = 0;
-                    }
-                }
-                else
-                {
-                    currentExitTime = 0;
-                }
+                currentExitTime = 0;
             }
 
-
-            //Exit when there no more speed in the 
-            if (animal.HorizontalSpeed <= ExitSpeed)
-            {
-                Debugging("[Allow Exit] Speed is Slow");
-                //SetExitStatus(ExitSpeedStatus);
-                AllowExit();
-                return;
-            }
+            ////Exit when there no more speed in the horizontal???
+            //if (animal.HorizontalSpeed <= ExitSpeed)
+            //{
+            //    Debugging("[Allow Exit] Speed is Slow");
+            //    //SetExitStatus(ExitSpeedStatus);
+            //    AllowExit();
+            //    return;
+            //}
         }
 
 

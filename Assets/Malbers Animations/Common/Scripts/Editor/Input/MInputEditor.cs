@@ -79,39 +79,50 @@ namespace MalbersAnimations
         {
             serializedObject.Update();
 
-            MalbersEditor.DrawDescription("Inputs to connect to components via UnityEvents");
+#if !ENABLE_LEGACY_INPUT_MANAGER
+            EditorGUILayout.HelpBox("Old Input System is Disabled. If you want to use this component. Go to Edit/Project Settings/Player/Active Input Handler = Use Both", MessageType.Error);
 
-            if (Application.isPlaying)
+            using (new EditorGUI.DisabledGroupScope(true))
             {
-                showOnPlayMode =
-                    GUILayout.Toggle(showOnPlayMode,
-                    new GUIContent("Show Buttons on Play Mode", "This makes the Inspector bit faster"), EditorStyles.miniButton);
-            }
+#endif
 
-            if (!Application.isPlaying || (showOnPlayMode && Application.isPlaying))
-            {
-                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                MalbersEditor.DrawDescription("Inputs to connect to components via UnityEvents");
+
+                if (Application.isPlaying)
                 {
-                    EditorGUILayout.PropertyField(IgnoreOnPause);
-                    EditorGUILayout.PropertyField(ResetOnFocusLost);
-                    EditorGUILayout.PropertyField(ResetAllInputsOnDisable);
-                    DrawRewired();
+                    showOnPlayMode =
+                        GUILayout.Toggle(showOnPlayMode,
+                        new GUIContent("Show Buttons on Play Mode", "This makes the Inspector bit faster"), EditorStyles.miniButton);
                 }
 
-                DrawList();
-
-
-                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                if (!Application.isPlaying || (showOnPlayMode && Application.isPlaying))
                 {
-                    showInputEvents.boolValue = MalbersEditor.Foldout(showInputEvents.boolValue, "Events");
-                    if (showInputEvents.boolValue)
+                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                     {
-                        EditorGUILayout.PropertyField(OnInputEnabled);
-                        EditorGUILayout.PropertyField(OnInputDisabled);
-                        EditorGUILayout.PropertyField(OnUsingGamePad);
+                        EditorGUILayout.PropertyField(IgnoreOnPause);
+                        EditorGUILayout.PropertyField(ResetOnFocusLost);
+                        EditorGUILayout.PropertyField(ResetAllInputsOnDisable);
+                        DrawRewired();
+                    }
+
+                    DrawList();
+
+
+                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                    {
+                        showInputEvents.boolValue = MalbersEditor.Foldout(showInputEvents.boolValue, "Events");
+                        if (showInputEvents.boolValue)
+                        {
+                            EditorGUILayout.PropertyField(OnInputEnabled);
+                            EditorGUILayout.PropertyField(OnInputDisabled);
+                            EditorGUILayout.PropertyField(OnUsingGamePad);
+                        }
                     }
                 }
+
+#if !ENABLE_LEGACY_INPUT_MANAGER
             }
+#endif
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -349,7 +360,6 @@ namespace MalbersAnimations
 
                 if (Element.isExpanded)
                 {
-
                     var active = Element.FindPropertyRelative("active");
                     var debug = Element.FindPropertyRelative("debug");
                     var OnInputChanged = Element.FindPropertyRelative("OnInputChanged");
@@ -388,11 +398,13 @@ namespace MalbersAnimations
                             EditorGUILayout.PropertyField(OnInputChanged);
                             break;
                         case InputButton.Up:
+                            EditorGUILayout.PropertyField(Element.FindPropertyRelative("InputUpFailed"));
                             EditorGUILayout.PropertyField(OnInputUp);
                             EditorGUILayout.PropertyField(OnInputChanged);
                             break;
                         case InputButton.LongPress:
                             EditorGUILayout.PropertyField(Element.FindPropertyRelative("LongPressTime"));
+                            EditorGUILayout.PropertyField(Element.FindPropertyRelative("LongPressDelay"));
                             EditorGUILayout.PropertyField(Element.FindPropertyRelative("SmoothDecrease"));
                             EditorGUILayout.Space();
                             EditorGUILayout.PropertyField(Element.FindPropertyRelative("OnLongPress"), new GUIContent("On Long Press Completed"));

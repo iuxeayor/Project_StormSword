@@ -5,11 +5,12 @@ using UnityEngine;
 
 namespace MalbersAnimations.Reactions
 {
-    [System.Serializable]
-    [AddTypeMenu("Malbers/Animal/Add Force to Animal")]
+    [System.Serializable, AddTypeMenu("Malbers/Animal/Add Force to Animal")]
 
     public class ForceReaction : MReaction
     {
+        public override string DynamicName => $"Animal Force [{Mode}] Dir{Direction.Value:F1}  Force[{force.Value}]  Acel[{Acceleration.Value}]  Time[{time.Value}] ";
+
         public enum DirectionType { Local, World, TargetPush, TargetPull }
 
         [Tooltip("Direction mode to be applied the force on the Animal. World, or Local")]
@@ -28,12 +29,14 @@ namespace MalbersAnimations.Reactions
         public FloatReference time = new(1f);
         [Tooltip("Amount of force to apply")]
         public FloatReference force = new(10f);
-        [Tooltip("Aceleration to apply to the force")]
-        public FloatReference Aceleration = new(2f);
+        [Tooltip("Acceleration to apply to the force")]
+        public FloatReference Acceleration = new(2f);
         [Tooltip("Drag to Decrease the Force after the Force time has pass")]
         public FloatReference ExitDrag = new(2f);
         [Tooltip("Set if the Animal is grounded when adding a force")]
         public BoolReference ResetGravity = new(false);
+
+        // public BoolReference UseGravity = new(false);
 
 
 
@@ -63,7 +66,8 @@ namespace MalbersAnimations.Reactions
             };
             dir.Normalize();
 
-            animal.Force_Add(dir, force, Aceleration, ResetGravity);
+            animal.Force_Add(dir, force, Acceleration, ResetGravity);
+            // animal.UseGravity = UseGravity;
 
             yield return new WaitForSeconds(time);
 

@@ -4,23 +4,22 @@ using UnityEngine;
 namespace MalbersAnimations.Controller
 {
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/main-components/manimal-controller/states/fall")]
+    [AddTypeMenu("Air/Fall")]
     public class Fall : State
     {
         //TODO: DO Fall Rotator
-
-        public override string StateName => "Fall";
+        // public override string StateName => "Fall";
         public override string StateIDName => "Fall";
         public enum FallBlending { DistanceNormalized, Distance, VerticalVelocity }
 
         /// <summary>Air Resistance while falling</summary>
-        [Header("Fall Parameters")]
         [Tooltip("Can the Animal be controller while falling?")]
         public BoolReference AirControl = new(true);
         [Tooltip("Rotation while falling")]
         public FloatReference AirRotation = new(10);
         [Tooltip("Maximum Movement while falling")]
         public FloatReference AirMovement = new(0);
-        [Tooltip("Lerp value for the Air Movement adjusment")]
+        [Tooltip("Lerp value for the Air Movement adjustment")]
         public FloatReference AirSmooth = new(2);
 
         [Space]
@@ -40,7 +39,7 @@ namespace MalbersAnimations.Controller
         [Tooltip("Multiplier for the Fall Ray Length. The Default Value is the Animal's Height")]
         public FloatReference lengthMultiplier = new(1f);
 
-        [Tooltip("RayHits Allowed on the Raycast NonAloc (Try Fall Logic)")]
+        [Tooltip("RayHits Allowed on the Raycast NonAlloc (Try Fall Logic)")]
         public IntReference rayHits = new(6);
 
         [Space, Tooltip("State Float Value in the animator. This is used to blend between different Fall Animations")]
@@ -53,10 +52,10 @@ namespace MalbersAnimations.Controller
         [Space, Header("Fall Damage")]
         public StatID AffectStat;
 
-        [Tooltip("Minimum Distance to Apply Fall Damage, If the distance falled is lesser than this value, no damage will be applied")]
+        [Tooltip("Minimum Distance to Apply Fall Damage, If the fall distance is lesser than this value, no damage will be applied")]
         public FloatReference FallMinDistance = new(5f);
 
-        [Tooltip("Maximum Distance to Apply Fall Damage, If the distance falled is greater  than this value,the animal will die")]
+        [Tooltip("Maximum Distance to Apply Fall Damage, If the fall distance is greater  than this value,the animal will die")]
         public FloatReference FallMaxDistance = new(15f);
 
         [Tooltip("The Fall State will set the Exit State Status Depending the Fall Distance (X: Distance Y:Exit Status Value)")]
@@ -70,10 +69,10 @@ namespace MalbersAnimations.Controller
 
         [Tooltip("When Falling, the animal may get stuck falling. The animal will be force to move forward.")]
         public FloatReference PushForward = new(2);
-        /// <summary>Stores the max heigth before going Down</summary>
+        /// <summary>Stores the max height before going Down</summary>
         public float MaxHeight { get; set; }
 
-        /// <summary>Acumulated Fall Distance</summary>
+        /// <summary>Accumulated Fall Distance</summary>
         public float FallCurrentDistance { get; set; }
 
         protected Vector3 fall_Point;
@@ -92,6 +91,9 @@ namespace MalbersAnimations.Controller
         //public bool Has_UP_Impulse { get; private set; }
 
         private MSpeed FallSpeed = MSpeed.Default;
+
+        ///// <summary>  UpIntertia at the moment of the fall Activation </summary>
+        //public Vector3 UpIntertia { get; private set; }
 
         public Vector3 FallPoint { get; private set; }
 
@@ -114,14 +116,17 @@ namespace MalbersAnimations.Controller
             var fall_Pivot = animal.Main_Pivot_Point + (Offset * ScaleFactor * animal.Forward) +
                 (MoveMultiplier * ScaleFactor * SprintMultiplier * animal.Forward); //Calculate ahead the falling ray
 
-            fall_Pivot += animal.DeltaPos; //Check for the Next Frame
+            //fall_Pivot += animal.DeltaPos; //Check for the Next Frame (Does not work now with
 
+
+            //Check Front 
             if (CheckFrontObstacle && MoveMultiplier > 0)
             {
                 if (GizmoDebug)
-                    MDebug.DrawLine(animal.Main_Pivot_Point, fall_Pivot, Color.magenta);
-
-                if (Physics.Linecast(animal.Main_Pivot_Point, fall_Pivot, GroundLayer, IgnoreTrigger)) return false;
+                {
+                    MDebug.DrawLine(fall_Pivot, fall_Pivot, Color.magenta);
+                }
+                if (Physics.Linecast(fall_Pivot, fall_Pivot, GroundLayer, IgnoreTrigger)) return false;
             }
 
 
@@ -135,15 +140,26 @@ namespace MalbersAnimations.Controller
             var Direction = Gravity;
             // var Direction =   -transform.up;
 
+            //if (!animal.FrontRay && !animal.MainRay)
+            //{
+            //    Debugging($"[Try Failed] Missing Rays FrontRay: {animal.FrontRay} MainRay: {animal.MainRay}");
+            //    return true; //Rare case when the animal is not grounded but fall ray is playing (BUG CAUSING OTHER ISSUES)
+            //}
+
             var Radius = animal.RayCastRadius * ScaleFactor;
             Hits = Physics.SphereCastNonAlloc(fall_Pivot, Radius, Direction, FallHits, Multiplier, GroundLayer, IgnoreTrigger);
 
             if (GizmoDebug)
             {
-                MDebug.DrawRay(fall_Pivot, Direction * Multiplier, Color.black);
-                MDebug.DrawRay(fall_Pivot, Direction * Multiplier, Color.magenta);
+                var Dir = Direction * Multiplier;
+                MDebug.DrawRay(fall_Pivot, Dir, Color.black);
+                MDebug.DrawRay(fall_Pivot, Dir, Color.magenta);
                 MDebug.DrawRay(FallRayCast.point, 0.2f * ScaleFactor * FallRayCast.normal, Color.magenta);
+                // MDebug.DrawWireSphere(fall_Pivot + Dir - (Dir.normalized * Radius), Color.magenta, Radius);
+                MDebug.DrawCapsule(fall_Pivot, fall_Pivot + Dir - (Dir * Radius), Radius, Color.magenta);
             }
+
+            // Debugging($"[Try] Hits {Hits} - Direction {Direction} - Multiplier {Multiplier} - Radius {Radius}");
 
             if (Hits > 0)
             {
@@ -187,12 +203,11 @@ namespace MalbersAnimations.Controller
 
                     if (Height >= DistanceToGround) //If the distance to ground is very small means that we are very close to the ground
                     {
-
                         if (animal.ExternalForce != Vector3.zero) return true; //Hack for external forces
 
-                        Debugging($"[Try Failed] Distance to the ground is very small means that we are very close to the ground. CHECK IF GROUNDED");
-                        animal.CheckIfGrounded();//means whe are very close to the ground!! so check if we are grounded
+                        var isGrounded = animal.CheckIfGrounded();//means whe are very close to the ground!! so check if we are grounded
 
+                        Debugging($"[Try Failed] Distance to the ground is very small. Checking if we are grounded [{isGrounded}]");
                         if (animal.Grounded)
                         {
                             animal.Grounded = true; //Force Grounded
@@ -217,7 +232,9 @@ namespace MalbersAnimations.Controller
             }
             else
             {
+                // MDebug.DrawWireSphere(fall_Pivot, 0.2f, Color.magenta, 2f);
                 Debugging($"[Try] There's no Ground beneath the Animal");
+                // Debug.Break();
                 return true;
             }
 
@@ -227,7 +244,7 @@ namespace MalbersAnimations.Controller
 
         public override void Activate()
         {
-            KeepForwardFall = !AirControl.Value;
+            KeepForwardMovement = !AirControl.Value;
 
             //  if (!animal.ActiveState.KeepForwardMovement) AirControlFrom = false; //Inherit the Air Control from the last s
 
@@ -239,31 +256,29 @@ namespace MalbersAnimations.Controller
 
             // Debug.Log($"StartingSpeedDirection: {StartingSpeedDirection}");
 
-            if (animal.LastState.ID == StateEnum.Jump)
+            if (animal.LastState.ID == StateEnum.Jump || animal.LastState.ID.ID <= 2)
             {
                 StartingSpeedDirection = animal.HorizontalVelocity; //Clean from JUMP
-                KeepForwardFall = animal.LastState.KeepForwardMovement;
+                KeepForwardMovement = animal.LastState.KeepForwardMovement;
             }
-
 
             ResetStateValues();
             Fall_Float = animal.State_Float;
+            // animal.UpInertia_Store();
         }
 
         // public override bool KeepForwardMovement => true;
 
-        private bool KeepForwardFall;
+        // private bool KeepForwardFall;
 
         public override void EnterCoreAnimation()
         {
-            SetEnterStatus(0);
 
+            SetEnterStatus(0);
             IgnoreLowerStates = false;
 
+            var Speed = animal.HorizontalSpeed / ScaleFactor;                       //Remove the scaleFactor since it will be added later 
 
-            var Speed = animal.HorizontalSpeed / ScaleFactor; //Remove the scaleFactor since it will be added later 
-
-            //  Debug.Log($"Speed FALL: {Speed}");
 
             if (animal.HasExternalForce)
             {
@@ -287,23 +302,38 @@ namespace MalbersAnimations.Controller
                 rotation = AirRotation.Value,
                 lerpPosition = AirSmooth.Value,
                 lerpStrafe = AirSmooth.Value,
+                lerpAnimator = 8
             };
 
 
+
+            animal.SetCustomSpeed(FallSpeed, false);
+
+            CanExit = true; //FORCE CAN EXIT IF WE ARE ALREADY ON THE ANIMATION Is this working or not???
             //if (!animal.MovementDetected)
             //{
             //    animal.SetCustomSpeed(FallSpeed, true);                  
             //    animal.ResetDeltaRootMotion();
             //}
             //else
-            {
-                animal.SetCustomSpeed(FallSpeed, false);                     //Set the Current Speed to the Jump Speed Modifier
-            }
+            //{
+            //    animal.SetCustomSpeed(FallSpeed, false);                     //Set the Current Speed to the Jump Speed Modifier
+            //}
 
             //Disable the Gravity if we are on an external Force (Wind, Spring) //IMPORTANT
             if (animal.HasExternalForce && animal.InZone) animal.UseGravity = false;
 
-            CanExit = true; // FORCE CAN EXIT IF WE ARE ALREADY ON THE ANIMATION Is this working or not???
+            //  Debug.Log("ENTERING CORE ANIMATION");
+
+            //Set the Target Speed to the Horizontal Velocity (coming from RootMotion Like Jump RootMotion or FallFrom Ledge)
+            if (animal.TargetSpeed == Vector3.zero)
+            {
+                animal.DeltaRootMotion = Vector3.zero;      //Reset the Delta Root Motion
+
+                animal.UpInertia_Store();                   //Store the UpInertia at the moment of the Fall Activation
+
+                if (animal.defaultPlatform == null) animal.ResetInertiaSpeed(animal.HorizontalVelocity * animal.DeltaTime);
+            }
         }
 
         public override Vector3 Speed_Direction()
@@ -311,7 +341,7 @@ namespace MalbersAnimations.Controller
             if (GizmoDebug)
                 MDebug.Draw_Arrow(transform.position, StartingSpeedDirection, Color.magenta);
 
-            if (!KeepForwardFall)
+            if (!KeepForwardMovement)
             {
                 return (base.Speed_Direction());
             }
@@ -320,7 +350,6 @@ namespace MalbersAnimations.Controller
                 return StartingSpeedDirection;
             }
         }
-
 
         Vector3 StartingSpeedDirection;
         private Stats animalStats;
@@ -331,13 +360,14 @@ namespace MalbersAnimations.Controller
             {
                 if (animal.InZone && animal.HasExternalForce) animal.GravityTime = 0; //Reset the gravity when the animal is on a Force Zone.
 
-                if (!KeepForwardFall && AirMovement > 0 && AirMovement > CurrentSpeedPos)
+                if (!KeepForwardMovement && AirMovement > 0 && AirMovement > CurrentSpeedPos)
                 {
                     if (!animal.ExternalForceAirControl) return;
 
                     CurrentSpeedPos = Mathf.Lerp(CurrentSpeedPos, AirMovement, (AirSmooth != 0 ? (deltaTime * AirSmooth) : 1));
                 }
-                // if (!CanExit) TryExitState(deltaTime);
+                ////Keep the Up Momentum
+                animal.UpInertia_Apply();
             }
         }
 
@@ -352,7 +382,7 @@ namespace MalbersAnimations.Controller
             //  var Gravity = this.Gravity;
             // var Gravity = animal.DeepSlope ? this.Gravity :  -animal.Up;
 
-            FallPoint += animal.DeltaPos; //Check for the Next Frame
+            //  FallPoint += animal.AdditivePosition; //Check for the with the additive position.. IMPORTANT
             //FallPoint = animal.Main_Pivot_Point;
 
 
@@ -369,7 +399,7 @@ namespace MalbersAnimations.Controller
             if (GizmoDebug)
             {
                 MDebug.DrawWireSphere(FallPoint, Color.magenta, Radius);
-                MDebug.DrawWireSphere(FallPoint + Gravity * Height, (Color.red + Color.blue) / 2, Radius);
+                MDebug.DrawWireSphere(FallPoint + Gravity * Height, Color.white, Radius);
                 Debug.DrawRay(FallPoint, Gravity * 100f, Color.magenta);
             }
 
@@ -385,8 +415,8 @@ namespace MalbersAnimations.Controller
 
                 if (GizmoDebug)
                 {
-                    MDebug.DrawWireSphere(FallRayCast.point, (Color.blue + Color.red) / 2, Radius);
-                    MDebug.DrawWireSphere(FallPoint, (Color.red), Radius);
+                    // MDebug.DrawWireSphere(FallRayCast.point, (Color.blue + Color.red) / 2, Radius);
+                    MDebug.DrawWireSphere(FallPoint, (Color.magenta), Radius);
                 }
 
                 switch (BlendFall)
@@ -417,7 +447,7 @@ namespace MalbersAnimations.Controller
                         break;
                     case FallBlending.VerticalVelocity:
                         var UpInertia = Vector3.Project(animal.DeltaPos, animal.UpVector).magnitude;   //Clean the Vector from Forward and Horizontal Influence    
-                        animal.State_SetFloat(UpInertia / animal.DeltaTime * (GoingDown ? 1 : -1));
+                        animal.State_SetFloat(UpInertia / DeltaTime * (GoingDown ? 1 : -1));
                         break;
                     default:
                         break;
@@ -498,7 +528,7 @@ namespace MalbersAnimations.Controller
             {
                 //Debug.Log("GoinDown");
 
-                var RBOldDown = Vector3.Project(animal.RB.velocity, Gravity);
+                var RBOldDown = Vector3.Project(animal.RB.linearVelocity, Gravity);
                 var RBNewDown = Vector3.Project(animal.DesiredRBVelocity, Gravity);
                 var NewDMagn = RBNewDown.magnitude;
                 var Old_DMagn = RBOldDown.magnitude;
@@ -536,7 +566,7 @@ namespace MalbersAnimations.Controller
             //}
         }
 
-        /// <summary> This is for cleaning the Ribidbody with unnecesary velocity </summary>
+        /// <summary> This is for cleaning the Rigid body with unnecessary velocity </summary>
         private int ResetCount;
 
         public override void ResetStateValues()
@@ -551,6 +581,8 @@ namespace MalbersAnimations.Controller
             MaxHeight = float.NegativeInfinity; //Resets MaxHeight
             FallCurrentDistance = 0;
             Fall_Float = 0; //IMPORTANT
+
+            // UpIntertia = Vector3.zero;
         }
 
 

@@ -8,8 +8,6 @@ using UnityEngine.Events;
 using System;
 using MalbersAnimations.Events;
 
-
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -39,7 +37,7 @@ namespace MalbersAnimations.PathCreation
 
         [Tooltip("Radius to check if the Character can Enter this path")]
         [Min(0)] public float SearchRadius = 0.5f;
-        [Tooltip("Orient Smothness per path")]
+        [Tooltip("Orient Smoothness per path")]
         [Min(0)] public float OrientSmoothness = 1f;
 
         [Tooltip("Offset of the Radius on the Path")]
@@ -116,38 +114,29 @@ namespace MalbersAnimations.PathCreation
         public bool IsClosed => Path.IsClosed;
 
         [Tooltip("Adds a reaction to the Animal entering the Path")]
-        [SerializeReference, SubclassSelector]
+        [SerializeReference]
         public Reaction EnterReaction;
 
         [Tooltip("Adds a reaction to the Animal exiting the Path")]
-        [SerializeReference, SubclassSelector]
-        public Reaction ExitReaction;
-
-
+        [SerializeReference] public Reaction ExitReaction;
 
         [Tooltip("Adds a reaction to the Animal entering the path from the Start point of the Path")]
-        [SerializeReference, SubclassSelector]
-        public Reaction EnterFromStart;
+        [SerializeReference] public Reaction EnterFromStart;
 
         [Tooltip("Adds a reaction to the Animal entering the path from the End point of the Path")]
-        [SerializeReference, SubclassSelector]
-        public Reaction EnterFromEnd;
+        [SerializeReference] public Reaction EnterFromEnd;
 
         [Tooltip("Adds a reaction to the Animal entering the path from the middle of the Path")]
-        [SerializeReference, SubclassSelector]
-        public Reaction EnterFromMiddle;
+        [SerializeReference] public Reaction EnterFromMiddle;
 
         [Tooltip("Adds a reaction to the Animal exiting the path from the start of the Path")]
-        [SerializeReference, SubclassSelector]
-        public Reaction ExitFromStart;
+        [SerializeReference] public Reaction ExitFromStart;
 
         [Tooltip("Adds a reaction to the Animal exiting the path from the End of the Path")]
-        [SerializeReference, SubclassSelector]
-        public Reaction ExitFromEnd;
+        [SerializeReference] public Reaction ExitFromEnd;
 
         [Tooltip("Adds a reaction to the Animal exiting the path from the Middle of the Path")]
-        [SerializeReference, SubclassSelector]
-        public Reaction ExitFromMiddle;
+        [SerializeReference] public Reaction ExitFromMiddle;
 
         [Tooltip("Stores the Current Path Position of the Character in a Transform")]
         public TransformReference PathPosition = new();
@@ -174,7 +163,7 @@ namespace MalbersAnimations.PathCreation
 
 
         // [HideInInspector]
-        public HashSet<MPathConstraint> ActivePathContraints = new();
+        public HashSet<MPathConstraint> ActivePathConstraints = new();
 
         public bool debug;
 
@@ -189,12 +178,12 @@ namespace MalbersAnimations.PathCreation
         {
             if (BoundsProxy == null && PathBounds != null)
             {
-                if (!PathBounds.TryGetComponent(out BoundsProxy)) 
+                if (!PathBounds.TryGetComponent(out BoundsProxy))
                     BoundsProxy = PathBounds.gameObject.AddComponent<TriggerProxy>();
             }
-             
+
             BoundsProxy.Layer = Layer;
-            PathBounds.isTrigger = true;
+            if (PathBounds) PathBounds.isTrigger = true;
         }
 
         /// <summary>  List to access all the Paths </summary>
@@ -205,9 +194,11 @@ namespace MalbersAnimations.PathCreation
             Paths ??= new List<MPath>();
             Paths.Add(this);
 
-            BoundsProxy?.OnGameObjectEnter.AddListener(_OnBoundsTriggerEnter);
-            BoundsProxy?.OnGameObjectExit.AddListener(_OnBoundsTriggerExit);
-            
+            if (BoundsProxy)
+            {
+                BoundsProxy.OnGameObjectEnter.AddListener(_OnBoundsTriggerEnter);
+                BoundsProxy.OnGameObjectExit.AddListener(_OnBoundsTriggerExit);
+            }
             if (!TryGetComponent(out Path))
             {
                 Debugging("Path Not found. Disable All");
@@ -219,8 +210,11 @@ namespace MalbersAnimations.PathCreation
 
         private void OnDisable()
         {
-            BoundsProxy?.OnGameObjectEnter.RemoveListener(_OnBoundsTriggerEnter);
-            BoundsProxy?.OnGameObjectExit.RemoveListener(_OnBoundsTriggerExit);
+            if (BoundsProxy)
+            {
+                BoundsProxy.OnGameObjectEnter.RemoveListener(_OnBoundsTriggerEnter);
+                BoundsProxy.OnGameObjectExit.RemoveListener(_OnBoundsTriggerExit);
+            }
 
             Paths?.Remove(this);
         }
@@ -233,11 +227,11 @@ namespace MalbersAnimations.PathCreation
 
             if (constraint)
             {
-                ActivePathContraints.Add(constraint);
+                ActivePathConstraints.Add(constraint);
 
                 OnEnterBounds.Invoke(constraint);
 
-                Debugging($"{name}.Constraint Detected: {constraint.name}");
+                Debugging($"[{name}] Path Detected: {constraint.name}");
 
                 if (I_CheckInBounds == null)
                 {
@@ -255,12 +249,12 @@ namespace MalbersAnimations.PathCreation
             {
                 // Debug.Log($"{name}.OnBoundsExit [{gameObject.name}]");
 
-                ActivePathContraints.Remove(constraint);
+                ActivePathConstraints.Remove(constraint);
                 OnExitBounds.Invoke(constraint);
 
-                Debugging($"{name}.Constraint Removed: {constraint.name}");
+                Debugging($"[{name}] Path Removed: {constraint.name}");
 
-                if (ActivePathContraints.Count == 0)
+                if (ActivePathConstraints.Count == 0)
                 {
                     if (I_CheckInBounds != null)
                     {
@@ -277,7 +271,7 @@ namespace MalbersAnimations.PathCreation
         {
             var WaitTime = new WaitForSeconds(interval);
 
-            while (ActivePathContraints.Count > 0)
+            while (ActivePathConstraints.Count > 0)
             {
                 InBounds();
                 yield return WaitTime;
@@ -318,9 +312,13 @@ namespace MalbersAnimations.PathCreation
 
         internal void CalculateBounds()
         {
+            if (Application.isPlaying) return;
             OnValidate();
 
-            if (Path == null) return;
+
+            Debug.Log("CalculateBounds");
+
+            if (Path == null || PathBounds == null) return;
             Bounds bounds = Path.bounds;
 
             bounds.Expand(2f);
@@ -334,7 +332,7 @@ namespace MalbersAnimations.PathCreation
         /// <summary>  Checks if the characters can enter a path </summary>
         public virtual bool InBounds()
         {
-            foreach (var item in ActivePathContraints)
+            foreach (var item in ActivePathConstraints)
             {
                 if (item.Path == this) continue;        //Meaning the Path Constraint has already this path as the active one, so skip!
 
@@ -652,6 +650,7 @@ namespace MalbersAnimations.PathCreation
             using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 PathBounds.isExpanded = MalbersEditor.Foldout(PathBounds.isExpanded, "Trigger Bounds");
+
                 if (PathBounds.isExpanded)
                 {
                     using (new GUILayout.HorizontalScope())
@@ -677,7 +676,7 @@ namespace MalbersAnimations.PathCreation
                 {
                     using (new EditorGUI.DisabledGroupScope(true))
                     {
-                        foreach (var item in M.ActivePathContraints)
+                        foreach (var item in M.ActivePathConstraints)
                         {
                             EditorGUILayout.ObjectField(item, typeof(MPathConstraint), false);
                         }

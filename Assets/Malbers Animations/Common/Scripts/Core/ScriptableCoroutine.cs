@@ -14,19 +14,20 @@ namespace MalbersAnimations
 
         internal void StartCoroutine(Component component, IEnumerator ICoroutine)
         {
-            if (Coroutine == null) Coroutine = new Dictionary<Component, IEnumerator>();
+            Coroutine ??= new Dictionary<Component, IEnumerator>();
 
-            //if (Interrupt && Coroutine.ContainsKey(component))
-            //{
-            //    ExitValue(component);
-            //    Stop(component);
-            //}
 
-            if (!Coroutine.ContainsKey(component)) //Play the coroutine in case the component is tryin to do the coroutine is not playing any other coroutine
+            if (Coroutine.TryGetValue(component, out var coro)) //Interrupt
             {
+                MScriptableCoroutine.Stop_Coroutine(coro);
+                MScriptableCoroutine.PlayCoroutine(this, ICoroutine);
+            }
+            else
+            {
+                //Play the coroutine in case the component is tryin to do the coroutine is not playing any other coroutine
                 Coroutine.Add(component, ICoroutine);
                 MScriptableCoroutine.PlayCoroutine(this, ICoroutine);
-               // Debug.Log($"Coroutine Started: [{component.name}]");
+                // Debug.Log($"Coroutine Started: [{component.name}]");
             }
         }
 
@@ -39,12 +40,11 @@ namespace MalbersAnimations
             if (Coroutine.TryGetValue(component, out IEnumerator CurrentCoro))
             {
                 MScriptableCoroutine.Stop_Coroutine(CurrentCoro);
-
                 Coroutine.Remove(component); //Remove the Coroutine since its already Finished
-              //  Debug.Log($"Coroutine Stopped {component.name}");
+
+                //Debug.Log($"Coroutine Stopped {component.name}");
             }
         }
-
         internal abstract void Evaluate(MonoBehaviour mono, Transform target, float time, AnimationCurve curve);
 
         internal virtual void CleanCoroutine()
@@ -55,7 +55,6 @@ namespace MalbersAnimations
 
             Coroutine = null;
         }
-
-        internal virtual void ExitValue(Component compoennt) { }
+        internal virtual void ExitValue(Component component) { }
     }
 }

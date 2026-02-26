@@ -1,14 +1,41 @@
-﻿ 
+﻿
 using System;
 using UnityEngine;
 
 namespace MalbersAnimations.Reactions
 {
     [System.Serializable]
-    [AddTypeMenu("Unity/Rigidbody/Properties")]
+    [AddTypeMenu("Unity/Rigidbody/RigidBody Properties")]
     public class RigidBodyReaction : Reaction
     {
-        public enum RB_Reaction { IsKinematic, UseGravity, Drag,AngularDrag, Constraints, Collisions}
+        public override string DynamicName
+        {
+            get
+            {
+                var display = $"Rigidbody [{action}]"; //Name of the Reaction
+                switch (action)
+                {
+                    case RB_Reaction.IsKinematic:
+                    case RB_Reaction.UseGravity:
+                        display += $" [{m_value}]";
+                        break;
+                    case RB_Reaction.Drag:
+                    case RB_Reaction.AngularDrag:
+                        display += $" [{value}]";
+                        break;
+                    case RB_Reaction.Constraints:
+                        display += $" [{_value}]";
+                        break;
+                    case RB_Reaction.Collisions:
+                        display += $" [{CollisionDetection}]";
+                        break;
+                }
+                return display;
+            }
+        }
+
+
+        public enum RB_Reaction { IsKinematic, UseGravity, Drag, AngularDrag, Constraints, Collisions }
 
         public override Type ReactionType => typeof(Rigidbody);
 
@@ -39,10 +66,10 @@ namespace MalbersAnimations.Reactions
                     rb.useGravity = m_value;
                     break;
                 case RB_Reaction.Drag:
-                    rb.drag = value;
+                    rb.linearDamping = value;
                     break;
                 case RB_Reaction.AngularDrag:
-                    rb.angularDrag = value;
+                    rb.angularDamping = value;
                     break;
                 case RB_Reaction.Constraints:
                     rb.constraints = _value;

@@ -1,12 +1,14 @@
 ﻿using MalbersAnimations.Events;
 using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
+
 
 
 #if UNITY_EDITOR
+using UnityEditor;
 #endif
 
 namespace MalbersAnimations
@@ -17,16 +19,19 @@ namespace MalbersAnimations
     /// So when an AI Animal sets a gameObject holding this script  as a target, 
     /// it can have a stopping distance and it can stop on a properly distance.
     /// </summary>
-    [AddComponentMenu("Malbers/AI/AI Target")]
-    [SelectionBase]
+    [AddComponentMenu("Malbers/AI/AI Target"), SelectionBase]
     public class AITarget : MonoBehaviour, IAITargeterTarget, IAITarget
     {
         public WayPointType pointType = WayPointType.Ground;
 
         public ICharacterAction character;
 
+        [Tooltip("Default Height for the Waypoints")]
+        [SerializeField][Min(0)] private float m_height = 1.5f;
+
         [Tooltip("Distance for AI driven animals to stop when arriving to this gameobject. When is set as the AI Target.")]
-        [Min(0)] public float stoppingDistance = 1f;
+        [FormerlySerializedAs("stoppingDistance")]
+        [Min(0)] public float radius = 1f;
 
         [Tooltip("Distance for AI driven animals to start slowing its speed when arriving to this gameobject. If its set to zero or lesser than the Stopping distance, the Slowing Movement Logic will be ignored")]
         [Min(0)] public float slowingDistance = 0;
@@ -34,8 +39,7 @@ namespace MalbersAnimations
         [Tooltip("Offset to correct the Position of the Target")]
         [SerializeField] private Vector3 center;
 
-        [Tooltip("Default Height for the Waypoints")]
-        [SerializeField] private float m_height = 0.5f;
+
 
         [Tooltip(" When the AI  arrives to this target, The character will rotate in place to  looks at the center of the AI Target?")]
         [SerializeField] private bool m_arriveLookAt = true;
@@ -43,14 +47,14 @@ namespace MalbersAnimations
         [Min(0), Tooltip("How many AI character can target this gameObject at the same time. Zero means infinite targets")]
         public int m_TargetLimit = 0;
 
-        [Tooltip("Distance for AI driven animals to stop when arriving to this gameobject. When is set as the AI Target.")]
-        [Hide(nameof(m_TargetLimit), true)]
-        [Min(0)] public float m_targeterStopDistance = 0.2f;
+        //[Tooltip("Distance for AI driven animals to stop when arriving to this gameobject. When is set as the AI Target.")]
+        //[Hide(nameof(m_TargetLimit), true)]
+        //[Min(0)] public float m_targeterStopDistance = 0.2f;
 
         [Hide(nameof(m_TargetLimit), true)]
-        [Tooltip("Distance the AI has to wait if all the spots on this Target are ocupied")]
+        [Tooltip("Distance the AI has to wait if all the spots on this Target are occupied")]
         [Min(0)] public float m_WaitTargeterDistance = 4f;
-        public float TargeterStopDistance { get => m_targeterStopDistance; set => m_targeterStopDistance = value; }
+        // public float TargeterStopDistance { get => m_targeterStopDistance; set => m_targeterStopDistance = value; }
 
         public int Targeters// { get; set; }
         {
@@ -62,10 +66,13 @@ namespace MalbersAnimations
                 //Debug.Log($"Targeters {value}");
             }
         }
+        public int TargetsLimits
+        {
+            get => m_TargetLimit;
+            set => m_TargetLimit = value;
+        }
 
-        /// <summary>
-        /// The AI TARGET HAS ALL THE TARGETERs Occupied
-        /// </summary>
+        /// <summary> The AI TARGET HAS ALL THE TARGETERs Occupied  </summary>
         public bool FullTargeters { get; set; }
 
         private int targeters;
@@ -78,12 +85,12 @@ namespace MalbersAnimations
         public float Height => m_height * transform.localScale.y;
 
         //Event to listen when the Target Type of waypoint has changed
-        public System.Action<WayPointType> TargetTypeChanged { get; set; } = delegate { };
+        public System.Action<WayPointType> TargetTypeChanged { get; set; }
 
         /// <summary>There's a new AI using this target so Refresh </summary>
         public UnityEvent TargetersRefresh { get; set; }
 
-
+        public Color gizmoColor = new Color(1f, 0f, 0f, 0.4f);
         public WayPointType TargetType
         {
             set
@@ -91,7 +98,7 @@ namespace MalbersAnimations
                 if (pointType != value)
                 {
                     pointType = value;
-                    TargetTypeChanged.Invoke(value);
+                    TargetTypeChanged?.Invoke(value);
                 }
             }
             get
@@ -116,13 +123,13 @@ namespace MalbersAnimations
             get => m_WaitTargeterDistance + StopDistance();
         }
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             character = this.FindInterface<ICharacterAction>();
 
-            if (m_TargetLimit > 0)
+            if (TargetsLimits > 0)
             {
-                TargetersObjects = new IAIControl[m_TargetLimit]; //Set the Limit on the Targeter Objects
+                TargetersObjects = new IAIControl[TargetsLimits]; //Set the Limit on the Targeter Objects
                 TargetersWaiting = new(); //Set the Waiting Objects
             }
 
@@ -130,8 +137,6 @@ namespace MalbersAnimations
 
             TargetersRefresh ??= new();
         }
-
-
 
         private void OnDisable()
         {
@@ -173,18 +178,18 @@ namespace MalbersAnimations
         /// <summary>Get the center of the AI Target plus the Height value</summary>
         public virtual Vector3 GetCenterY() => Center + (transform.up * Height);
 
-        public float StopDistance() => stoppingDistance * transform.localScale.y; //IMPORTANT For Scaled objects like the ball
+        public float StopDistance() => radius * transform.localScale.y; //IMPORTANT For Scaled objects like the ball
         public float SlowDistance() => slowingDistance * transform.localScale.y; //IMPORTANT For Scaled objects like the ball
 
 
         public virtual void AddTargeter(IAIControl targeter)
         {
-            if (m_TargetLimit == 0) return;
+            if (TargetsLimits == 0) return;
 
             bool FoundSpace = false;
 
             //Find the first space 
-            for (int i = 0; i < m_TargetLimit; i++)
+            for (int i = 0; i < TargetsLimits; i++)
             {
                 if (TargetersObjects[i] == targeter) //We have found ourselves so skip everything Do not do anything if we are already here
                 {
@@ -201,21 +206,20 @@ namespace MalbersAnimations
                 }
             }
 
-            //Meaning all spaces were ocupied
-            if (!FoundSpace)
+            //Meaning all spaces were occupied
+            if (!FoundSpace && !TargetersWaiting.Contains(targeter))
             {
                 TargetersWaiting.Add(targeter); //Add the waiting Target to the wait list
-                targeter.Index = Targeters + TargetersWaiting.Count - 1; //Set Index to the wating ones
+                targeter.IsWaitingOnTarget = true;
+                targeter.Index = Targeters + TargetersWaiting.Count - 1; //Set Index to the waiting ones
             }
 
-            TargetersRefresh.Invoke(); //BroadCast that the Ammount of targeters has changed
+            TargetersRefresh.Invoke(); //BroadCast that the Amount of targeters has changed
         }
-
-
 
         public virtual void RemoveTargeter(IAIControl targeter)
         {
-            if (m_TargetLimit == 0) return;
+            if (TargetsLimits == 0) return;
 
             int index = Array.IndexOf(TargetersObjects, targeter); //Find if the target was added
 
@@ -228,8 +232,9 @@ namespace MalbersAnimations
                 {
                     TargetersObjects[index] = TargetersWaiting[0];
                     TargetersObjects[index].Index = index;
+
+                    TargetersWaiting[0].IsWaitingOnTarget = false;
                     TargetersWaiting.RemoveAt(0);
-                    //Targeters++;
                 }
                 else
                 {
@@ -244,27 +249,26 @@ namespace MalbersAnimations
                 //The Targeter was on the Wait list so remove it because it went to another Target
                 if (TargetersWaiting.Contains(targeter))
                 {
+                    targeter.IsWaitingOnTarget = false;
                     TargetersWaiting.Remove(targeter);
                 }
             }
 
-            TargetersRefresh.Invoke(); //BroadCast that the Ammount of targeters has changed
+            TargetersRefresh.Invoke(); //BroadCast that the Amount of targeters has changed
         }
 
         /// <summary>  Calculates the position of the Targeter by its index </summary>
         /// <param name="index"></param>
         private Vector3 TargeterPosition(int index)
         {
-            if (m_TargetLimit == 0 || Targeters == 1) return Center;
+            if (TargetsLimits == 0 || Targeters == 1) return Center;
 
-            if (index > m_TargetLimit - 1) return Center; //Skip for all the other targeters that are ouside the limit
+            if (index > TargetsLimits - 1) return Center; //Skip for all the other targeters that are outside the limit
 
-            var total = Mathf.Min(Targeters, m_TargetLimit);
+            var total = Mathf.Min(Targeters, TargetsLimits);
 
             float arcDegree = 360.0f / total;
             var rot = arcDegree * index;
-
-            //Debug.Log($"total: {total} ..  arcDegree: {arcDegree} ");
 
             if (float.IsNaN(rot) || float.IsInfinity(rot)) rot = 0; //Weird bug
 
@@ -281,30 +285,40 @@ namespace MalbersAnimations
 
         public bool TargeterIsWaiting(int index)
         {
-            if (m_TargetLimit == 0) { return true; }
-            return (index > m_TargetLimit - 1);
+            if (TargetsLimits == 0) { return false; }
+            return (index > TargetsLimits - 1);
         }
 
         public float GetTargeterStoppingDistance(int index)
         {
+            if (TargetsLimits == 0 || Targeters == 1) return StopDistance();
+
             //Sent the Wait Target Distance for the Outside waiting ones
-            return index > m_TargetLimit - 1 ? WaitTargeterDistance : TargeterStopDistance;
+            return index > TargetsLimits - 1 ? WaitTargeterDistance : StopDistance();
         }
-
-
         public void SetGrounded() => TargetType = WayPointType.Ground;
         public void SetAir() => TargetType = WayPointType.Air;
         public void SetWater() => TargetType = WayPointType.Water;
 
 
 #if UNITY_EDITOR && MALBERS_DEBUG
+
+        private void OnDrawGizmos()
+        {
+            //  if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this)) return;
+
+
+            UnityEditor.Handles.color = gizmoColor;
+            UnityEditor.Handles.DrawWireDisc(Center, transform.up, radius * transform.localScale.y);
+        }
+
         private void OnDrawGizmosSelected()
         {
             if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this)) return;
 
-            StopDistanceGizmo(Color.red);
+            StopDistanceGizmo(gizmoColor);
 
-            if (stoppingDistance < slowingDistance)
+            if (radius < slowingDistance)
             {
                 UnityEditor.Handles.color = Color.cyan;
                 UnityEditor.Handles.DrawWireDisc(Center, transform.up, slowingDistance * transform.localScale.y);
@@ -317,48 +331,111 @@ namespace MalbersAnimations
                 for (int i = 0; i < Targeters; i++)
                 {
                     var CurrentPoint = TargeterPosition(i);
-                    Gizmos.DrawWireSphere(CurrentPoint, m_targeterStopDistance);
+                    Gizmos.DrawWireSphere(CurrentPoint, StopDistance());
                 }
             }
 
-
-            if (m_TargetLimit > 0 && m_WaitTargeterDistance > 0)
+            if (TargetsLimits > 0 && m_WaitTargeterDistance > 0)
             {
-                UnityEditor.Handles.color = (Color.yellow + Color.red) / 2;
-                UnityEditor.Handles.DrawWireDisc(Center, transform.up, (stoppingDistance + m_WaitTargeterDistance) * transform.localScale.y);
+                UnityEditor.Handles.color = (Color.yellow + Color.white) / 2;
+                UnityEditor.Handles.DrawWireDisc(Center, transform.up, (radius + m_WaitTargeterDistance) * transform.localScale.y);
             }
         }
 
-
+        private Mesh _mesh;
 
         private void StopDistanceGizmo(Color color)
         {
+            var matrix = Gizmos.matrix;
+
+            MDebug.GizmoCylinder(transform, ref _mesh, center + new Vector3(0, 0.001f, 0), radius, Height, color);
+            MDebug.GizmoCylinderWire(transform, center + new Vector3(0, 0.001f, 0), radius, Height, Color.yellow);
+
+            Gizmos.matrix = matrix;
+
+            color.a = 1;
+
             //Draw Stopping Distance
             UnityEditor.Handles.color = Gizmos.color = color;
-            UnityEditor.Handles.DrawWireDisc(Center, transform.up, stoppingDistance * transform.localScale.y);
 
             //Draw Height
             Gizmos.DrawRay(Center, transform.up * Height);
-            UnityEditor.Handles.DrawWireDisc(Center, transform.up, stoppingDistance * transform.localScale.y * 0.1f);
-            Gizmos.DrawWireSphere(Center + transform.up * Height, stoppingDistance * 0.1f);
+            UnityEditor.Handles.DrawWireDisc(Center, transform.up, radius * transform.localScale.y * 0.1f);
+            Gizmos.DrawWireSphere(Center + transform.up * Height, radius * 0.1f);
         }
 #endif
     }
 
 
 #if UNITY_EDITOR
-    [CustomEditor(typeof(AITarget))]
+    [CustomEditor(typeof(AITarget)), CanEditMultipleObjects]
     public class AITargetEditor : Editor
     {
         AITarget M;
-        private void OnEnable()
+
+        SerializedProperty
+            m_height, pointType, radius, slowingDistance, center, gizmoColor,
+            m_arriveLookAt, m_TargetLimit, m_targeterStopDistance, m_WaitTargeterDistance, OnTargetArrived;
+
+        protected virtual void OnEnable()
         {
             M = target as AITarget;
+
+            m_height = serializedObject.FindProperty("m_height");
+            pointType = serializedObject.FindProperty("pointType");
+            radius = serializedObject.FindProperty("radius");
+            slowingDistance = serializedObject.FindProperty("slowingDistance");
+            center = serializedObject.FindProperty("center");
+            m_arriveLookAt = serializedObject.FindProperty("m_arriveLookAt");
+            m_TargetLimit = serializedObject.FindProperty("m_TargetLimit");
+            m_targeterStopDistance = serializedObject.FindProperty("m_targeterStopDistance");
+            m_WaitTargeterDistance = serializedObject.FindProperty("m_WaitTargeterDistance");
+            OnTargetArrived = serializedObject.FindProperty("OnTargetArrived");
+            gizmoColor = serializedObject.FindProperty("gizmoColor");
         }
 
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
+            serializedObject.Update();
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                using (new GUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PropertyField(pointType);
+                    EditorGUILayout.PropertyField(gizmoColor, GUIContent.none, GUILayout.Width(50));
+                }
+
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PropertyField(radius);
+
+                    EditorGUIUtility.labelWidth = 50;
+                    EditorGUILayout.PropertyField(m_height, GUILayout.MinWidth(50));
+                    EditorGUIUtility.labelWidth = 0;
+                }
+
+                EditorGUILayout.PropertyField(slowingDistance);
+                EditorGUILayout.PropertyField(center);
+            }
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.PropertyField(m_arriveLookAt);
+                EditorGUILayout.PropertyField(m_TargetLimit);
+
+                if (m_TargetLimit.intValue > 0)
+                {
+                    // EditorGUILayout.PropertyField(m_targeterStopDistance);
+                    EditorGUILayout.PropertyField(m_WaitTargeterDistance);
+                }
+            }
+
+            EditorGUILayout.PropertyField(OnTargetArrived);
+
+            serializedObject.ApplyModifiedProperties();
+
 
             if (Application.isPlaying && M.TargetersObjects != null)
             {
@@ -388,6 +465,8 @@ namespace MalbersAnimations
                     }
                 }
             }
+
+
         }
     }
 #endif

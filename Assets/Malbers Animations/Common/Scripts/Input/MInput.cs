@@ -45,10 +45,12 @@ namespace MalbersAnimations
 
         public Action<Vector3> OnMoveAxis { get; set; } = delegate { };
 
-        // public Action<float> UpDown { get; set; } = delegate { };
-
+        public Vector3 MoveAxis { get; set; }
+        // public void SetMoveAxis(Vector3 move) => MoveAxis = move;
 
         #endregion
+
+        //public void PlayerInput(IInputSource player) { }
 
         void Awake()
         {
@@ -133,7 +135,6 @@ namespace MalbersAnimations
         {
             InitializeDefaultMap();
 
-
             //Store all inputs from all MAPS in a new list
             AllInputs = new List<InputRow>(inputs);
             if (actionMaps.Count > 0)
@@ -144,7 +145,10 @@ namespace MalbersAnimations
 
             //Update to all the Inputs the Input System
             foreach (var i in AllInputs)
+            {
                 i.InputSystem = Input_System;
+                i.MCoroutine = this; //Set the Coroutine to the MInput so it can be used by the InputRow
+            }
 
             //  List_to_Dictionary();
         }
@@ -171,6 +175,11 @@ namespace MalbersAnimations
 
         protected virtual void OnEnable()
         {
+#if !ENABLE_LEGACY_INPUT_MANAGER
+            Debug.LogWarning("Old Input System is Disabled. Malbers Input Component won't work. Go to Edit/Project Settings/Player/Active Input Handler = Use Both", this);
+            enabled = false;
+#endif
+
             OnInputEnabled.Invoke();
             SetMap(ActiveMapIndex);
         }
@@ -217,7 +226,13 @@ namespace MalbersAnimations
                 _ = item.GetValue;  //This will set the Current Input value to the inputs and Invoke the Values
 
 
+            CheckDevice();
+        }
 
+        protected virtual void CheckDevice()
+        {
+#if ENABLE_LEGACY_INPUT_MANAGER
+ 
             if (IsJoystickInput())
             {
                 if (!usingGamePad)
@@ -236,14 +251,15 @@ namespace MalbersAnimations
             }
 
             currentMousePosition = Input.mousePosition;
-
+#endif
         }
 
-        private bool usingGamePad;
-        private Vector3 currentMousePosition;
+        protected bool usingGamePad;
+        protected Vector3 currentMousePosition;
 
-        private bool IsJoystickInput()
+        protected virtual bool IsJoystickInput()
         {
+#if ENABLE_LEGACY_INPUT_MANAGER
             // joystick buttons
             if (Input.GetKey(KeyCode.Joystick1Button0) ||
                 Input.GetKey(KeyCode.Joystick1Button1) ||
@@ -271,18 +287,27 @@ namespace MalbersAnimations
 
 
             return false;
+#else
+            return false;
+#endif
+
         }
 
-        private bool IsMouseAndKeyboard()
+        protected virtual bool IsMouseAndKeyboard()
         {
+#if ENABLE_LEGACY_INPUT_MANAGER
+
             // mouse & keyboard buttons
             if (Input.anyKey || Input.GetMouseButton(0))
                 return true;
             // mouse movement
-            if ((Input.mousePosition - currentMousePosition).sqrMagnitude > 0.1f)
+            if ((Input.mousePosition - currentMousePosition).sqrMagnitude > 0.01f)
                 return true;
 
             return false;
+#else
+            return false;
+#endif
         }
 
 
@@ -401,7 +426,7 @@ namespace MalbersAnimations
                 item.InputChanged.RemoveListener(action);
         }
 
-
+        public void PlayerInput(IInputSource player) {/* Do nothing this is for the new input link*/}
         public virtual bool OnAnimatorBehaviourMessage(string message, object value) => this.InvokeWithParams(message, value);
 
         #region Create Inputs
@@ -619,6 +644,11 @@ namespace MalbersAnimations
 
             MTools.SetDirty(this);
         }
+
+
+
+
+
 #endif
         #endregion
     }
@@ -644,17 +674,17 @@ namespace MalbersAnimations
         // public bool InputValue = false;
         public bool InputValue
         {
-            get => m_Input;
+            get => inputValue;
             set
             {
-                if (m_Input != value)
+                if (inputValue != value)
                 {
-                    m_Input = value;
-                    if (debug) Debug.Log($"<color=cyan><B>[Input {name} : {m_Input}]</B></color>");
+                    inputValue = value;
+                    if (debug) Debug.Log($"<color=cyan><B>[Input {name} : {inputValue}]</B></color>");
                 }
             }
         }
-        private bool m_Input = false;
+        private bool inputValue = false;
 
         //  public bool ToggleValue = false;
         [Tooltip("When the Input is disabled the input value will set to false and it will send that value to all possible connections")]
@@ -677,16 +707,29 @@ namespace MalbersAnimations
         public float DoubleTapTime = 0.3f;                          //Double Tap Time
         [Tooltip("Time the Input Should be Pressed")]
         public float LongPressTime = 0.5f;
-        [Tooltip("Smooth decrese the acumulated pressed time")]
+        [Tooltip("Smooth decrease the accumulated pressed time")]
         public bool SmoothDecrease;
+
+        [Tooltip("Delay before the Long Press is considered as a Long Press. If the Input Up is released within this time, Long press will be ignored")]
+        public FloatReference LongPressDelay = new(0f);
+
+        [Tooltip("If the Input Up is not released within this time, it will be considered as a failed input")]
+        public FloatReference InputUpFailed = new(0.1f);
+
+
         //public FloatReference LongPressTime = new FloatReference(0.5f);
         private bool FirstInputPress = false;
         private bool InputCompleted = false;
         private float InputStartTime;
-        public UnityEvent OnInputPressed = new UnityEvent();
-        public FloatEvent OnInputFloat = new FloatEvent();
+        private float InputLongPressDelta;
+        public UnityEvent OnInputPressed = new();
+        public FloatEvent OnInputFloat = new();
+
+        public MonoBehaviour MCoroutine;
 
         #endregion
+
+        private bool InputUpReleasing;
 
         /// <summary>Return True or False to the Selected type of Input of choice</summary>
         public virtual bool GetValue
@@ -733,38 +776,66 @@ namespace MalbersAnimations
                     //-------------------------------------------------------------------------------------------------------
                     case InputButton.Up:
 
-                        InputValue = (type == InputType.Input) ? InputSystem.GetButtonUp(input) : Input.GetKeyUp(key);
+                        oldValue = InputUpReleasing;
 
-                        if (oldValue != InputValue)
+                        InputUpReleasing = (type == InputType.Input) ? InputSystem.GetButton(input) : Input.GetKey(key);
+
+                        if (oldValue != InputUpReleasing)
                         {
-                            if (!InputValue) OnInputUp.Invoke();
+                            if (InputUpReleasing)
+                            {
+                                InputStartTime = Time.time; //Store the time when the Input was released
+                            }
+                            else
+                            {
+                                if (InputUpFailed.Value == 0 || !MTools.ElapsedTime(InputStartTime, InputUpFailed))
+                                {
+                                    OnInputUp.Invoke();
+                                    OnInputChanged.Invoke(InputValue = true);
 
-                            OnInputChanged.Invoke(InputValue);
+                                    //Release the Input Value after a frame
+                                    MCoroutine.Delay_Action(() =>
+                                    {
+                                        OnInputChanged.Invoke(InputValue = false);
+                                    });
+                                }
+                            }
                         }
                         break;
                     //-------------------------------------------------------------------------------------------------------
                     case InputButton.LongPress:
 
-                        InputValue = (type == InputType.Input) ? InputSystem.GetButton(input) : Input.GetKey(key);
+                        oldValue = InputUpReleasing;
+
+                        InputUpReleasing = (type == InputType.Input) ? InputSystem.GetButton(input) : Input.GetKey(key);
+
+                        if (oldValue != InputUpReleasing && InputUpReleasing)
+                            InputStartTime = Time.time; //Store the time when the Input was pressed
+
+                        //If the Input is pressed but the Long Press Delay is not completed yet, then ignore the Input
+                        if (LongPressDelay.Value > 0 && !MTools.ElapsedTime(InputStartTime, LongPressDelay))
+                            return false;
+
+                        InputValue = InputUpReleasing;
 
                         if (oldValue != InputValue) OnInputChanged.Invoke(InputValue); //Just to make sure the Input is Pressed
 
-                        //Debug.Log($"FirstInputPress = {FirstInputPress} | InputCompleted {InputCompleted}");
 
                         if (InputValue)
                         {
                             if (!FirstInputPress && !InputCompleted)
                             {
                                 FirstInputPress = true;
-                                InputStartTime = 0;
+                                InputLongPressDelta = 0;
                                 OnInputFloat.Invoke(0);
                                 OnInputDown.Invoke();
+                                InputStartTime = Time.time;
                             }
                             else
                             {
                                 if (!InputCompleted)
                                 {
-                                    if (InputStartTime >= LongPressTime)
+                                    if (InputLongPressDelta >= LongPressTime)
                                     {
                                         OnInputFloat.Invoke(1);
                                         OnLongPress.Invoke(); //Complete the long press
@@ -774,8 +845,8 @@ namespace MalbersAnimations
                                     }
                                     else
                                     {
-                                        InputStartTime += Time.deltaTime;
-                                        OnInputFloat.Invoke(Mathf.Clamp01(InputStartTime / LongPressTime));
+                                        InputLongPressDelta += Time.deltaTime;
+                                        OnInputFloat.Invoke(Mathf.Clamp01(InputLongPressDelta / LongPressTime));
                                     }
                                 }
                             }
@@ -790,11 +861,11 @@ namespace MalbersAnimations
                             {
                                 if (SmoothDecrease)
                                 {
-                                    InputStartTime -= Time.deltaTime;
+                                    InputLongPressDelta -= Time.deltaTime;
 
-                                    if (InputStartTime > 0)
+                                    if (InputLongPressDelta > 0)
                                     {
-                                        OnInputFloat.Invoke(Mathf.Clamp01(InputStartTime / LongPressTime));
+                                        OnInputFloat.Invoke(Mathf.Clamp01(InputLongPressDelta / LongPressTime));
                                     }
                                     else
                                     {

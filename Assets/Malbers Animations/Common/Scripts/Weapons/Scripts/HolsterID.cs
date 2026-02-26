@@ -21,7 +21,7 @@ namespace MalbersAnimations
         public List<Transform> Slots;
 
         /// <summary> Transform Reference for the holster</summary>
-        [Tooltip("Weapon GameObject asociated to the Holster")]
+        [Tooltip("Weapon GameObject associated to the Holster")]
         public MWeapon Weapon;
 
         [Tooltip("Input to Equip the weapon in the holster")]
@@ -63,12 +63,12 @@ namespace MalbersAnimations
                 //MAKE SURE THE WEAPON HAS THE SAME ID OF THE WEAPON 
                 Weapon.Holster = ID;
 
-               
+
 
                 //Re-Parent a frame after
                 Weapon.Delay_Action(() =>
                 {
-                    if (!Weapon.IsEquiped)
+                    if (!Weapon.IsEquipped)
                     {
                         Weapon.transform.SetParent(slot);
                         Weapon.transform.SetLocalTransform(Weapon.HolsterOffset);

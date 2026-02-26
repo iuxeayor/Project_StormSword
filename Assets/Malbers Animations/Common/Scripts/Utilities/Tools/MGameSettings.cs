@@ -7,6 +7,9 @@ namespace MalbersAnimations
     [AddComponentMenu("Malbers/Utilities/Managers/Game Settings <Simple>")]
     public class MGameSettings : MonoBehaviour, IScene
     {
+        public enum CustomFixedTimeStep { Default, FPS30, FPS60, FPS75, FPS90, FPS120, FPS144 };
+
+
         public bool HideCursor = false;
         public bool ForceFPS = false;
         [Hide("ForceFPS")]
@@ -14,6 +17,8 @@ namespace MalbersAnimations
 
         [Min(0)] public int vSyncCount = 0;
         public bool DebugBuild = false;
+
+        public CustomFixedTimeStep customFixedTimeStep = CustomFixedTimeStep.Default;
 
 
 
@@ -38,7 +43,33 @@ namespace MalbersAnimations
             }
 
             QualitySettings.vSyncCount = vSyncCount;
+
             Application.targetFrameRate = ForceFPS ? GameFPS : -1;
+
+            switch (customFixedTimeStep)
+            {
+                case CustomFixedTimeStep.Default:
+                    break;
+                case CustomFixedTimeStep.FPS30:
+                    Time.fixedDeltaTime = 0.03333334f;
+                    break;
+                case CustomFixedTimeStep.FPS60:
+                    Time.fixedDeltaTime = 0.01666667f;
+                    break;
+                case CustomFixedTimeStep.FPS75:
+                    Time.fixedDeltaTime = 0.01333333f;
+                    break;
+                case CustomFixedTimeStep.FPS90:
+                    Time.fixedDeltaTime = 0.01111111f;
+                    break;
+                case CustomFixedTimeStep.FPS120:
+                    Time.fixedDeltaTime = 0.008333334f;
+                    break;
+                case CustomFixedTimeStep.FPS144:
+                    Time.fixedDeltaTime = 0.006944444f;
+                    break;
+            }
+
 
             if (sceneNames != null && !InEditor)
             {

@@ -7,16 +7,16 @@ using UnityEditor;
 
 namespace MalbersAnimations.Scriptables
 {
-    public abstract class ScriptableVar: ScriptableObject
+    public abstract class ScriptableVar : ScriptableObject
     {
 #if UNITY_EDITOR
-        [TextArea(3, 20)]
+        //  [TextArea(3, 20)]
         public string Description = "";
 #endif
         public bool debug = false;
     }
 
-    /// <summary> Base for all Local Scritable Reference Variables </summary>
+    /// <summary> Base for all Local Scriptable Reference Variables </summary>
     public abstract class ReferenceVar
     {
         /// <summary> Use Local Value instead of Global Value (Scriptable Var)  </summary>
@@ -25,6 +25,7 @@ namespace MalbersAnimations.Scriptables
 
 
 #if UNITY_EDITOR
+    [CustomEditor(typeof(ScriptableVar), true)]
     public class VariableEditor : Editor
     {
         public static GUIStyle StyleBlue => MTools.Style(new Color(0, 0.5f, 1f, 0.3f));
@@ -54,18 +55,12 @@ namespace MalbersAnimations.Scriptables
 
                 ExtraValues();
 
-                
-                EditorGUILayout.PropertyField(Description);
-
-
+                EditorGUILayout.PropertyField(Description, GUIContent.none);
             }
             serializedObject.ApplyModifiedProperties();
         }
 
-        public virtual void ExtraValues()
-        {
-            
-        }
+        public virtual void ExtraValues() { }
     }
 #endif
 }

@@ -23,3 +23,23 @@ MonoBehaviour:
       UseConstant: 1
       ConstantValue: 20
       Variable: {fileID: 0}
+    enable:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+  modifiers:
+  - ID: {fileID: 11400000, guid: 8f96533110b305a4792c37a844108d26, type: 2}
+    modify: 6
+    MinValue:
+      UseConstant: 1
+      ConstantValue: 20
+      Variable: {fileID: 0}
+    MaxValue:
+      UseConstant: 1
+      ConstantValue: 20
+      Variable: {fileID: 0}
+    enable:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+  V2Updated: 1

@@ -7,11 +7,12 @@ namespace MalbersAnimations.Reactions
     [AddTypeMenu("Malbers/Animal/Mode Enable-Disable")]
     public class ModeEnableReaction : MReaction
     {
+        override public string DynamicName =>
+                $"Enable-Disable Modes [Total: {(modes != null ? modes.Length : 0)}] Temporal {(TemporalEnable ? "[■]" : "[ ]")}";
+
+        [Tooltip("Enable or Disable the Mode temporally, this does not deactivate completely the Mode. Disables modes will remain disabled. and it wont be affected by this")]
         public bool TemporalEnable = false;
         public IDEnable<ModeID>[] modes;
-
-        [Tooltip("Enable or Disable the Mode temporally, this does not deactivate completely the Mode. Disbles modes will remain disabled. and it wont be affected by this")]
-
 
         protected override bool _TryReact(Component component)
         {

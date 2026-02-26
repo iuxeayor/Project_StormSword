@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -33,6 +41,7 @@ MonoBehaviour:
   General:
     modify: -1
     RootMotion: 1
+    RootMotionRotation: 1
     Sprint: 1
     Gravity: 0
     Grounded: 0
@@ -63,6 +72,17 @@ MonoBehaviour:
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 1
+  newCapsule:
+    name: Preset
+    enabled: 1
+    isTrigger: 0
+    center: {x: 0, y: 0.15, z: -0.32}
+    height: 1.05
+    direction: 1
+    radius: 0.22
+    material: {fileID: 0}
+    modify: 44
   TryLoop:
     UseConstant: 1
     ConstantValue: 6

@@ -6,6 +6,43 @@ namespace MalbersAnimations
     /// <summary> Malbers Debug Class to Draw Different debug shapes  </summary>
     public static class MDebug
     {
+        [HideInCallstack]
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        [System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
+        [System.Diagnostics.Conditional("MALBERS_DEBUG")]
+        public static void Log(object message) => Debug.Log(message);
+
+        [HideInCallstack]
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        [System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
+        [System.Diagnostics.Conditional("MALBERS_DEBUG")]
+        public static void Log(object message, Object context) => Debug.Log(message, context);
+
+        [HideInCallstack]
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        [System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
+        [System.Diagnostics.Conditional("MALBERS_DEBUG")]
+        public static void LogWarning(object message, Object context) => Debug.LogWarning(message, context);
+
+        [HideInCallstack]
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        [System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
+        [System.Diagnostics.Conditional("MALBERS_DEBUG")]
+        public static void LogWarning(object message) => Debug.LogWarning(message);
+
+        [HideInCallstack]
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        [System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
+        [System.Diagnostics.Conditional("MALBERS_DEBUG")]
+        public static void LogError(object message) => Debug.LogError(message);
+
+        [HideInCallstack]
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        [System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]
+        [System.Diagnostics.Conditional("MALBERS_DEBUG")]
+        public static void LogError(object message, Object context) => Debug.LogError(message, context);
+
+
         /// <summary>  Draw an arrow Using Gizmos  </summary>
         public static void Gizmo_Arrow(Vector3 pos, Vector3 direction, float arrowHeadLength = 0.2f, float arrowHeadAngle = 20.0f)
         {
@@ -61,14 +98,14 @@ namespace MalbersAnimations
 
 
             var drawAngle = 360 / Steps;
-            Vector3 Lastpoint = position + rotation * new Vector3(Mathf.Cos(0), Mathf.Sin(0)) * radius;
+            Vector3 LastPoint = position + rotation * new Vector3(Mathf.Cos(0), Mathf.Sin(0)) * radius;
 
             for (int i = 0; i <= Steps; i++)
             {
                 float a = i * drawAngle * Mathf.Deg2Rad;
                 Vector3 point = position + rotation * new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * radius;
-                Debug.DrawLine(point, Lastpoint, color, duration, false);
-                Lastpoint = point;
+                Debug.DrawLine(point, LastPoint, color, duration, false);
+                LastPoint = point;
             }
 #endif
 
@@ -77,8 +114,6 @@ namespace MalbersAnimations
         public static void DrawCircle(Vector3 position, Vector3 normal, float radius, Color color, bool cross = false, float duration = 0, int steps = 36)
         {
 #if UNITY_EDITOR && MALBERS_DEBUG
-
-
             var forward = Vector3.Cross(normal, Vector3.up).normalized;
             var right = Vector3.Cross(normal, forward).normalized;
 
@@ -135,9 +170,9 @@ namespace MalbersAnimations
             var r = radius * scale;
 
 
-            Vector3 LastXpoint = position + rotation * new Vector3(0, Mathf.Cos(0), Mathf.Sin(0)) * r;
-            Vector3 LastYpoint = position + rotation * new Vector3(Mathf.Cos(0), 0, Mathf.Sin(0)) * r;
-            Vector3 LastZpoint = position + rotation * new Vector3(Mathf.Cos(0), Mathf.Sin(0)) * r;
+            Vector3 LastXPoint = position + rotation * new Vector3(0, Mathf.Cos(0), Mathf.Sin(0)) * r;
+            Vector3 LastYPoint = position + rotation * new Vector3(Mathf.Cos(0), 0, Mathf.Sin(0)) * r;
+            Vector3 LastZPoint = position + rotation * new Vector3(Mathf.Cos(0), Mathf.Sin(0)) * r;
 
             //draw the 4 lines
             for (int i = 0; i <= Steps; i++)
@@ -147,16 +182,17 @@ namespace MalbersAnimations
                 Vector3 pointY = position + rotation * new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * r;
                 Vector3 pointZ = position + rotation * new Vector3(Mathf.Cos(a), Mathf.Sin(a)) * r;
 
-                Debug.DrawLine(pointX, LastXpoint, color, drawDuration);
-                Debug.DrawLine(pointY, LastYpoint, color, drawDuration);
-                Debug.DrawLine(pointZ, LastZpoint, color, drawDuration);
+                Debug.DrawLine(pointX, LastXPoint, color, drawDuration);
+                Debug.DrawLine(pointY, LastYPoint, color, drawDuration);
+                Debug.DrawLine(pointZ, LastZPoint, color, drawDuration);
 
-                LastXpoint = pointX;
-                LastYpoint = pointY;
-                LastZpoint = pointZ;
+                LastXPoint = pointX;
+                LastYPoint = pointY;
+                LastZPoint = pointZ;
             }
 #endif
         }
+
 
         /// <summary> Draw a Capsule Gizmo using a center and a rotation</summary>
         /// <param name="Center">center of the capsule</param>
@@ -192,12 +228,69 @@ namespace MalbersAnimations
             }
         }
 
-        /// <summary>Draw a Capsule Gizmo </summary>
-        /// <param name="point1"></param>
-        /// <param name="point2"></param>
-        /// <param name="rot"></param>
+
+        private static void DrawCapsule(Vector3 point1, Vector3 point2, Quaternion rot, float radius, Color color, int Steps = 36)
+        {
+#if UNITY_EDITOR && MALBERS_DEBUG
+
+            GizmoWireHemiSphere(point1, rot * Quaternion.Euler(-90, 0, 0), radius, color, Steps);
+            GizmoWireHemiSphere(point2, rot * Quaternion.Euler(90, 0, 0), radius, color, Steps);
+
+            var Forward = rot * Vector3.forward;
+            var Right = rot * Vector3.right;
+
+
+            // Draw the cylinder
+            int lines = 4;
+            for (int i = 1; i <= lines; i++)
+            {
+                // Cylinder
+                Debug.DrawLine(point1 +
+                    ((Mathf.Cos(i * 2 * Mathf.PI / lines) * radius * Forward) +
+                    (Mathf.Sin(i * 2 * Mathf.PI / lines) * radius * Right)),
+                               point2 +
+                               ((Mathf.Cos(i * 2 * Mathf.PI / lines) * radius * Forward) +
+                               (Mathf.Sin(i * 2 * Mathf.PI / lines) * radius * Right)));
+            }
+#endif
+        }
+
+
+        /// <summary> Draw a Capsule Gizmo using a center and a rotation</summary>
+        /// <param name="Center">center of the capsule</param>
+        /// <param name="height">Height of the capsule</param>
         /// <param name="radius">Radius of the capsule</param>
-        public static void DrawCapsule(Vector3 point1, Vector3 point2, Quaternion rot, float radius, Color color, int Steps = 36)
+        /// <param name="direction">0:(X) Right, 1:(Y) Up 2:(Z) Forward</param>
+        public static void GizmoCapsule(Vector3 Center, Quaternion rotation, float height, float radius, Color color, int direction = 1, int Steps = 36)
+        {
+            Vector3 point1, point2;
+
+            height = Mathf.Clamp(height, radius * 2, height);
+
+            if (direction == 0)
+            {
+                point1 = Center + rotation * (Vector3.right * (height / 2 - radius));
+                point2 = Center + rotation * (-Vector3.right * (height / 2 - radius));
+                GizmoCapsule(point1, point2, rotation * Quaternion.Euler(0, 0, -90), radius, color, Steps);
+
+            }
+            else if (direction == 1)
+            {
+                point1 = Center + rotation * (Vector3.up * (height / 2 - radius));
+                point2 = Center + rotation * (-Vector3.up * (height / 2 - radius));
+
+                GizmoCapsule(point1, point2, rotation, radius, color, Steps);
+            }
+            else
+            {
+                point1 = Center + rotation * (Vector3.forward * (height / 2 - radius));
+                point2 = Center + rotation * (-Vector3.forward * (height / 2 - radius));
+
+                GizmoCapsule(point1, point2, rotation * Quaternion.Euler(90, 0, 0), radius, color, Steps);
+            }
+        }
+
+        private static void GizmoCapsule(Vector3 point1, Vector3 point2, Quaternion rot, float radius, Color color, int Steps = 36)
         {
 #if UNITY_EDITOR && MALBERS_DEBUG
 
@@ -223,11 +316,44 @@ namespace MalbersAnimations
 #endif
         }
 
-        public static void GizmoWireSphere(Vector3 position, Quaternion rotation, float radius, Color color, float scale = 1, int Steps = 36)
+
+        public static void DrawCapsule(Vector3 point1, Vector3 point2, float radius, Color color, float duration = 0, int Steps = 36)
         {
 #if UNITY_EDITOR && MALBERS_DEBUG
 
+            if (point1 == point2)
+            {
+                Gizmos.color = color;
+                DrawCircle(point1, Quaternion.identity, radius, color, duration, Steps); return;
+            }
 
+            var rot = Quaternion.LookRotation(point2 - point1) * Quaternion.Euler(-90, 0, 0);
+
+            DrawWireHemiSphere(point1, rot * Quaternion.Euler(-90, 0, 0), radius, color, duration, Steps);
+            DrawWireHemiSphere(point2, rot * Quaternion.Euler(90, 0, 0), radius, color, duration, Steps);
+
+            var Forward = rot * Vector3.forward;
+            var Right = rot * Vector3.right;
+
+
+            // Draw the cylinder
+            int lines = 4;
+            for (int i = 1; i <= lines; i++)
+            {
+                // Cylinder
+                Debug.DrawLine(point1 +
+                    ((Mathf.Cos(i * 2 * Mathf.PI / lines) * radius * Forward) +
+                    (Mathf.Sin(i * 2 * Mathf.PI / lines) * radius * Right)),
+                               point2 +
+                               ((Mathf.Cos(i * 2 * Mathf.PI / lines) * radius * Forward) +
+                               (Mathf.Sin(i * 2 * Mathf.PI / lines) * radius * Right)), color, duration);
+            }
+#endif
+        }
+
+        public static void GizmoWireSphere(Vector3 position, Quaternion rotation, float radius, Color color, float scale = 1, int Steps = 36)
+        {
+#if UNITY_EDITOR && MALBERS_DEBUG
             Vector3 forward = rotation * Vector3.forward;
             Vector3 endPosition = position;
 
@@ -281,6 +407,46 @@ namespace MalbersAnimations
             }
 #endif
         }
+
+        public static void DrawWireHemiSphere(Vector3 position, Quaternion rotation, float radius, Color color, float duration = 0, int Steps = 36)
+        {
+#if UNITY_EDITOR && MALBERS_DEBUG
+            //Vector3 forward = rotation * Vector3.forward;
+            Vector3 endPosition = position;
+
+            var drawAngle = 360 / Steps;
+
+            Vector3 LastXpoint = position + rotation * new Vector3(0, Mathf.Cos(0), Mathf.Sin(0)) * radius;
+            Vector3 LastYpoint = position + rotation * new Vector3(Mathf.Cos(0), 0, Mathf.Sin(0)) * radius;
+            Vector3 LastZpoint = position + rotation * new Vector3(Mathf.Cos(0), Mathf.Sin(0)) * radius;
+
+            //draw the 4 lines
+            for (int i = 0; i <= Steps / 2; i++)
+            {
+                float a = i * drawAngle * Mathf.Deg2Rad;
+                Vector3 pointX = position + rotation * new Vector3(0, Mathf.Cos(a), Mathf.Sin(a)) * radius;
+                Vector3 pointY = position + rotation * new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * radius;
+
+                Debug.DrawLine(pointX, LastXpoint, color, duration);
+                Debug.DrawLine(pointY, LastYpoint, color, duration);
+
+                LastXpoint = pointX;
+                LastYpoint = pointY;
+            }
+
+            //Draw the Circle
+            for (int i = 0; i <= Steps; i++)
+            {
+                float a = i * drawAngle * Mathf.Deg2Rad;
+                Vector3 pointZ = position + rotation * new Vector3(Mathf.Cos(a), Mathf.Sin(a)) * radius;
+
+                Debug.DrawLine(pointZ, LastZpoint, color, duration);
+
+                LastZpoint = pointZ;
+            }
+#endif
+        }
+
 
         public static void GizmoWireHemiSphere(Vector3 position, Quaternion rotation, float radius, Color color, int Steps = 36)
         {
@@ -460,70 +626,35 @@ namespace MalbersAnimations
 
         }
 
-        public static void DrawThickLine(Vector3 start, Vector3 end, float thickness = 2f)
-        {
-#if UNITY_EDITOR && MALBERS_DEBUG
-            Camera c = Camera.current;
-            if (c == null) return;
+        //        public static void DrawThickLine(Vector3 start, Vector3 end, Color color, float thickness = 2f)
+        //        {
+        //#if UNITY_EDITOR && MALBERS_DEBUG
+        //            Camera c = Camera.current;
+        //            if (c == null) return;
 
-            // Only draw on normal cameras
-            if (c.clearFlags == CameraClearFlags.Depth || c.clearFlags == CameraClearFlags.Nothing)
-            {
-                return;
-            }
+        //            // Only draw on normal cameras
+        //            if (c.clearFlags == CameraClearFlags.Depth || c.clearFlags == CameraClearFlags.Nothing)
+        //            {
+        //                return;
+        //            }
+        //            Handles.color = color;
+        //            // Only draw the line when it is the closest thing to the camera
+        //            // (Remove the Z-test code and other objects will not occlude the line.)
+        //            var prevZTest = Handles.zTest;
+        //            Handles.zTest = UnityEngine.Rendering.CompareFunction.LessEqual;
 
-            // Only draw the line when it is the closest thing to the camera
-            // (Remove the Z-test code and other objects will not occlude the line.)
-            var prevZTest = Handles.zTest;
-            Handles.zTest = UnityEngine.Rendering.CompareFunction.LessEqual;
+        //            Handles.color = Gizmos.color;
+        //            Handles.DrawAAPolyLine(thickness * 10, new Vector3[] { start, end });
 
-            Handles.color = Gizmos.color;
-            Handles.DrawAAPolyLine(thickness * 10, new Vector3[] { start, end });
-
-            Handles.zTest = prevZTest;
-#endif
-        }
+        //            Handles.zTest = prevZTest;
+        //#endif
+        //        }
 
         public static void GizmoRay(Vector3 p1, Vector3 dir, float width = 2f)
         {
-#if UNITY_EDITOR && MALBERS_DEBUG
+#if UNITY_EDITOR 
 
             var p2 = p1 + dir;
-
-            int count = 1 + Mathf.CeilToInt(width); // how many lines are needed.
-            if (count == 1)
-            {
-                Gizmos.DrawLine(p1, p2);
-            }
-            else
-            {
-                Camera c = Camera.current;
-                if (c == null)
-                {
-                    Debug.LogError("Camera.current is null");
-                    return;
-                }
-                var scp1 = c.WorldToScreenPoint(p1);
-                var scp2 = c.WorldToScreenPoint(p2);
-
-                Vector3 v1 = (scp2 - scp1).normalized; // line direction
-                Vector3 n = Vector3.Cross(v1, Vector3.forward); // normal vector
-
-                for (int i = 0; i < count; i++)
-                {
-                    Vector3 o = 0.99f * n * width * ((float)i / (count - 1) - 0.5f);
-                    Vector3 origin = c.ScreenToWorldPoint(scp1 + o);
-                    Vector3 destiny = c.ScreenToWorldPoint(scp2 + o);
-                    Gizmos.DrawLine(origin, destiny);
-                }
-            }
-#endif
-        }
-
-        public static void DrawLine(Vector3 p1, Vector3 p2, float width = 2f)
-        {
-#if UNITY_EDITOR && MALBERS_DEBUG
-
 
             int count = 1 + Mathf.CeilToInt(width); // how many lines are needed.
             if (count == 1)
@@ -555,6 +686,286 @@ namespace MalbersAnimations
 #endif
         }
 
+        /// <summary>
+        /// Draws a Gizmo Cylinder at the given transform with specified parameters.
+        /// </summary>
+        /// <param name="transform"> Transform to get the position, rotation and scale </param>
+        /// <param name="_cylinderMesh"> Mesh to paint the cylinder </param>
+        /// <param name="radius"></param>
+        /// <param name="height"></param>
+        /// <param name="gizmoColor"></param>
+        /// <param name="Segments"></param>
+        /// <param name="lines"></param>
+        public static void GizmoCylinder(Transform transform, ref Mesh _cylinderMesh, Vector3 localOffset, float radius, float height, Color gizmoColor, int Segments = 24, int lines = 4)
+        {
+#if UNITY_EDITOR
+            // 1. Rebuild Mesh if segments changed
+            if (_cylinderMesh == null || ((_cylinderMesh.vertexCount - 12) / 8 != (Segments - 4 / 4)))
+            {
+                _cylinderMesh = CreateBottomPivotCylinder(Segments);
+            }
+
+            if (_cylinderMesh == null) return;
+
+            // 2. Setup Matrix
+            // We handle Position, Rotation, and Uniform Scale via the Matrix.
+            // We also apply the Radius and Height scaling here.
+            Matrix4x4 drawMatrix = transform.localToWorldMatrix;
+            drawMatrix *= Matrix4x4.Translate(localOffset);
+            drawMatrix *= Matrix4x4.Scale(new Vector3(radius, height, radius));
+
+
+            // Apply matrix to Gizmos (for mesh) and Handles (for lines)
+            Gizmos.matrix = drawMatrix;
+            Handles.matrix = drawMatrix;
+
+            // 3. Draw Solid Mesh
+            Gizmos.color = gizmoColor;
+            if (gizmoColor.a > 0) Gizmos.DrawMesh(_cylinderMesh); //Draw the mesh only when alpha > 0
+
+            // 4. Draw Custom Wireframe
+            Color wireColor = new Color(gizmoColor.r, gizmoColor.g, gizmoColor.b, 1f);
+            Handles.color = wireColor;
+
+            // A. Draw Caps (Polygonal) based on 'segments'
+            // We draw lines between points on the unit circle (radius 1). 
+            // The Matrix scales this to the actual 'radius'.
+            float angleStep = 360.0f / Segments;
+
+            for (int i = 0; i < Segments; i++)
+            {
+                // Calculate current angle and next angle
+                float angle = Mathf.Deg2Rad * i * angleStep;
+                float nextAngle = Mathf.Deg2Rad * (i + 1) * angleStep;
+
+                // Coordinates for current point
+                float x1 = Mathf.Cos(angle);
+                float z1 = Mathf.Sin(angle);
+
+                // Coordinates for next point
+                float x2 = Mathf.Cos(nextAngle);
+                float z2 = Mathf.Sin(nextAngle);
+
+                // -- Bottom Cap (Y=0) --
+                Vector3 p1_bottom = new Vector3(x1, 0, z1);
+                Vector3 p2_bottom = new Vector3(x2, 0, z2);
+                Handles.DrawLine(p1_bottom, p2_bottom);
+
+                // -- Top Cap (Y=1) --
+                Vector3 p1_top = new Vector3(x1, 1, z1);
+                Vector3 p2_top = new Vector3(x2, 1, z2);
+                Handles.DrawLine(p1_top, p2_top);
+            }
+
+            // B. Draw Vertical Connecting Lines
+            if (lines > 0)
+            {
+                float vLineStep = 360.0f / lines;
+
+                for (int i = 0; i < lines; i++)
+                {
+                    float angle = Mathf.Deg2Rad * i * vLineStep;
+                    float x = Mathf.Cos(angle);
+                    float z = Mathf.Sin(angle);
+
+                    // Draw from Bottom (0) to Top (1)
+                    Vector3 bottomPos = new Vector3(x, 0, z);
+                    Vector3 topPos = new Vector3(x, 1, z);
+
+                    Handles.DrawLine(bottomPos, topPos);
+                }
+            }
+
+
+            // Reset Matrices
+            Gizmos.matrix = Matrix4x4.identity;
+            Handles.matrix = Matrix4x4.identity;
+
+            //return _cylinderMesh;
+
+#endif
+        }
+
+        public static void GizmoCylinderWire(Transform transform, Vector3 localOffset, float radius, float height, Color gizmoColor, int Segments = 24, int lines = 4)
+        {
+
+#if UNITY_EDITOR
+
+            // 2. Setup Matrix
+            // We handle Position, Rotation, and Uniform Scale via the Matrix.
+            // We also apply the Radius and Height scaling here.
+            Matrix4x4 drawMatrix = transform.localToWorldMatrix;
+            drawMatrix *= Matrix4x4.Translate(localOffset);
+            drawMatrix *= Matrix4x4.Scale(new Vector3(radius, height, radius));
+
+            // Apply matrix to Gizmos (for mesh) and Handles (for lines)
+            Gizmos.matrix = drawMatrix;
+            Handles.matrix = drawMatrix;
+
+            // 3. Draw Solid Mesh
+            Gizmos.color = gizmoColor;
+
+            // 4. Draw Custom Wireframe
+            Color wireColor = new Color(gizmoColor.r, gizmoColor.g, gizmoColor.b, 1f);
+            Handles.color = wireColor;
+
+            // A. Draw Caps (Polygonal) based on 'segments'
+            // We draw lines between points on the unit circle (radius 1). 
+            // The Matrix scales this to the actual 'radius'.
+            float angleStep = 360.0f / Segments;
+
+            for (int i = 0; i < Segments; i++)
+            {
+                // Calculate current angle and next angle
+                float angle = Mathf.Deg2Rad * i * angleStep;
+                float nextAngle = Mathf.Deg2Rad * (i + 1) * angleStep;
+
+                // Coordinates for current point
+                float x1 = Mathf.Cos(angle);
+                float z1 = Mathf.Sin(angle);
+
+                // Coordinates for next point
+                float x2 = Mathf.Cos(nextAngle);
+                float z2 = Mathf.Sin(nextAngle);
+
+                // -- Bottom Cap (Y=0) --
+                Vector3 p1_bottom = new Vector3(x1, 0, z1);
+                Vector3 p2_bottom = new Vector3(x2, 0, z2);
+                Handles.DrawLine(p1_bottom, p2_bottom);
+
+                // -- Top Cap (Y=1) --
+                Vector3 p1_top = new Vector3(x1, 1, z1);
+                Vector3 p2_top = new Vector3(x2, 1, z2);
+                Handles.DrawLine(p1_top, p2_top);
+            }
+
+            // B. Draw Vertical Connecting Lines
+            if (lines > 0)
+            {
+                float vLineStep = 360.0f / lines;
+
+                for (int i = 0; i < lines; i++)
+                {
+                    float angle = Mathf.Deg2Rad * i * vLineStep;
+                    float x = Mathf.Cos(angle);
+                    float z = Mathf.Sin(angle);
+
+                    // Draw from Bottom (0) to Top (1)
+                    Vector3 bottomPos = new Vector3(x, 0, z);
+                    Vector3 topPos = new Vector3(x, 1, z);
+
+                    Handles.DrawLine(bottomPos, topPos);
+                }
+            }
+
+
+            // Reset Matrices
+            Gizmos.matrix = Matrix4x4.identity;
+            Handles.matrix = Matrix4x4.identity;
+
+            //return _cylinderMesh;
+
+#endif
+        }
+
+
+
+        private static Mesh CreateBottomPivotCylinder(int segs)
+        {
+            Mesh mesh = new() { name = "ProceduralCylinder_BottomPivot" };
+
+            if (segs < 3) segs = 3;
+            float angleStep = 360.0f / segs;
+
+            // Vertices: 2 rings + 2 center caps
+            Vector3[] vertices = new Vector3[(segs + 1) * 2 + 2];
+            int[] triangles = new int[segs * 6 + segs * 6];
+
+            float bottomY = 0f;
+            float topY = 1f;
+
+            vertices[0] = new Vector3(0, bottomY, 0); // Bottom Center
+            vertices[1] = new Vector3(0, topY, 0);    // Top Center
+
+            for (int i = 0; i <= segs; i++)
+            {
+                float angle = Mathf.Deg2Rad * i * angleStep;
+                float x = Mathf.Cos(angle);
+                float z = Mathf.Sin(angle);
+
+                // Bottom Ring
+                vertices[2 + i] = new Vector3(x, bottomY, z);
+                // Top Ring
+                vertices[2 + segs + 1 + i] = new Vector3(x, topY, z);
+            }
+
+            int t = 0;
+            int bottomOffset = 2;
+            int topOffset = 2 + segs + 1;
+
+            for (int i = 0; i < segs; i++)
+            {
+                // Bottom Cap
+                triangles[t++] = 0;
+                triangles[t++] = bottomOffset + i + 1;
+                triangles[t++] = bottomOffset + i;
+
+                // Top Cap
+                triangles[t++] = 1;
+                triangles[t++] = topOffset + i;
+                triangles[t++] = topOffset + i + 1;
+
+                // Sides
+                int next = i + 1;
+                triangles[t++] = bottomOffset + i;
+                triangles[t++] = bottomOffset + next;
+                triangles[t++] = topOffset + i;
+
+                triangles[t++] = topOffset + i;
+                triangles[t++] = bottomOffset + next;
+                triangles[t++] = topOffset + next;
+            }
+
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            return mesh;
+        }
+
+        public static void DrawLine(Vector3 p1, Vector3 p2, float width = 2f)
+        {
+#if UNITY_EDITOR && MALBERS_DEBUG
+            int count = 1 + Mathf.CeilToInt(width); // how many lines are needed.
+            if (count == 1)
+            {
+                Gizmos.DrawLine(p1, p2);
+            }
+            else
+            {
+                Camera c = Camera.current;
+                if (c == null)
+                {
+                    Debug.LogError("Camera.current is null");
+                    return;
+                }
+                var scp1 = c.WorldToScreenPoint(p1);
+                var scp2 = c.WorldToScreenPoint(p2);
+
+                Vector3 v1 = (scp2 - scp1).normalized; // line direction
+                Vector3 n = Vector3.Cross(v1, Vector3.forward); // normal vector
+
+                for (int i = 0; i < count; i++)
+                {
+                    Vector3 o = ((float)i / (count - 1) - 0.5f) * 0.99f * width * n;
+                    Vector3 origin = c.ScreenToWorldPoint(scp1 + o);
+                    Vector3 destiny = c.ScreenToWorldPoint(scp2 + o);
+                    Gizmos.DrawLine(origin, destiny);
+                }
+            }
+#endif
+        }
 
         //internal static void DebugCapsule(Vector3 baseSphere, Vector3 endSphere, Color color, float radius = 1,
         //  bool colorizeBase = true, float drawDuration = 0,  bool drawDepth = false)

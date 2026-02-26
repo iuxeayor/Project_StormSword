@@ -18,7 +18,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   task: 3
   distance:
@@ -98,15 +101,50 @@ MonoBehaviour:
   - decision: {fileID: -1420615141407408200}
     trueState: {fileID: 11400000, guid: 1cc1d97de03d36049bbd42341beabf5a, type: 2}
     falseState: {fileID: 0}
-  - decision: {fileID: 3679279294978835924, guid: b0abd06b44fcfad4c9f55df4fa203123,
-      type: 2}
+  - decision: {fileID: 3679279294978835924, guid: b0abd06b44fcfad4c9f55df4fa203123, type: 2}
     trueState: {fileID: 11400000, guid: 2294f87c65fdbf343ab4e8316acca518, type: 2}
+    falseState: {fileID: 0}
+  - decision: {fileID: 200297746311902282}
+    trueState: {fileID: 11400000, guid: 1cc1d97de03d36049bbd42341beabf5a, type: 2}
     falseState: {fileID: 0}
   GizmoStateColor: {r: 0.5471698, g: 0.18779378, b: 0.1264685, a: 1}
   CreateTaskAsset: 1
   CreateDecisionAsset: 1
-  TasksIndex: -1
-  DecisionIndex: 0
+  TasksIndex: 1
+  DecisionIndex: -1
+--- !u!114 &200297746311902282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcb15355fb5af304ebab1307cd8dab67, type: 3}
+  m_Name: D_Wait to Drop
+  m_EditorClassIdentifier: 
+  active: 1
+  Description: Type Description Here
+  DecisionID:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  send: 0
+  interval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
+  WaitForAllTasks: 0
+  waitForTask: -1
+  WaitMinTime:
+    UseConstant: 1
+    ConstantValue: 2
+    Variable: {fileID: 0}
+  WaitMaxTime:
+    UseConstant: 1
+    ConstantValue: 2
+    Variable: {fileID: 0}
 --- !u!114 &8019364335122867081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,7 +163,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   affect: 0
   when: 0
@@ -141,9 +182,18 @@ MonoBehaviour:
     floatValue: 0
     stringValue: 
     intVarValue: {fileID: 0}
-    transformValue: {fileID: 0}
-    GoValue: {fileID: 0}
     ComponentValue: {fileID: 0}
+    TransformValue:
+      UseConstant: 1
+      ConstantValue: {fileID: 0}
+      Variable: {fileID: 0}
+    GOValue:
+      UseConstant: 1
+      ConstantValue: {fileID: 0}
+      Variable: {fileID: 0}
+    Old_transformValue: {fileID: 0}
+    Old_GoValue: {fileID: 0}
     time: 0
     sent: 0
     Active: 1
+    UpdateVarReference: 0

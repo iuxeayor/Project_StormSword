@@ -1,12 +1,14 @@
-﻿using UnityEngine;
+﻿using MalbersAnimations.Scriptables;
+using UnityEngine;
 
 namespace MalbersAnimations.Reactions
 {
-    [CreateAssetMenu(menuName = "Malbers Animations/Reaction Var", order = 100)]
+    [CreateAssetMenu(menuName = "Malbers Animations/[Obsolete] Reaction Var", order = 100)]
     public class MReactionsVar : ScriptableObject
     {
-        [SerializeReference,SubclassSelector]
-        public Reaction reaction;
+
+        [Header("[Obsolete] Please use Reaction2 Var")]
+        [SerializeReference] public Reaction reaction;
 
         public void React(Component component)
         {
@@ -27,7 +29,13 @@ namespace MalbersAnimations.Reactions
             }
             reaction.React(go);
         }
+
+        public void React(Transform t) => React((Component)t);
+
+        public void React(GameObjectVar go) => React(go.Value);
+
+        public void React(TransformVar t) => React((Component)t.Value);
+
     }
 }
 
- 

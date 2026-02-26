@@ -17,7 +17,15 @@ MonoBehaviour:
   Input: Sprint
   ExitInput:
     UseConstant: 1
-    ConstantValue: 
+    ConstantValue: Sprint
+    Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
     Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
@@ -27,12 +35,13 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
-  Priority: 7
+  Priority: 5
   resetInputOnFailed: 0
   ResetLastState: 0
   General:
     modify: -1
     RootMotion: 1
+    RootMotionRotation: 0
     Sprint: 1
     Gravity: 0
     Grounded: 0
@@ -63,6 +72,17 @@ MonoBehaviour:
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 6
@@ -93,7 +113,9 @@ MonoBehaviour:
   MovementStrafe: 1
   IdleStrafe: 1
   m_debug: 1
-  Editor_Tabs1: 4
+  Editor_Tabs1: 3
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets:
   - name: Wall Run Vertical
     StartVerticalIndex:
@@ -190,11 +212,15 @@ MonoBehaviour:
         ConstantValue: 4
         Variable: {fileID: 0}
   ID: {fileID: 11400000, guid: c4d4b48bc0215ed4db52e7f962297a8c, type: 2}
+  EnterConditions:
+    conditions:
+    - rid: 7187480087757062144
+    active: 1
+  ExitConditions:
+    conditions:
+    - rid: 7187480087757062146
+    active: 1
   Automatic:
-    UseConstant: 1
-    ConstantValue: 0
-    Variable: {fileID: 0}
-  OnSprint:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
@@ -220,6 +246,7 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 1
     Variable: {fileID: 0}
+  WallFaceAngle: 15
   WallLimitAngle: 45
   UseRotator: 0
   AlignSmoothness: 10
@@ -231,3 +258,44 @@ MonoBehaviour:
   ExitDelay: 0
   ExitForce: 15
   ExitForceAceleration: 2
+  references:
+    version: 2
+    RefIds:
+    - rid: 7187480087757062144
+      type: {class: C2_AnimalSpeed, ns: MalbersAnimations.Conditions, asm: MalbersAnimations}
+      data:
+        desc: Sprinting
+        invert: 0
+        OrAnd: 0
+        LocalTarget: 0
+        debug: 0
+        Target: {fileID: 0}
+        Condition: 4
+        compare: 0
+        Value:
+          UseConstant: 1
+          ConstantValue: 0
+          Variable: {fileID: 0}
+        SpeedName:
+          UseConstant: 1
+          ConstantValue: 
+          Variable: {fileID: 0}
+    - rid: 7187480087757062146
+      type: {class: C2_AnimalSpeed, ns: MalbersAnimations.Conditions, asm: MalbersAnimations}
+      data:
+        desc: Sprinting
+        invert: 1
+        OrAnd: 0
+        LocalTarget: 0
+        debug: 0
+        Target: {fileID: 0}
+        Condition: 4
+        compare: 0
+        Value:
+          UseConstant: 1
+          ConstantValue: 0
+          Variable: {fileID: 0}
+        SpeedName:
+          UseConstant: 1
+          ConstantValue: 
+          Variable: {fileID: 0}

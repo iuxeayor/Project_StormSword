@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 namespace MalbersAnimations
 {
@@ -7,21 +8,27 @@ namespace MalbersAnimations
     [AddComponentMenu("Malbers/Input/Mouse Scroll")]
     public class MMouseScroll : MonoBehaviour
     {
-        public UnityEvent OnScrollUp = new UnityEvent();
-        public UnityEvent OnScrollDown = new UnityEvent();
+        public UnityEvent OnScrollUp = new();
+        public UnityEvent OnScrollDown = new();
 
-        private float mousedelta = 0;
+        private float mouseDelta = 0;
 
         private void Update()
         {
-            var newDelta = Input.mouseScrollDelta.y;
+            var mouse = Mouse.current;
+            if (mouse == null) return; // no mouse attached or Input System not initialized
 
-            if (newDelta != mousedelta)
+
+            // Read the scroll delta (Vector2: x for horizontal, y for vertical)
+            var newDelta = mouse.scroll.ReadValue().y;
+
+
+            if (newDelta != mouseDelta)
             {
-                mousedelta = newDelta;
+                mouseDelta = newDelta;
 
-                if (mousedelta < 0) OnScrollDown.Invoke();
-                else if (mousedelta > 0) OnScrollUp.Invoke();
+                if (mouseDelta < 0) OnScrollDown.Invoke();
+                else if (mouseDelta > 0) OnScrollUp.Invoke();
             }
         }
     }

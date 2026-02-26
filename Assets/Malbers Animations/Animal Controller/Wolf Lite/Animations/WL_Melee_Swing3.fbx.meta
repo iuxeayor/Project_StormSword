@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 28ccaf5d9145a5d45ba459b349f2a450
 ModelImporter:
-  serializedVersion: 20200
+  serializedVersion: 22200
   internalIDToNameTable:
   - first:
       74: 1827226128182048838
@@ -23,6 +23,7 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
     motionNodeName: 
     rigImportErrors: 
     rigImportWarnings: 
@@ -63,14 +64,37 @@ ModelImporter:
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: LookAt
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          preInfinity: 3
+          postInfinity: 3
+          rotationOrder: 4
       events: []
       transformMask:
       - path: 
         weight: 1
       - path: CG
-        weight: 1
-      - path: CG/ Footsteps
         weight: 1
       - path: CG/Pelvis
         weight: 1
@@ -84,10 +108,6 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/L Thigh/L Calf/L HorseLink/L Foot
         weight: 1
-      - path: CG/Pelvis/Spine/L Thigh/L Calf/L HorseLink/L Foot/ L Toe0
-        weight: 1
-      - path: CG/Pelvis/Spine/L Thigh/L Calf/L HorseLink/L Foot/ L Toe0/ L Toe0Nub
-        weight: 1
       - path: CG/Pelvis/Spine/R Thigh
         weight: 1
       - path: CG/Pelvis/Spine/R Thigh/R Calf
@@ -95,10 +115,6 @@ ModelImporter:
       - path: CG/Pelvis/Spine/R Thigh/R Calf/R HorseLink
         weight: 1
       - path: CG/Pelvis/Spine/R Thigh/R Calf/R HorseLink/R Foot
-        weight: 1
-      - path: CG/Pelvis/Spine/R Thigh/R Calf/R HorseLink/R Foot/ R Toe0
-        weight: 1
-      - path: CG/Pelvis/Spine/R Thigh/R Calf/R HorseLink/R Foot/ R Toe0/ R Toe0Nub
         weight: 1
       - path: CG/Pelvis/Spine/Spine1
         weight: 1
@@ -108,37 +124,21 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/ HeadNub
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Eye L
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Eye R
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/ JawNub
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue/CG TongueNub
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue/Sword
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek/CG L CheekNub
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear/ Ponytail1Nub
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek/CG R CheekNub
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear/ Ponytail2Nub
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/L Clavicle
         weight: 1
@@ -149,12 +149,6 @@ ModelImporter:
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/L Clavicle/L UpperArm/L Forearm/L
           Hand
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/L Clavicle/L UpperArm/L Forearm/L
-          Hand/ L Finger0
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/L Clavicle/L UpperArm/L Forearm/L
-          Hand/ L Finger0/ L Finger0Nub
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/R Clavicle
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/R Clavicle/R UpperArm
@@ -164,12 +158,6 @@ ModelImporter:
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/R Clavicle/R UpperArm/R Forearm/R
           Hand
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/R Clavicle/R UpperArm/R Forearm/R
-          Hand/ R Finger0
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/R Clavicle/R UpperArm/R Forearm/R
-          Hand/ R Finger0/ R Finger0Nub
-        weight: 1
       - path: CG/Pelvis/Spine/Tail
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1
@@ -178,11 +166,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3
         weight: 1
-      - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3/ TailNub
-        weight: 1
-      - path: Wolf
-        weight: 1
-      - path: Wolf Pxy
+      - path: Root
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
@@ -195,10 +179,12 @@ ModelImporter:
     addColliders: 0
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
+    importPhysicalCameras: 1
     importVisibility: 0
     importBlendShapes: 0
     importCameras: 0
     importLights: 0
+    nodeNameCollisionStrategy: 0
     fileIdsGeneration: 2
     swapUVChannels: 0
     generateSecondaryUV: 0
@@ -210,6 +196,7 @@ ModelImporter:
     skinWeightsMode: 0
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
+    optimizeBones: 1
     meshOptimizationFlags: 1
     indexFormat: 1
     secondaryUVAngleDistortion: 8
@@ -220,6 +207,7 @@ ModelImporter:
     secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 2
@@ -253,7 +241,16 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 2
   addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Animal Controller/Wolf Lite/Animations/WL_Melee_Swing3.fbx
+  uploadId: 848732

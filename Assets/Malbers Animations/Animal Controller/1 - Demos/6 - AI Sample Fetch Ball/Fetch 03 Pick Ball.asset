@@ -55,15 +55,14 @@ MonoBehaviour:
   - decision: {fileID: 4302319481303826133}
     trueState: {fileID: 11400000, guid: afbb75fdf8a811e4291dacb3ea658501, type: 2}
     falseState: {fileID: 0}
-  - decision: {fileID: -1651739815227646092, guid: 2294f87c65fdbf343ab4e8316acca518,
-      type: 2}
+  - decision: {fileID: -1651739815227646092, guid: 2294f87c65fdbf343ab4e8316acca518, type: 2}
     trueState: {fileID: 11400000, guid: b0abd06b44fcfad4c9f55df4fa203123, type: 2}
     falseState: {fileID: 0}
   GizmoStateColor: {r: 0, g: 0.65917397, b: 1, a: 1}
   CreateTaskAsset: 1
   CreateDecisionAsset: 1
   TasksIndex: -1
-  DecisionIndex: 1
+  DecisionIndex: 0
 --- !u!114 &4302319481303826133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113,7 +112,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   affect: 0
   when: 0
@@ -129,9 +131,18 @@ MonoBehaviour:
     floatValue: 0
     stringValue: 
     intVarValue: {fileID: 0}
-    transformValue: {fileID: 0}
-    GoValue: {fileID: 0}
     ComponentValue: {fileID: 0}
+    TransformValue:
+      UseConstant: 1
+      ConstantValue: {fileID: 0}
+      Variable: {fileID: 0}
+    GOValue:
+      UseConstant: 1
+      ConstantValue: {fileID: 0}
+      Variable: {fileID: 0}
+    Old_transformValue: {fileID: 0}
+    Old_GoValue: {fileID: 0}
     time: 0
     sent: 0
     Active: 1
+    UpdateVarReference: 0

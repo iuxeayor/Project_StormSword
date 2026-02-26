@@ -28,6 +28,73 @@ MonoBehaviour:
   check: 1
   StateID: {fileID: 11400000, guid: adfa24f62d6db4d40a1d837f4ec1a6e9, type: 2}
   when: 1
+--- !u!114 &-7138499330241328639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92f7b2438ccf74c4d8547d45f7b7ee07, type: 3}
+  m_Name: Is Player Attacking
+  m_EditorClassIdentifier: 
+  active: 1
+  Description: 'If the Player is Attacking then Dodge
+
+'
+  DecisionID:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  send: 0
+  interval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
+  WaitForAllTasks: 0
+  waitForTask: -1
+  checkOn: 1
+  MCondition:
+    conditions:
+    - rid: 5767721742542045274
+    - rid: 5767721742542045278
+    active: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 5767721742542045274
+      type: {class: C2_AnimalMode, ns: MalbersAnimations.Conditions, asm: MalbersAnimations}
+      data:
+        desc: 
+        invert: 0
+        OrAnd: 0
+        LocalTarget: 0
+        debug: 0
+        Target: {fileID: 0}
+        Condition: 0
+        Value: {fileID: 11400000, guid: dc411047be38d924fbfc67128f6957f2, type: 2}
+        AbilityName:
+          UseConstant: 1
+          ConstantValue: 
+          Variable: {fileID: 0}
+        AbilityIndex:
+          UseConstant: 1
+          ConstantValue: 0
+          Variable: {fileID: 0}
+    - rid: 5767721742542045278
+      type: {class: C2_Weight, ns: MalbersAnimations.Conditions, asm: MalbersAnimations}
+      data:
+        desc: 
+        invert: 0
+        OrAnd: 0
+        LocalTarget: 0
+        debug: 0
+        Weight:
+          UseConstant: 1
+          ConstantValue: 0.5
+          Variable: {fileID: 0}
 --- !u!114 &-6918185587059074170
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,19 +135,25 @@ MonoBehaviour:
     Variable: {fileID: 0}
   AssignTarget: 0
   MoveToTarget: 0
-  RemoveTarget: 0
   ChooseRandomly: 0
   UnityTag: 
   GameObjectName: 
   transform: {fileID: 11400000, guid: 0c45a2c5e368c004eb9efaa6152aa0ea, type: 2}
   gameObject: {fileID: 0}
   gameObjectSet: {fileID: 0}
-  tags: []
   zoneType: 0
   AllZones: 1
   ZoneID: -1
   ZoneModeAbility: -1
-  debugColor: {r: 0.69803923, g: 0.34524903, b: 0, a: 0.3}
+  tags: []
+  ReactionOnSelf:
+    reactions: []
+  ReactionOnTarget:
+    reactions: []
+  debugColor: {r: 0.69803923, g: 0.34524903, b: 0, a: 0.10980392}
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &-6472950082954214781
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -99,7 +172,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   task: 0
   distance:
@@ -137,19 +213,24 @@ MonoBehaviour:
   m_Name: T_Run
   m_EditorClassIdentifier: 
   active: 1
-  Description: Change the Speed on the Animal
+  Description: Change the Speed to maximum speed
   MessageID:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   affect: 0
-  SpeedSet: Ground
+  SpeedSet: 
   SpeedIndex:
     UseConstant: 1
-    ConstantValue: 2
+    ConstantValue: 10
     Variable: {fileID: 0}
+  Sprint: 0
+  ResetSprintOnExit: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,17 +253,53 @@ MonoBehaviour:
   - {fileID: -6472950082954214781}
   - {fileID: 9002399122284257095}
   transitions:
+  - decision: {fileID: 3945128226036494982}
+    trueState: {fileID: 11400000, guid: a464eb0132145af4b8c60c695406dbf5, type: 2}
+    falseState: {fileID: 0}
   - decision: {fileID: -7381318385376975343}
     trueState: {fileID: 11400000, guid: 2bb031809ac90e84c9a657e2a125e1bf, type: 2}
     falseState: {fileID: 0}
   - decision: {fileID: -6918185587059074170}
     trueState: {fileID: 0}
     falseState: {fileID: 11400000, guid: 2bb031809ac90e84c9a657e2a125e1bf, type: 2}
+  - decision: {fileID: -7138499330241328639}
+    trueState: {fileID: 11400000, guid: 14e7120ddc1ef6c46b4ca5703db96028, type: 2}
+    falseState: {fileID: 0}
   GizmoStateColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   CreateTaskAsset: 1
   CreateDecisionAsset: 1
-  TasksIndex: 0
-  DecisionIndex: -1
+  TasksIndex: -1
+  DecisionIndex: 2
+--- !u!114 &3945128226036494982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 417fba2be41a7274c9373ec4edf30972, type: 3}
+  m_Name: D_No Weapon figth with Fist
+  m_EditorClassIdentifier: 
+  active: 1
+  Description: Type Description Here
+  DecisionID:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  send: 0
+  interval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
+  WaitForAllTasks: 0
+  waitForTask: -1
+  CheckOn: 0
+  weapon: 8
+  weaponType: {fileID: 0}
+  comparer: 0
+  value: 0
 --- !u!114 &5873187726266594735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,7 +318,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   near: 0
   Actions: 0
@@ -227,7 +347,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 1
   near: 1
   Actions: 5

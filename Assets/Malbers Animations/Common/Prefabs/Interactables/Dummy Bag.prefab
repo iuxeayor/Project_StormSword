@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 3989744743723828308}
   - component: {fileID: 3989744743723828311}
   - component: {fileID: 3989744743723828310}
-  - component: {fileID: 3989744743723828307}
   - component: {fileID: 7204690968527997276}
   m_Layer: 23
   m_Name: Bag
@@ -63,6 +62,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -138,21 +140,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &3989744743723828307
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3989744743723828329}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20201266b5fdc6c4ca0fa6ce10d048c8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tags:
-  - {fileID: 11400000, guid: 6d1f17f4e5ea02440806b4b6afafa7d0, type: 2}
-  - {fileID: 11400000, guid: 9d80b30d48e415e4daefefb2e359ad3d, type: 2}
 --- !u!114 &7204690968527997276
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -174,6 +161,7 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 4294967295
     Variable: {fileID: 0}
+  debug: 0
   Tags: []
   OnAimEnter:
     m_PersistentCalls:
@@ -181,7 +169,6 @@ MonoBehaviour:
   OnAimExit:
     m_PersistentCalls:
       m_Calls: []
-  debug: 0
 --- !u!1 &3989744744231566261
 GameObject:
   m_ObjectHideFlags: 0
@@ -243,6 +230,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -323,17 +313,17 @@ SpringJoint:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3989744744231566261}
+  serializedVersion: 4
   m_ConnectedBody: {fileID: 3989744743723828310}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0, y: 0.5, z: 0}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0, y: -0.91599995, z: 0}
-  serializedVersion: 2
   m_Spring: 1000000
   m_Damper: 0.5
   m_MinDistance: 0
   m_MaxDistance: 0
-  m_Tolerance: 1.00000005e-20
+  m_Tolerance: 0.000001
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
   m_EnableCollision: 1
@@ -352,6 +342,7 @@ GameObject:
   - component: {fileID: 1364153357367907917}
   - component: {fileID: 8381659217127426785}
   - component: {fileID: 1386231773}
+  - component: {fileID: 6502031583933183378}
   m_Layer: 23
   m_Name: Dummy Bag
   m_TagString: Untagged
@@ -389,14 +380,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointType: 0
-  stoppingDistance: 1.8
+  m_height: 2.16
+  radius: 0.7
   slowingDistance: 0
   center: {x: 0, y: 0, z: 0}
-  m_height: 2.01
   m_arriveLookAt: 1
   m_TargetLimit: 0
   m_targeterStopDistance: 0.2
   m_WaitTargeterDistance: 4
+  gizmoColor: {r: 1, g: 0, b: 0, a: 0.4}
   OnTargetArrived:
     m_PersistentCalls:
       m_Calls: []
@@ -412,6 +404,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b6db78c48b0b6342937f21d4681fba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Selected_StatIndex: 0
   stats:
   - active: 1
     ID: {fileID: 11400000, guid: d6b3e636d59a6c547a2cad40b69f4432, type: 2}
@@ -472,6 +465,10 @@ MonoBehaviour:
       ConstantValue: 0
       Variable: {fileID: 0}
     resetTo: 1
+    ResetOnEnable:
+      UseConstant: 1
+      ConstantValue: 1
+      Variable: {fileID: 0}
     isPercent: 1
     debug: 0
     OnStatFull:
@@ -570,6 +567,10 @@ MonoBehaviour:
       ConstantValue: 0
       Variable: {fileID: 0}
     resetTo: 1
+    ResetOnEnable:
+      UseConstant: 1
+      ConstantValue: 1
+      Variable: {fileID: 0}
     isPercent: 1
     debug: 0
     OnStatFull:
@@ -621,12 +622,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   character: {fileID: 0}
-  reaction:
-    rid: -2
+  damageReaction:
+    reactions: []
   criticalReaction:
-    rid: -2
+    reactions: []
   damagerReaction:
-    rid: -2
+    reactions: []
   surface: {fileID: 0}
   ignoreDamagerReaction:
     UseConstant: 1
@@ -640,6 +641,10 @@ MonoBehaviour:
   AlignToDamage:
     UseConstant: 1
     ConstantValue: 0
+    Variable: {fileID: 0}
+  OnlyOnMovementZero:
+    UseConstant: 1
+    ConstantValue: 1
     Variable: {fileID: 0}
   AlignTime:
     UseConstant: 1
@@ -690,15 +695,89 @@ MonoBehaviour:
     OnStatEmpty:
       m_PersistentCalls:
         m_Calls: []
+    OnProfileDefaultEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    OnProfileDefaultExit:
+      m_PersistentCalls:
+        m_Calls: []
   elements: []
+  Default:
+    name: 
+    surface: {fileID: 0}
+    damageReaction:
+      reactions: []
+    criticalReaction:
+      reactions: []
+    damagerReaction:
+      reactions: []
+    multiplier:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    AlignToDamage:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    ignoreDamagerReaction:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    elements: []
+    OnProfileEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    OnProfileExit:
+      m_PersistentCalls:
+        m_Calls: []
+  CurrentProfile:
+    name: 
+    surface: {fileID: 0}
+    damageReaction:
+      reactions: []
+    criticalReaction:
+      reactions: []
+    damagerReaction:
+      reactions: []
+    multiplier:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    AlignToDamage:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    ignoreDamagerReaction:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    elements: []
+    OnProfileEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    OnProfileExit:
+      m_PersistentCalls:
+        m_Calls: []
   profiles: []
   Editor_Tabs1: 0
-  First_Change: 1
+  FirstTime: 1
   references:
     version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    RefIds: []
+--- !u!114 &6502031583933183378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3989744744938877188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20201266b5fdc6c4ca0fa6ce10d048c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tags:
+  - {fileID: 11400000, guid: 9d80b30d48e415e4daefefb2e359ad3d, type: 2}
 --- !u!1 &7966735512275719268
 GameObject:
   m_ObjectHideFlags: 0

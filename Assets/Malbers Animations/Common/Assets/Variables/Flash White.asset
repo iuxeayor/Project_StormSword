@@ -86,3 +86,8 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
+  revertColorAfterLerp: 1
+  ResetToOriginalBefore: 1
+  FloatOriginal: 0
+  ColorOriginal: {r: 0, g: 0, b: 0, a: 1}
+  ColorHDROriginal: {r: 0, g: 0, b: 0, a: 1}

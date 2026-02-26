@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace MalbersAnimations.Scriptables
 {
@@ -9,6 +10,9 @@ namespace MalbersAnimations.Scriptables
         /// <summary>The current value</summary>
         [SerializeField] private Vector2 value = Vector2.zero;
 
+        /// <summary>Invoked when the value changes </summary>
+        public Action<Vector2> OnValueChanged;
+
         /// <summary> Value of the Float Scriptable variable</summary>
         public virtual Vector2 Value
         {
@@ -16,6 +20,7 @@ namespace MalbersAnimations.Scriptables
             set
             {
                 this.value = value;
+                OnValueChanged?.Invoke(value);
 #if UNITY_EDITOR
                 if (debug) Debug.Log($"<B>{name} -> <color=green> {value} </color> </B>", this);
 #endif

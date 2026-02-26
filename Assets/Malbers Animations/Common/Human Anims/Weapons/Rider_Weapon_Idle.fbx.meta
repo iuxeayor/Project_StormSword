@@ -608,11 +608,7 @@ ModelImporter:
     removeConstantScaleCurves: 0
     motionNodeName: 
     rigImportErrors: 
-    rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
-      copied configuration does not match position in animation file:\n\t'R_L Foot'
-      : position error = 27.611298 mm\n\t'R_L Toe0' : position error = 31.769409
-      mm\n\t'R_R Foot' : position error = 27.611383 mm\n\t'R_R Toe0' : position error
-      = 31.800009 mm\n"
+    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -1521,7 +1517,7 @@ ModelImporter:
       takeName: Take 001
       internalID: 7892081000819541804
       firstFrame: 65
-      lastFrame: 67
+      lastFrame: 65.5
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -2371,3 +2367,10 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Common/Human Anims/Weapons/Rider_Weapon_Idle.fbx
+  uploadId: 848732

@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -27,12 +35,15 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  Priority: 8
+  Priority: 5
   resetInputOnFailed: 0
   ResetLastState: 0
+  RemoveForceOnEnter: 0
+  ForceDamping: 0
   General:
     modify: 7423
     RootMotion: 1
+    RootMotionRotation: 0
     Sprint: 1
     Gravity: 0
     Grounded: 0
@@ -63,6 +74,17 @@ MonoBehaviour:
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 6
@@ -94,164 +116,37 @@ MonoBehaviour:
   IdleStrafe: 1
   m_debug: 1
   Editor_Tabs1: 0
-  SpeedSets:
-  - name: Swim
-    StartVerticalIndex:
-      UseConstant: 1
-      ConstantValue: 1
-      Variable: {fileID: 0}
-    TopIndex:
-      UseConstant: 1
-      ConstantValue: 2
-      Variable: {fileID: 0}
-    m_SprintIndex:
-      UseConstant: 1
-      ConstantValue: 10
-      Variable: {fileID: 0}
-    m_LockIndex:
-      UseConstant: 1
-      ConstantValue: 1
-      Variable: {fileID: 0}
-    m_LockSpeed:
-      UseConstant: 1
-      ConstantValue: 0
-      Variable: {fileID: 0}
-    m_RootMotionPos:
-      UseConstant: 1
-      ConstantValue: 1
-      Variable: {fileID: 0}
-    m_RootMotionRot:
-      UseConstant: 1
-      ConstantValue: 1
-      Variable: {fileID: 0}
-    BackSpeedMult:
-      UseConstant: 1
-      ConstantValue: 0.5
-      Variable: {fileID: 0}
-    PitchLerpOn:
-      UseConstant: 1
-      ConstantValue: 10
-      Variable: {fileID: 0}
-    PitchLerpOff:
-      UseConstant: 1
-      ConstantValue: 10
-      Variable: {fileID: 0}
-    BankLerp:
-      UseConstant: 1
-      ConstantValue: 10
-      Variable: {fileID: 0}
-    UpDownMult:
-      UseConstant: 1
-      ConstantValue: 1
-      Variable: {fileID: 0}
-    states:
-    - {fileID: 11400000, guid: 7e364e53b77644c47aa3abdaa2e2c08c, type: 2}
-    stances: []
-    Speeds:
-    - name: Swim
-      Vertical:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      position:
-        UseConstant: 1
-        ConstantValue: 3
-        Variable: {fileID: 0}
-      lerpPosition:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      lerpPosAnim:
-        UseConstant: 1
-        ConstantValue: 2
-        Variable: {fileID: 0}
-      rotation:
-        UseConstant: 1
-        ConstantValue: 5
-        Variable: {fileID: 0}
-      lerpRotAnim:
-        UseConstant: 1
-        ConstantValue: 2
-        Variable: {fileID: 0}
-      animator:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      lerpAnimator:
-        UseConstant: 1
-        ConstantValue: 4
-        Variable: {fileID: 0}
-      strafeSpeed:
-        UseConstant: 1
-        ConstantValue: 0
-        Variable: {fileID: 0}
-      lerpStrafe:
-        UseConstant: 1
-        ConstantValue: 4
-        Variable: {fileID: 0}
-    - name: Swim Fast
-      Vertical:
-        UseConstant: 1
-        ConstantValue: 2
-        Variable: {fileID: 0}
-      position:
-        UseConstant: 1
-        ConstantValue: 5
-        Variable: {fileID: 0}
-      lerpPosition:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      lerpPosAnim:
-        UseConstant: 1
-        ConstantValue: 2
-        Variable: {fileID: 0}
-      rotation:
-        UseConstant: 1
-        ConstantValue: 5
-        Variable: {fileID: 0}
-      lerpRotAnim:
-        UseConstant: 1
-        ConstantValue: 2
-        Variable: {fileID: 0}
-      animator:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      lerpAnimator:
-        UseConstant: 1
-        ConstantValue: 4
-        Variable: {fileID: 0}
-      strafeSpeed:
-        UseConstant: 1
-        ConstantValue: 0
-        Variable: {fileID: 0}
-      lerpStrafe:
-        UseConstant: 1
-        ConstantValue: 4
-        Variable: {fileID: 0}
+  selectedSpeed: 0
+  SpeedTabs: 0
+  SpeedSets: []
   ID: {fileID: 11400000, guid: 7e364e53b77644c47aa3abdaa2e2c08c, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   WaterLayer:
     serializedVersion: 2
     m_Bits: 16
+  HitTransform: SwimHit
+  waterTransform: WaterHit
   UpSearch: 3
   AlignSmooth: 10
-  bounce: 2
-  bounceLerp: 2
+  bounce: 0.5
+  bounceLerp: 5
   KeepInertia: 1
-  m_Radius: 0.1
+  m_Radius: 0.2
   FrontRayLength: 1
   HeightMult: 0.9
   OnTouchedWaterEnter:
-    rid: -2
+    reactions: []
   OnTouchedWaterExit:
-    rid: -2
+    reactions: []
   IsInWater: 0
   PivotAboveWater: 0
   BounceUp: {x: 0, y: 0, z: 0}
   BounceDown: {x: 0, y: 0, z: 0}
   references:
     version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    RefIds: []

@@ -7,8 +7,8 @@
         public float minValue;
         public float maxValue;
 
-        public readonly float Min => minValue;
-        public readonly float Max => maxValue;
+        public float Min { get => minValue; set => minValue = value; }
+        public float Max { get => maxValue; set => maxValue = value; }
         public readonly float Difference => maxValue - minValue;
 
         public RangedFloat(float minValue, float maxValue)

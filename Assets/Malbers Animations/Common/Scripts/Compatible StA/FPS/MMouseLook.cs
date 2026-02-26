@@ -28,8 +28,13 @@ namespace MalbersAnimations.SA
 
         public void LookRotation(Transform character, Transform camera)
         {
+#if ENABLE_LEGACY_INPUT_MANAGER
             float yRot = Input.GetAxis("Mouse X") * XSensitivity;
             float xRot = Input.GetAxis("Mouse Y") * YSensitivity;
+#else
+            float yRot = UnityEngine.InputSystem.Mouse.current.delta.x.ReadValue() * XSensitivity * 0.05f;
+            float xRot = UnityEngine.InputSystem.Mouse.current.delta.y.ReadValue() * YSensitivity * 0.05f;
+#endif
 
             m_CharacterTargetRot *= Quaternion.Euler(0f, yRot, 0f);
             m_CameraTargetRot *= Quaternion.Euler(-xRot, 0f, 0f);

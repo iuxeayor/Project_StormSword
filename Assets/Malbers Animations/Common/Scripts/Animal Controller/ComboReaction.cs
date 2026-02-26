@@ -9,6 +9,8 @@ namespace MalbersAnimations.Reactions
     [AddTypeMenu("Malbers/Damage/Play Combo")]
     public class ComboReaction : Reaction
     {
+        override public string DynamicName => $"Play Combo [Branch: {Branch}]";
+
         [Tooltip("Branch to Play on the Combo")]
         public int Branch;
 
@@ -16,9 +18,7 @@ namespace MalbersAnimations.Reactions
 
         protected override bool _TryReact(Component component)
         {
-            var combo = component as ComboManager;
-
-            combo.Play();
+            (component as ComboManager).Play(Branch);
 
             return true;
         }

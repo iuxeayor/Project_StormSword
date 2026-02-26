@@ -10,6 +10,8 @@ namespace MalbersAnimations.Reactions
     [AddTypeMenu("Tools/Aim")]
     public class AimReaction : Reaction
     {
+        public override string DynamicName => $"Aim Set Target [{(NewTarget != null && NewTarget.Value != null ? NewTarget.Value.name : "None")}]";
+
         [Tooltip("Set a new Target to the Aim Component. If left empty, it will clear the target")]
         public GameObjectReference NewTarget = new();
 
@@ -21,7 +23,7 @@ namespace MalbersAnimations.Reactions
             {
                 if (NewTarget.Value)
                 {
-                    aimer.SetTarget(NewTarget.Value);   
+                    aimer.SetTarget(NewTarget.Value);
                 }
                 else
                 {

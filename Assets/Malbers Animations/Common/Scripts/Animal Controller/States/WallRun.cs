@@ -5,10 +5,10 @@ using UnityEngine;
 namespace MalbersAnimations.Controller
 {
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/main-components/manimal-controller/states/wallrun")]
-
+    [AddTypeMenu("WallRun/Wall Run Horizontal")]
     public class WallRun : State
     {
-        public override string StateName => "WallRun/Wall-Run Sides";
+        //public override string StateName => "WallRun/Wall-Run Sides";
         public override string StateIDName => "WallRun";
 
         [Header("Wall Run Parameters")]
@@ -147,14 +147,15 @@ namespace MalbersAnimations.Controller
         /// <summary>Cast the Ray for checking walls on automatic too/ </summary>
         public override bool TryActivate()
         {
-            return (Automatic.Value || InputValue) && CheckWallRay();
+            var RealInput = string.IsNullOrEmpty(Input) || InputValue;
+            return (Automatic.Value || RealInput) && CheckWallRay();
         }
 
         public override void Activate()
         {
             base.Activate();
             SetEnterStatus(RightSide ? 1 : -1); //Set the correct Animatino
-            animal.ResetGravityValues();
+            animal.Gravity_ResetValues();
             UpImpulse = Vector3.Project(animal.DeltaPos, animal.UpVector);   //Clean the Vector from Forward and Horizontal Influence    
             Has_UP_Impulse = Vector3.Dot(UpImpulse, animal.UpVector) > 0;
         }
@@ -241,7 +242,7 @@ namespace MalbersAnimations.Controller
         private void AlignToWall(Vector3 Direction, float distance, float deltatime)
         {
             float difference = distance - (WallDistance * animal.ScaleFactor);
-            Vector3 align = Direction * difference * deltatime * AlignLerp;
+            Vector3 align = AlignLerp * deltatime * difference * Direction;
             animal.AdditivePosition += align;
         }
 
@@ -278,7 +279,7 @@ namespace MalbersAnimations.Controller
 
         public override void AllowStateExit()
         {
-            animal.ResetGravityValues();
+            animal.Gravity_ResetValues();
         }
 
         public override void PostExitState()

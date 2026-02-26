@@ -161,7 +161,6 @@ namespace MalbersAnimations
             }
         }
 
-
         private static GUIContent _icon_delete;
         public static GUIContent Icon_Delete
         {
@@ -174,6 +173,22 @@ namespace MalbersAnimations
                 }
 
                 return _icon_delete;
+            }
+        }
+
+
+        private static GUIContent _icon_Edit;
+        public static GUIContent Icon_Edit
+        {
+            get
+            {
+                if (_icon_Edit == null)
+                {
+                    _icon_Edit = EditorGUIUtility.IconContent("editicon.sml", "Edit");
+                    _icon_Edit.tooltip = "Edit";
+                }
+
+                return _icon_Edit;
             }
         }
 
@@ -405,9 +420,13 @@ namespace MalbersAnimations
             }
         }
 
+        //  public static GUIStyle DescStyle;
+
         public static void DrawDescription(string v)
         {
-            var styleDesc = new GUIStyle(StyleBlue)
+            // if (DescStyle == null)
+            // {
+            var DescStyle = new GUIStyle(StyleBlue)
             {
                 fontSize = 12,
                 fontStyle = FontStyle.Bold,
@@ -415,9 +434,9 @@ namespace MalbersAnimations
                 stretchWidth = true
             };
 
-            styleDesc.normal.textColor = EditorStyles.label.normal.textColor;
-
-            UnityEditor.EditorGUILayout.LabelField(v, styleDesc);
+            DescStyle.normal.textColor = EditorStyles.label.normal.textColor;
+            //  }
+            EditorGUILayout.LabelField(v, DescStyle);
         }
 
         private static GUIContent debugCont;
@@ -435,6 +454,14 @@ namespace MalbersAnimations
         {
             var currentGUIColor = GUI.color;
             GUI.color = property.boolValue ? Color.red : currentGUIColor;
+            property.boolValue = GUILayout.Toggle(property.boolValue, DebugCont, EditorStyles.miniButtonMid, GUILayout.Width(28), GUILayout.Height(20));
+            GUI.color = currentGUIColor;
+        }
+
+        public static void DrawDebugIcon(SerializedProperty property, Color color)
+        {
+            var currentGUIColor = GUI.color;
+            GUI.color = property.boolValue ? color : currentGUIColor;
             property.boolValue = GUILayout.Toggle(property.boolValue, DebugCont, EditorStyles.miniButtonMid, GUILayout.Width(28), GUILayout.Height(20));
             GUI.color = currentGUIColor;
         }

@@ -91,13 +91,14 @@ MonoBehaviour:
     ConstantValue: 0
     Variable: {fileID: 0}
   Auto: 1
-  InvokeOnEnable: 1
-  Description: 'Stamina Logics (True : Sprint is Enable)
+  InvokeOnEnable: 0
+  Description: 'Stamina Logics this is connected to the MAnimal.Sprint Event
 
-    - Degenerate the Stamina
-    Stat when Sprint is activated
+    -
+    Degenerate the Stamina Stat when Sprint is activated
 
-    - Shows the Stamina UI'
+    - Shows the Stamina
+    UI'
   ShowDescription: 1
   debug: 0
   value:
@@ -187,8 +188,9 @@ MonoBehaviour:
       type: {class: StatReaction, ns: MalbersAnimations.Reactions, asm: MalbersAnimations}
       data:
         Active: 1
-        useLocalTarget: 0
-        LocalTarget: {fileID: 0}
+        localComponent:
+          useLocal: 0
+          component: {fileID: 0}
         delay: 0
         modifiers:
         - ID: {fileID: 11400000, guid: 8f96533110b305a4792c37a844108d26, type: 2}
@@ -230,8 +232,9 @@ MonoBehaviour:
       type: {class: StatReaction, ns: MalbersAnimations.Reactions, asm: MalbersAnimations}
       data:
         Active: 1
-        useLocalTarget: 0
-        LocalTarget: {fileID: 0}
+        localComponent:
+          useLocal: 0
+          component: {fileID: 0}
         delay: 0
         modifiers:
         - ID: {fileID: 11400000, guid: 8f96533110b305a4792c37a844108d26, type: 2}

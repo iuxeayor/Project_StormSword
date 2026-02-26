@@ -50,7 +50,7 @@ namespace MalbersAnimations.Controller
         [Tooltip("Lerp used to for the Banking on FreeMovement")]
         public FloatReference BankLerp = new(10f);
 
-        [Tooltip("Up Down Multiplier ")]
+        [Tooltip("Up Down Multiplier")]
         public FloatReference UpDownMult = new(1);
 
 
@@ -61,7 +61,6 @@ namespace MalbersAnimations.Controller
 
         //[Tooltip("Multiplier to slowdown the speed if the character is on a slope. E.g. Set the Value (1,0.5) on the last key to slowdown the speed while  ")]
         //public AnimationCurve SlopeMultiplier = new AnimationCurve(new Keyframe(-1, 1), new Keyframe(0, 1), new Keyframe(1, 1));
-
 
         /// <summary> List of Speed Modifiers for the Speed Set</summary>
         public List<MSpeed> Speeds;
@@ -102,9 +101,9 @@ namespace MalbersAnimations.Controller
         {
             name = "Set Name";
             states = new List<StateID>();
-            StartVerticalIndex = new IntReference(1);
-            TopIndex = new IntReference(2);
-            Speeds = new List<MSpeed>(1) { new MSpeed("SpeedName", 1, 4, 4) };
+            StartVerticalIndex = new(1);
+            TopIndex = new(2);
+            Speeds = new(1) { new MSpeed("SpeedName", 1, 4, 4) };
         }
 
         public MSpeed this[int index]
@@ -156,8 +155,6 @@ namespace MalbersAnimations.Controller
             //find the SpeedSet
             var speedIndex = GetSpeedIndex(NewSpeed.Name);
 
-            Debug.Log($"speedIndex : {speedIndex}");
-
             if (speedIndex != -1)
             {
                 Speeds[speedIndex] = NewSpeed;
@@ -179,10 +176,10 @@ namespace MalbersAnimations.Controller
         /// <summary>Name of this Speed</summary>
         public string name;
 
-        /// <summary>Vertical Mutliplier for the Animator</summary>
+        /// <summary>Vertical Multiplier for the Animator</summary>
         public FloatReference Vertical;
 
-        /// <summary>Add additional speed to the transfrom</summary>
+        /// <summary>Add additional speed to the transform</summary>
         public FloatReference position;
 
         /// <summary> Smoothness to change to the Transform speed, higher value more Responsiveness</summary>
@@ -192,7 +189,7 @@ namespace MalbersAnimations.Controller
         public FloatReference lerpPosAnim;
 
 
-        /// <summary>Add Aditional Rotation to the Speed</summary>
+        /// <summary>Add Additional Rotation to the Speed</summary>
         public FloatReference rotation;
 
         /// <summary> Smoothness to change to the Animator Vertical speed, higher value more Responsiveness</summary>
@@ -236,7 +233,7 @@ namespace MalbersAnimations.Controller
         }
 
 
-        public MSpeed(string name, float lerpPos, float lerpanim)
+        public MSpeed(string name, float lerpPos, float lerpAnim)
         {
             this.name = name;
             Vertical = 1;
@@ -252,7 +249,7 @@ namespace MalbersAnimations.Controller
             lerpStrafe = 4;
 
             animator = 1;
-            lerpAnimator = lerpanim;
+            lerpAnimator = lerpAnim;
             // nameHash = name.GetHashCode();
         }
 
@@ -311,14 +308,13 @@ namespace MalbersAnimations.Controller
         {
             // using (new GUILayout.VerticalScope())
             {
-                EditorGUILayout.HelpBox("For [In Place] animations <Not Root Motion>, Increse [Position] and [Rotation] values for each Speed Set", MessageType.Info);
+                EditorGUILayout.HelpBox("For [In Place] animations <Not Root Motion>, Increase [Position] and [Rotation] values for each Speed Set", MessageType.Info);
                 list.DoLayoutList();        //Paint the Reordable List speeds 
 
                 list.index = OldSelectedSpeed;
 
-                if (list.index != -1)
+                if (list.index >= 0 && list.index < list.serializedProperty.arraySize)
                 {
-
                     var SelectedSpeed = list.serializedProperty.GetArrayElementAtIndex(list.index); //?!??!
 
                     if (SelectedSpeed != null)
@@ -383,8 +379,6 @@ namespace MalbersAnimations.Controller
                                         var m_RootMotionPos = SelectedSpeed.FindPropertyRelative("m_RootMotionPos");
                                         var m_RootMotionRot = SelectedSpeed.FindPropertyRelative("m_RootMotionRot");
 
-
-
                                         StartVerticalSpeed.isExpanded = MalbersEditor.Foldout(StartVerticalSpeed.isExpanded, "Indexes");
                                         if (StartVerticalSpeed.isExpanded)
                                         {
@@ -402,14 +396,12 @@ namespace MalbersAnimations.Controller
                                         }
 
 
-
                                         m_LockSpeed.isExpanded = MalbersEditor.Foldout(m_LockSpeed.isExpanded, "Lock Speed");
                                         if (m_LockSpeed.isExpanded)
                                         {
                                             EditorGUILayout.PropertyField(m_LockSpeed);
                                             EditorGUILayout.PropertyField(m_LockIndex);
                                         }
-
 
                                         PitchLerpOn.isExpanded = MalbersEditor.Foldout(PitchLerpOn.isExpanded, "Free Movement Lerp Values");
 
@@ -434,11 +426,9 @@ namespace MalbersAnimations.Controller
                                             EditorGUI.indentLevel--;
                                             EditorGUI.indentLevel--;
                                         }
-
                                     }
                                     else
                                     {
-
                                         // EditorGUILayout.Space();
                                         EditorGUI.indentLevel++;
                                         EditorGUILayout.PropertyField(Speeds, new GUIContent("Speeds", "Speeds for this speed Set"), true);

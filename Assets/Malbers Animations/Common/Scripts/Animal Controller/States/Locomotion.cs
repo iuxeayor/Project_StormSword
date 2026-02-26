@@ -1,30 +1,37 @@
-﻿using MalbersAnimations.Reactions;
-using MalbersAnimations.Scriptables;
+﻿using MalbersAnimations.Scriptables;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace MalbersAnimations.Controller
 {
+
     /// <summary>This will be in charge of the Movement While is on the Ground </summary>
+    [AddTypeMenu("Ground/Locomotion")]
     public class Locomotion : State
     {
         [System.Serializable]
-        public class WallStopProfiles
+        public struct WallStopProfiles
         {
             [Tooltip("Speed Index to Identify the Profile (Walk = 1, Trot = 2, etc)")]
             public float SpeedIndex;
             [Tooltip("Speed Index to Identify the Profile (Walk = 1, Trot = 2, etc)")]
             public float RayLength;
             [Tooltip("Reaction to do if the Animal touches a Wall")]
-            [SerializeReference, SubclassSelector]
-            public Reaction reaction;
-
+            public MalbersAnimations.Reactions.Reaction2 TouchWallReactions;
             [Tooltip("Reaction if there's no wall detected in front of the animal")]
-            [SerializeReference, SubclassSelector]
-            public Reaction NoWallDetected;
+            public MalbersAnimations.Reactions.Reaction2 NoWallDetectedReactions;
+
+
+            public void Empty()
+            {
+                SpeedIndex = 0;
+                RayLength = 0;
+                TouchWallReactions = new();
+                NoWallDetectedReactions = new();
+            }
         }
 
-        public override string StateName => "Locomotion";
+        //public override string StateName => "Locomotion";
         public override string StateIDName => "Locomotion";
         [Header("Locomotion Parameters")]
 
@@ -32,7 +39,7 @@ namespace MalbersAnimations.Controller
         public FloatReference FallRayBackwards = new(0.3f);
 
         [Tooltip("Reset Inertia On Enter")]
-        public BoolReference ResetIntertia = new(false);
+        public BoolReference ResetInertia = new(false);
 
         [Space(10), Tooltip("Makes the Animal Stop Moving when is near a Wall")]
         public bool WallStop = false;
@@ -42,6 +49,8 @@ namespace MalbersAnimations.Controller
         private Transform WallHit;
 
         private WallStopProfiles currentProfile;
+
+        public bool RootRotation = true;
 
         [Tooltip("Profiles to increase or decrease the WallRayLength depending the current Speed (Walk,Trot,Run)." +
             "\nX:Speed Index (Walk = 1, Trot = 2, etc)" +
@@ -71,6 +80,8 @@ namespace MalbersAnimations.Controller
         public override void InitializeState()
         {
             HasIdle = animal.HasState(StateEnum.Idle); //Check if the animal has Idle State if it does not have then Locomotion is IDLE TOO
+
+            if (RootRotation) General.RootMotionRotation = true; //Set the Root Motion Rotation to True
         }
 
 
@@ -82,9 +93,7 @@ namespace MalbersAnimations.Controller
                 if (!HasIdle) return true; //Return true if is grounded (Meaning Locomotion is also the IDLE STATE
 
                 if (animal.MovementAxisSmoothed != Vector3.zero || animal.MovementDetected) //If is moving? 
-                {
                     return true;
-                }
             }
             return false;
         }
@@ -103,13 +112,16 @@ namespace MalbersAnimations.Controller
 
             //When entering Locomotion from Idle
             //    if (animal.LastState.ID.ID == 0) //From Idle
-            SetEnterStatus((int)animal.CurrentSpeedModifier.Vertical.Value);
+
+            //********* NEWWWWWWWWWWWWW CHECK if it works for everybody
+            if (!animal.UseSmoothVertical || animal.UseSmoothVertical && animal.RawInputAxis.magnitude > 0.7)
+                SetEnterStatus((int)animal.CurrentSpeedModifier.Vertical.Value);
 
             CheckCurrentWallProfile(animal.CurrentSpeedIndex);
 
             animal.OnMovementDetected.AddListener(OnMovementDetected);
 
-            OnMovementDetected(true); //REcord that the movement has started
+            OnMovementDetected(true); //Record that the movement has started
 
             //Calculate Delta Angle again!!! IMPORTANT!!! BEFORE THE ANIMATOR
             InputAxisUpdate();
@@ -125,7 +137,7 @@ namespace MalbersAnimations.Controller
         private void OnMovementDetected(bool movementDetected)
         {
             //Means the input has been released
-            if (!movementDetected)
+            if (InCoreAnimation && IsActiveState && !movementDetected)
             {
                 var exitstatus = !(animal.sprint && animal.UseSprintState && !animal.CurrentSpeedSetIsLocked)
                     ? animal.CurrentSpeedIndex : animal.CurrentSpeedSet.SprintIndex;
@@ -133,7 +145,7 @@ namespace MalbersAnimations.Controller
                 SetExitStatus(exitstatus); //Use the Enter Status to check the speed
 
                 //Add an extra movement Detected when the Input is released so the Animal Can calculate a Exit Animations well,
-                //but do not do it if the animal is rotatin at direction
+                //but do not do it if the animal is rotating at direction
                 if (animal.Rotate_at_Direction)
                 {
                     // SetExitStatus(animal.CurrentSpeedIndex);
@@ -141,22 +153,19 @@ namespace MalbersAnimations.Controller
                     // animal.movementAxisRaw.z = 1;
                     animal.MovementAxisRaw.z = 1;
                 }
-                // Debug.Log($"Movement REleased!!! -> {animal.CurrentSpeedModifier.Vertical.Value} - {animal.Sprint}");
+                // Debug.Log($"Movement Released!!! -> {animal.CurrentSpeedModifier.Vertical.Value} - {animal.Sprint}");
             }
         }
         public override void EnterCoreAnimation()
         {
-            SetExitStatus(0); //Reset the Exit Status once the Enter Animation is playing
+            //SetExitStatus(0); //Reset the Exit Status once the Enter Animation is playing
+            //SetEnterStatus((int)CurrentSpeed.Vertical.Value); //Use the Enter Status to check the speed
 
             animal.TryAnimParameter(animal.hash_LastState, 1); //Reset the Last State Animator Parameter (CHANGE VELOCITIES ARE NOT ALLOWED)
 
             if (animal.LastState.ID == StateEnum.Climb) animal.ResetCameraInput(); //HACK\
 
-
-            ////Clear Enter Status
-            //SetEnterStatus(0);
-
-            if (ResetIntertia.Value) animal.ResetInertiaSpeed();  //BUG THAT IT WAS MAKING GO FASTER WHEN ENTERING LOCOMOTION
+            if (ResetInertia.Value) animal.ResetInertiaSpeed();  //BUG THAT IT WAS MAKING GO FASTER WHEN ENTERING LOCOMOTION
 
         }
 
@@ -166,6 +175,7 @@ namespace MalbersAnimations.Controller
             if (CurrentAnimTag == EnterTagHash)
             {
                 animal.VerticalSmooth = animal.CurrentSpeedModifier.Vertical;
+                SetEnterStatus(0);
             }
         }
 
@@ -174,7 +184,6 @@ namespace MalbersAnimations.Controller
             Wall_Stop();
             Anti_Fall();
         }
-
 
         public override void OnStateMove(float deltatime)
         {
@@ -210,14 +219,17 @@ namespace MalbersAnimations.Controller
 
         public override void SpeedModifierChanged(MSpeed speed, int SpeedIndex)
         {
-            //  SetEnterStatus((int)speed.Vertical.Value); //Use the Enter Status to check the speed
+            // NEW**************(NOW THIS IS DONE VIA THE VERTICAL RAW PARAMETER)
+            // SetEnterStatus((int)speed.Vertical.Value); //Use the Enter Status to check the speed
+
+
             CheckCurrentWallProfile(SpeedIndex);
         }
 
         //───────────────────────────────────────── Wall Stop ──────────────────────────────────────────────────────────────────
         private void Wall_Stop()
         {
-            if (WallStop && currentProfile != null && MovementRaw.z > 0)
+            if (WallStop && currentProfile.SpeedIndex != 0 && MovementRaw.z > 0) //Find a wall if we are doing Wall Stopping
             {
                 var Length = (currentProfile.RayLength) * ScaleFactor;
                 var MainPivotPoint = animal.Main_Pivot_Point;
@@ -230,7 +242,7 @@ namespace MalbersAnimations.Controller
                     animal.MovementAxis.z = 0; //Remove all ForwardMovement
                     if (hit.transform && WallHit != hit.transform)
                     {
-                        currentProfile.reaction?.React(animal);
+                        currentProfile.TouchWallReactions.React(animal);
                         WallHit = hit.transform;
                     }
                 }
@@ -240,7 +252,7 @@ namespace MalbersAnimations.Controller
                     if (WallHit)
                     {
                         WallHit = null;
-                        currentProfile.NoWallDetected?.React(animal);
+                        currentProfile.NoWallDetectedReactions.React(animal);
                     }
                 }
             }
@@ -255,21 +267,20 @@ namespace MalbersAnimations.Controller
                 foreach (var prof in wallStopProfiles)
                 {
                     if (prof.SpeedIndex <= SpeedIndex)
+                    {
                         currentProfile = prof;
+                    }
                 }
-
-                //   Debug.Log($"Current Wall Stop Index: {currentProfile.SpeedIndex}");
             }
         }
 
         public override void ResetStateValues()
         {
-            currentProfile = null; //Reset the current ProFile
+            currentProfile.Empty(); //Reset the current ProFile
             WallHit = null;
         }
 
         //───────────────────────────────────────── ANTI FALL CODE ──────────────────────────────────────────────────────────────────
-
         private void Anti_Fall()
         {
             if (AntiFall)
@@ -281,7 +292,7 @@ namespace MalbersAnimations.Controller
                     bool BlockForward = false;
 
 
-                    var ForwardMov = MovementRaw.z; // Get the Raw movement that enters on the animal witouth any modifications
+                    var ForwardMov = MovementRaw.z; // Get the Raw movement that enters on the animal without any modifications
                     var Dir = animal.TerrainSlope > 0 ? Gravity : -animal.Up;
 
                     float SprintMultiplier = (animal.CurrentSpeedModifier.Vertical).Value;
@@ -363,6 +374,9 @@ namespace MalbersAnimations.Controller
 
         readonly RaycastHit[] hits = new RaycastHit[1];
 
+        /// <summary>  Make sure RootMotion Root is enable on Idle and Locomotion last changes ON VALIDATE </summary>
+        [SerializeField, HideInInspector] private bool noRMRotation = false;
+
 #if UNITY_EDITOR
         public override void StateGizmos(MAnimal animal)
         {
@@ -412,6 +426,17 @@ namespace MalbersAnimations.Controller
         }
 
 
+
+        private void OnValidate()
+        {
+            if (!noRMRotation)   //If the RootMotion is not set then set it to true
+            {
+                noRMRotation = true;
+                General.RootMotionRotation = true;
+                MTools.SetDirty(this);
+            }
+        }
+
         internal override void Reset()
         {
             base.Reset();
@@ -419,6 +444,7 @@ namespace MalbersAnimations.Controller
             General = new AnimalModifier()
             {
                 RootMotion = true,
+                RootMotionRotation = true,
                 Grounded = true,
                 Sprint = true,
                 OrientToGround = true,

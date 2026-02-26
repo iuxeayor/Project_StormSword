@@ -29,10 +29,10 @@ namespace MalbersAnimations.Controller
 
         public override bool CanCauseDamage
         {
-            get => Enabled;
+            get => Active;
             set
             {
-                Enabled = value;
+                Active = value;
 
                 if (CanCauseDamage && AttackDirection)
                 {
@@ -77,9 +77,10 @@ namespace MalbersAnimations.Controller
             }
             if (Trigger)
             {
-                Proxy = TriggerProxy.CheckTriggerProxy(Trigger, Layer, TriggerInteraction, Owner.transform);
-                Proxy.EnterTriggerInteraction = delegate { }; //Clear all of them in start
+                Proxy = TriggerProxy.CheckTriggerProxy(Trigger, Layer, TriggerInteraction, Owner.transform, true);
+                Proxy.EnterTriggerInteraction = null; //Clear all of them in start
                 Proxy.Tags = Tags;
+                Proxy.enabled = false; //Disable the Proxy until the Attack Trigger is enabled
             }
             else
             {
@@ -91,14 +92,12 @@ namespace MalbersAnimations.Controller
         {
             if (Trigger) Trigger.enabled = Trigger.isTrigger = Proxy.Active = true;
 
-
-
             CheckAudioSource();
 
             Proxy.EnterTriggerInteraction += AttackTriggerEnter;
             Proxy.ExitTriggerInteraction += AttackTriggerExit;
 
-            damagee = null;
+            // damagee = null;
 
             OnAttackBegin.Invoke();
 
@@ -115,16 +114,16 @@ namespace MalbersAnimations.Controller
             Proxy.EnterTriggerInteraction -= AttackTriggerEnter;
             Proxy.ExitTriggerInteraction -= AttackTriggerExit;
 
-            TryDamage(damagee, EnemyStatExit); //Means the Colliders was disable before Exit Trigger
+            //TryDamage(damagee, EnemyStatExit, false); //Means the Colliders was disable before Exit Trigger
 
             OnAttackEnd.Invoke();
 
             if (animator) animator.speed = defaultAnimatorSpeed;
 
-            damagee = null;
+            //  damagee = null;
         }
 
-        private void AttackTriggerEnter(GameObject newGo, Collider other)
+        private void AttackTriggerEnter(GameObject newGo, Collider other, TriggerProxy proxy)
         {
             if (dontHitOwner && Owner != null && other.transform.IsChildOf(Owner.transform)) return;
 
@@ -138,12 +137,18 @@ namespace MalbersAnimations.Controller
             {
                 Direction = (other.bounds.center - center).normalized;                      //Calculate the direction of the attack
             }
+            var damagee = other.GetComponentInParent<IMDamage>();                      //Get the Animal on the Other collider
 
-            TryInteract(other.gameObject);                                              //Get the interactable on the Other collider
-            TryPhysics(other.attachedRigidbody, other, center, Force);       //If the other has a riggid body and it can be pushed
+            var MissedAttack = MissAttack();
+            TryDamage(damagee, statModifier, MissedAttack); //if the other doesn't have the Damageable Interface dont send the Damageable stuff  
+
+            if (MissedAttack) return;
+
+
+            TryInteract(other.gameObject);                                   //Get the interactable on the Other collider
+            TryPhysics(other.attachedRigidbody, other, center, Force);       //If the other has a rigid body and it can be pushed
             TryStopAnimator();
 
-            damagee = other.GetComponentInParent<IMDamage>();                      //Get the Animal on the Other collider
 
             if (damagee != null)
             {
@@ -151,17 +156,15 @@ namespace MalbersAnimations.Controller
             }
             TryHitEffect(other, Trigger.bounds.center, damagee);
 
-            TryDamage(damagee, statModifier); //if the other does'nt have the Damagable Interface dont send the Damagable stuff  
-
             //Store the Last Collider that the animal hit
             if (damagee != null) { damagee.HitCollider = other; }
         }
 
-        private void AttackTriggerExit(GameObject newGo, Collider other)
+        private void AttackTriggerExit(GameObject newGo, Collider other, TriggerProxy proxy)
         {
             if (dontHitOwner && Owner != null && other.transform.IsChildOf(Owner.transform)) return;
 
-            TryDamage(other.GetComponentInParent<IMDamage>(), EnemyStatExit); //if the other does'nt have the Damagable Interface dont send the Damagable stuff
+            TryDamage(other.GetComponentInParent<IMDamage>(), EnemyStatExit); //if the other doesn't have the Damageable Interface dont send the Damageable stuff
         }
 
         public override void DoDamage(bool value, int prof)
@@ -170,8 +173,6 @@ namespace MalbersAnimations.Controller
             // enabled = value;
             CanCauseDamage = value;
         }
-
-
 
 
 #if UNITY_EDITOR
@@ -190,17 +191,22 @@ namespace MalbersAnimations.Controller
 
         void OnDrawGizmos()
         {
+            if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this)) //Show Gizmos only when the Inspector is Open
+            { return; }
+
+
             if (Application.isPlaying)
                 DrawTriggers(transform, Trigger, DebugColor, false);
         }
 
         void OnDrawGizmosSelected()
         {
+            if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this)) //Show Gizmos only when the Inspector is Open
+            { return; }
+
             if (!Application.isPlaying)
                 DrawTriggers(transform, Trigger, DebugColor, true);
         }
-
-
 
 
         //[ContextMenu("Create Cinemachine Impulse")]
@@ -235,7 +241,7 @@ namespace MalbersAnimations.Controller
 
         // MAttackTrigger M;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
             FindBaseProperties();
 

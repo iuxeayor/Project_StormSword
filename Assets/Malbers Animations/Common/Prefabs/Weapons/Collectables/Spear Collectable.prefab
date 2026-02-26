@@ -173,6 +173,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Spear Collectable
       objectReference: {fileID: 0}
+    - target: {fileID: 6614954751395445749, guid: 3290af58b4932f84998a1eea0ae1ecc4,
+        type: 3}
+      propertyPath: m_Size.z
+      value: 1.4945369
+      objectReference: {fileID: 0}
+    - target: {fileID: 6614954751395445749, guid: 3290af58b4932f84998a1eea0ae1ecc4,
+        type: 3}
+      propertyPath: m_Center.z
+      value: -0.24726865
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -276,6 +286,8 @@ MonoBehaviour:
   DebugColor: {r: 0, g: 0.6545739, b: 1, a: 0.27058825}
   DrawAxis: 0
   AxisSize: 0.65
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
 --- !u!114 &3206038087535361995
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -289,9 +301,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Align: 0
-  AlignPos: 0
   AlignTime: 0.15
-  AlignDistance: 1
   PickDelay:
     UseConstant: 1
     ConstantValue: 0.15
@@ -317,6 +327,10 @@ MonoBehaviour:
     ConstantValue: 0
     Variable: {fileID: 0}
   m_Amount:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  canBePicked:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
@@ -366,6 +380,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  OnPickedFailed:
+    m_PersistentCalls:
+      m_Calls: []
   OnPrePicked:
     m_PersistentCalls:
       m_Calls:
@@ -400,8 +417,20 @@ MonoBehaviour:
   PreDroppedReaction:
     rid: -2
   rb: {fileID: 792275939893495741}
+  DestroyRbOnPick:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_colliders:
   - {fileID: 401972636033810428}
+  kinematicOnPick:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  disableColliders:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
   EditorTabs: 0
   references:
     version: 2

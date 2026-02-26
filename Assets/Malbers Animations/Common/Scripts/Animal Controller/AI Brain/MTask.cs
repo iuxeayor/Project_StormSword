@@ -10,8 +10,8 @@ namespace MalbersAnimations.Controller.AI
 
         [Tooltip("ID Used for sending messages to the Brain to see if the Task started")]
         public IntReference MessageID = new(0);
-        [Min(0), Tooltip("Task using Update will be executed every X seconds")]
-        public float UpdateInterval = 0.2f;
+        [Tooltip("Task using Update will be executed every X seconds")]
+        public FloatReference UpdateInterval = new(0.2f);
         [Tooltip("If the previous Task is done then this Task will start")]
         public bool WaitForPreviousTask = false;
 
@@ -30,7 +30,7 @@ namespace MalbersAnimations.Controller.AI
             }
         }
 
-        /// <summary>While a AI State is runing using this Task, run thi Code</summary>
+        /// <summary>While a AI State is running using this Task, run thi Code</summary>
         public virtual void UpdateTask(MAnimalBrain brain, int index) { }
 
         /// <summary>While a AI State Ends, run this Code</summary>
@@ -56,21 +56,9 @@ namespace MalbersAnimations.Controller.AI
     public abstract class BrainBase : ScriptableObject
     {
         [Tooltip("Enable disable Task or Decisions")]
-        public bool active = true;
+        [HideInInspector] public bool active = true;
         [Space, TextArea(3, 10)]
         public string Description = "Type Description Here";
         public virtual void DrawGizmos(MAnimalBrain brain) { }
-
-        //public virtual void OnAnimalStateEnter(MAnimalBrain brain, State state, int index) { }
-        //public virtual void OnAnimalStateExit(MAnimalBrain brain, State state, int index) { }
-        //public virtual void OnAnimalStanceChange(MAnimalBrain brain, int Stance, int index) { }
-        //public virtual void OnAnimalModeStart(MAnimalBrain brain, Mode mode, int index) { }
-        //public virtual void OnAnimalModeEnd(MAnimalBrain brain, Mode mode, int index) { }
-
-        //public virtual void OnTargetAnimalStateEnter(MAnimalBrain brain, State state, int index) { }
-        //public virtual void OnTargetAnimalStateExit(MAnimalBrain brain, State state, int index) { }
-        //public virtual void OnTargetAnimalStanceChange(MAnimalBrain brain, int Stance, int index) { }
-        //public virtual void OnTargetAnimalModeStart(MAnimalBrain brain, Mode mode, int index) { }
-        //public virtual void OnTargetAnimalModeEnd(MAnimalBrain brain, Mode mode, int index) { }
     }
 }

@@ -15,6 +15,8 @@ namespace MalbersAnimations.IK
         public AxisDirection direction = AxisDirection.Forward;
         public override bool RequireTargets => false;
 
+        [Tooltip("Use the Target assigned as the Origin of the RayCast")]
+        public bool UseTargetAsOrigin = false;
 
         public bool position = true;
         [Hide(nameof(position))]
@@ -78,6 +80,11 @@ namespace MalbersAnimations.IK
                 default: break;
             }
 
+            if (UseTargetAsOrigin)
+            {
+                set.Var[index].RootBone = set.Targets[TargetIndex];
+            }
+
             // set.Var[index].Normal = NormalFromDirection(anim);
             //  set.Var[index].vectors.Add(NormalHash, NormalFromDirection(anim));
         }
@@ -91,10 +98,10 @@ namespace MalbersAnimations.IK
 
             var Bone = set.Var[index].Bone; //Get the RootBone
 
-            var NormalV = NormalFromDirection(anim); //Get the Normal Vector
+            // var NormalV = NormalFromDirection(anim); //Get the Normal Vector
 
             var StartPoint = MTools.ClosestPointOnPlane(set.Var[index].RootBone.position, Dir, Bone.position);
-
+            if (UseTargetAsOrigin) StartPoint = set.Targets[TargetIndex].position;
 
             MDebug.DrawWireSphere(StartPoint, Color.magenta, 0.025f);
             MDebug.DrawWireSphere(Bone.position, Color.white, 0.025f);
@@ -156,22 +163,29 @@ namespace MalbersAnimations.IK
                 {
                     Transform bn = null;
 
-                    //Cache the RootBone
-                    switch (goal)
+                    if (UseTargetAsOrigin) bn = IKSet.Targets[TargetIndex];
+                    else
+
                     {
-                        case AvatarIKGoal.LeftFoot:
-                            bn = anim.GetBoneTransform(HumanBodyBones.LeftUpperLeg);
-                            break;
-                        case AvatarIKGoal.RightFoot:
-                            bn = anim.GetBoneTransform(HumanBodyBones.RightUpperLeg);
-                            break;
-                        case AvatarIKGoal.LeftHand:
-                            bn = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm);
-                            break;
-                        case AvatarIKGoal.RightHand:
-                            bn = anim.GetBoneTransform(HumanBodyBones.RightUpperArm);
-                            break;
+                        //Cache the RootBone
+                        switch (goal)
+                        {
+                            case AvatarIKGoal.LeftFoot:
+                                bn = anim.GetBoneTransform(HumanBodyBones.LeftUpperLeg);
+                                break;
+                            case AvatarIKGoal.RightFoot:
+                                bn = anim.GetBoneTransform(HumanBodyBones.RightUpperLeg);
+                                break;
+                            case AvatarIKGoal.LeftHand:
+                                bn = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+                                break;
+                            case AvatarIKGoal.RightHand:
+                                bn = anim.GetBoneTransform(HumanBodyBones.RightUpperArm);
+                                break;
+                        }
                     }
+
+                    if (bn == null) return;
 
                     var StartPositon = bn.position;
 

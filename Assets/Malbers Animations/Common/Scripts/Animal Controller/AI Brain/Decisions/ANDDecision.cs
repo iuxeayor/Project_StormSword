@@ -68,7 +68,7 @@ namespace MalbersAnimations.Controller.AI
 
         private GUIContent plus;
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             FindTarget();
             if (plus == null) plus = UnityEditor.EditorGUIUtility.IconContent("d_Toolbar Plus");

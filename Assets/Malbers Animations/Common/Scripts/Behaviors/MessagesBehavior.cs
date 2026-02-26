@@ -18,9 +18,9 @@ namespace MalbersAnimations
         public bool debug;
         public bool NormalizeTime = true;
 
-        public MesssageItem[] onEnterMessage;   //Store messages to send it when Enter the animation State
-        public MesssageItem[] onExitMessage;    //Store messages to send it when Exit  the animation State
-        public MesssageItem[] onTimeMessage;    //Store messages to send on a specific time  in the animation State
+        public MessageItem[] onEnterMessage;   //Store messages to send it when Enter the animation State
+        public MessageItem[] onExitMessage;    //Store messages to send it when Exit  the animation State
+        public MessageItem[] onTimeMessage;    //Store messages to send on a specific time  in the animation State
 
         IAnimatorListener[] listeners;         //To all the MonoBehavious that Have this 
 
@@ -84,7 +84,7 @@ namespace MalbersAnimations
                 }
         }
 
-        private void SendAnimatorMessage(Animator animator, MesssageItem onExitM)
+        private void SendAnimatorMessage(Animator animator, MessageItem onExitM)
         {
             if (UseSendMessage)
                 onExitM.DeliverMessage(animator, SendToChildren, debug);

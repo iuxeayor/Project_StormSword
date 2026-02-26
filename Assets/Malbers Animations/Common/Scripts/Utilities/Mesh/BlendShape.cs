@@ -21,6 +21,7 @@ namespace MalbersAnimations.Utilities
         [Tooltip("Max Value to use on the blendshapes")]
         public float Max = 100;
 
+        [Tooltip("Start with a random shape on Start")]
         public bool random;
         public int PinnedShape;
 
@@ -100,7 +101,7 @@ namespace MalbersAnimations.Utilities
 
         public void LoadPreset(BlendShapePreset preset)
         {
-            if (preset)
+            if (preset && preset.blendShapes != null && preset.blendShapes.Length > 0)
             {
                 blendShapes = new float[preset.blendShapes.Length];
 
@@ -236,9 +237,11 @@ namespace MalbersAnimations.Utilities
         void CreateListeners()
         {
 
-            MEventListener listener = this.FindComponent<MEventListener>();
-            if (listener == null) listener = transform.root.gameObject.AddComponent<MEventListener>();
-            if (listener.Events == null) listener.Events = new List<MEventItemListener>();
+            MEventListener listener =
+                (this.FindComponent<MEventListener>()
+                ?? transform.root.GetComponentInChildren<MEventListener>())
+                ?? transform.root.gameObject.AddComponent<MEventListener>();
+            listener.Events ??= new List<MEventItemListener>();
 
             MEvent BlendS = MTools.GetInstance<MEvent>("Blend Shapes");
 

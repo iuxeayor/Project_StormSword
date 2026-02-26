@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -33,6 +41,7 @@ MonoBehaviour:
   General:
     modify: 7423
     RootMotion: 1
+    RootMotionRotation: 0
     Sprint: 1
     Gravity: 0
     Grounded: 1
@@ -63,6 +72,17 @@ MonoBehaviour:
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 1
@@ -189,13 +209,18 @@ MonoBehaviour:
         ConstantValue: 4
         Variable: {fileID: 0}
   ID: {fileID: 11400000, guid: e71f5adec2f2e10438b86050fb7f94c6, type: 2}
+  EnterConditions:
+    conditions: []
+  ExitConditions:
+    conditions: []
+  tags: []
   OrientLerp:
     UseConstant: 1
     ConstantValue: 5
     Variable: {fileID: 0}
-  ignoreRotation:
+  MinSlopeAngle:
     UseConstant: 1
-    ConstantValue: 1
+    ConstantValue: 0
     Variable: {fileID: 0}
   RotationAngle:
     UseConstant: 1
@@ -205,19 +230,35 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 5
     Variable: {fileID: 0}
-  EnterAngleSlope:
-    UseConstant: 1
-    ConstantValue: 0
-    Variable: {fileID: 0}
   ExitSpeed:
     UseConstant: 1
     ConstantValue: 0.5
     Variable: {fileID: 0}
-  ExitAngleSlope:
+  ExitSlopeAngleFall:
     UseConstant: 1
-    ConstantValue: 60
+    ConstantValue: 70
     Variable: {fileID: 0}
   ExitWaitTime:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
+  AutoSlope: 0
+  EnterAngleSlope:
+    UseConstant: 1
+    ConstantValue: 30
+    Variable: {fileID: 0}
+  EnterMaxAngleSlope:
+    UseConstant: 1
+    ConstantValue: 70
+    Variable: {fileID: 0}
+  FacingAngleSlope:
+    UseConstant: 1
+    ConstantValue: 90
+    Variable: {fileID: 0}
+  ignoreRotation:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

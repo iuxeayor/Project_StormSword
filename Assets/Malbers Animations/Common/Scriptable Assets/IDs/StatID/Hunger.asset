@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6bc9525668e41846992f78c6d05b3b6, type: 3}
   m_Name: Hunger
   m_EditorClassIdentifier: 
-  ID: 5
+  DisplayName: Hunger
+  ID: 8

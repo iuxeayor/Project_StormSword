@@ -1,7 +1,7 @@
 ﻿using MalbersAnimations.Scriptables;
 using UnityEngine;
 using MalbersAnimations.Events;
-using MalbersAnimations.Reactions;
+using System.Collections.Generic;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -9,9 +9,8 @@ using UnityEditor;
 
 namespace MalbersAnimations.Utilities
 {
-    [DefaultExecutionOrder(15)]
-    [SelectionBase]
     [AddComponentMenu("Malbers/Interaction/Interactable")]
+    [DefaultExecutionOrder(15), SelectionBase]
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/global-components/interactable")]
     public class MInteract : MonoBehaviour, IInteractable
     {
@@ -19,14 +18,13 @@ namespace MalbersAnimations.Utilities
         public IntReference m_ID = new(0);
         [Tooltip("ID for the Interactor. Makes this Interactable to interact only with Interactors with this ID Value\n" +
             "By default its -1, which means that can be activated by anyone")]
-        [UnityEngine.Serialization.FormerlySerializedAs("m_InteracterID")]
         public IntReference m_InteractorID = new(-1);
 
         [Tooltip("If the Interactor has this Interactable focused, it will interact with it automatically.\n" +
             "It also is used by the AI Animals. If the Animal Reaches this gameobject to Interact with it this needs to be set to true")]
         [SerializeField] private BoolReference m_Auto = new(false);
 
-        [Tooltip("Interact Once, after that it cannot longer work, unlest the Interactable is Restarted. Disable the component")]
+        [Tooltip("Interact Once, after that it cannot longer work, unless the Interactable is Restarted. Disable the component")]
         [SerializeField] private BoolReference m_singleInteraction = new(false);
 
         [Tooltip("Destroy after a Single Interaction. (After the Delay)")]
@@ -38,21 +36,14 @@ namespace MalbersAnimations.Utilities
         [Tooltip("CoolDown between Interactions when the Interactable is NOT a Single/One time interaction")]
         public FloatReference m_CoolDown = new(0);
 
-        [Tooltip("When an Interaction is executed these events will be invoked." +
-            "\n\nOnInteractWithGO(GameObject) -> will have the *INTERACTER* gameObject as parameter" +
-            "\n\nOnInteractWith(Int) -> will have the *INTERACTER* ID as parameter")]
-        public InteractionEvents events = new();
+        public bool debug;
 
+        public List<MInteractorReaction> reactions = new();
+        public GameObjectEvent OnInteractWithGO = new();
+        public IntEvent OnInteractWithID = new();
         public GameObjectEvent OnFocused = new();
         public GameObjectEvent OnUnfocused = new();
-
-        //[SerializeReference, SubclassSelector]
-        //public Reaction InteractReaction;
-        //[SerializeReference, SubclassSelector]
-        //public Reaction FocusedReaction;
-        //[SerializeReference, SubclassSelector]
-        //public Reaction UnFocusedReaction;
-        
+        public BoolEvent OnCoolDown = new();
         public int Index => m_ID;
 
         public bool Active { get => enabled && !InCooldown; set => enabled = value; }
@@ -69,54 +60,64 @@ namespace MalbersAnimations.Utilities
         /// <summary>Is the Interactable in CoolDown?</summary>
         public bool InCooldown => !MTools.ElapsedTime(CurrentActivationTime, Cooldown);
 
-        public IInteractor CurrentInteractor { get; set; }
+        public IInteractor FocusedBy { get; set; }
 
-        private bool focused;
-        public bool Focused
-        {
-            get => focused;
-            set
-            {
-                if (focused != value)
-                {
-                    focused = value;
-
-                    if (focused)
-                    {
-                        OnFocused.Invoke(CurrentInteractor?.Owner);
-                    }
-                    else
-                    {
-                        OnUnfocused.Invoke(CurrentInteractor?.Owner);
-                    }
-                }
-            }
-        }
+        public virtual bool Focused { get; set; }
 
         public GameObject Owner { get; set; }
 
-        private float CurrentActivationTime;
+        protected float CurrentActivationTime;
 
         public string Description = "Invoke events when an Interactor interacts with it";
         [HideInInspector] public bool ShowDescription = true;
         [ContextMenu("Show Description")]
         internal void EditDescription() => ShowDescription ^= true;
 
-        private void OnEnable()
+        public virtual void OnEnable()
         {
             Owner = transform.FindObjectCore().gameObject;
             CurrentActivationTime = -Cooldown;
         }
 
-        private void OnDisable()
+        public virtual void OnDisable()
         {
-            focused = false;
-            CurrentInteractor?.UnFocus(this);    //Clean the Current Focused item  
+            FocusedBy?.UnFocus(this); //Make sure the Interactor is unfocused when the Interactable is disabled
+
+            UnFocus(FocusedBy); //Unfocus the Interactable if it was focused by an Interactor
         }
+
+        public void UnFocus(IInteractor focuser)
+        {
+            if (Focused && FocusedBy != null && FocusedBy == focuser)
+            {
+                Focused = false; //Set the Interactable as Unfocused
+                OnUnfocused.Invoke(FocusedBy.Owner); //Invoke the Unfocused Event
+                Debugging($"Unfocused by [{focuser.Owner.name}] [ID: {focuser.ID}]");
+
+                FocusedBy = null;
+            }
+        }
+
+        public void Focus(IInteractor focuser)
+        {
+            FocusedBy = focuser;      //Set the new Interactor
+            Focused = true; //Set the Interactable as Focused
+            OnFocused.Invoke(FocusedBy.Owner);
+            Debugging($"Focused by [{focuser.Owner.name}] [ID: {focuser.ID}]");
+        }
+
+
+
+        private void Debugging(string msg)
+        {
+            if (debug)
+                MDebug.Log($"<B><color=green>Interactable</color>:</b> [{name}] -> [<color=green><B>{msg}</B></color>]", this);
+        }
+
 
         /// <summary> Receive an Interaction from the Interacter </summary>
         /// <param name="InteracterID">ID of the Interacter</param>
-        /// <param name="interacter">Interacter's GameObject</param>
+        /// <param name="interacter">Interactor's GameObject</param>
         public bool Interact(int InteracterID, GameObject interacter)
         {
             if (Active)
@@ -127,20 +128,34 @@ namespace MalbersAnimations.Utilities
 
                     this.Delay_Action(Delay, () =>
                      {
-                         events.OnInteractWithGO.Invoke(interacter);
-                         events.OnInteractWith.Invoke(InteracterID);
+                         OnInteractWithGO.Invoke(interacter);
+                         OnInteractWithID.Invoke(InteracterID);
+
+                         foreach (var r in reactions)
+                         {
+                             r.React(InteracterID, interacter);
+                         }
+
+                         if (interacter) Debugging($"Interacted with [{interacter.name}] [ID: {InteracterID}]");
                      }
                     );
 
                     if (SingleInteraction)
                     {
                         Focused = false;
+                        OnUnfocused.Invoke(interacter);
                         Active = false;
 
                         if (m_Destroy.Value)
                         {
-                            Destroy(gameObject, Delay + 0.001f); //Destroy one frame after
+                            Destroy(base.gameObject, Delay + 0.001f); //Destroy one frame after
                         }
+                    }
+
+                    if (Cooldown > 0 && !m_Destroy.Value)
+                    {
+                        OnCoolDown.Invoke(true);
+                        this.Delay_Action(Cooldown, () => OnCoolDown.Invoke(false));
                     }
                     return true;
                 }
@@ -151,20 +166,22 @@ namespace MalbersAnimations.Utilities
 
         /// <summary>  Receive an Interaction from an gameObject </summary>
         /// <param name="InteracterID">ID of the Interacter</param>
-        /// <param name="interacter">Interacter's GameObject</param>
-        public bool Interact(IInteractor interacter)
+        /// <param name="interacter">Interactor's GameObject</param>
+        public virtual bool Interact(IInteractor interacter)
         {
             if (interacter != null)
-                return Interact(interacter.ID, interacter.Owner.gameObject);
+                return Interact(interacter.ID, interacter.Owner);
 
             return false;
         }
 
-        public void Interact() => Interact(-1, null);
+        public virtual void Interact() => Interact(-1, null);
 
         public virtual void Restart()
         {
             Focused = false;
+            OnUnfocused.Invoke(null);
+
             Active = true;
             CurrentActivationTime = -Cooldown;
         }
@@ -173,25 +190,25 @@ namespace MalbersAnimations.Utilities
 
         public void DestroyMe(float time)
         {
-            Destroy(gameObject, time);
+            Destroy(base.gameObject, time);
         }
-
     }
 
-
+    #region Inspector
+    //-------------------------INSPECTOR-------------------------------------------------------------------------------------------------------------------
 #if UNITY_EDITOR
     [UnityEditor.CustomEditor(typeof(MInteract)), CanEditMultipleObjects]
     public class MInteractEditor : UnityEditor.Editor
     {
-        SerializedProperty m_ID, m_InteractorID, m_Auto, m_singleInteraction, m_Delay, m_Destroy, 
-            //InteractReaction, FocusedReaction, UnFocusedReaction,
-            m_CoolDown, events, OnFocused, OnUnfocused, Editor_Tabs1, Description, ShowDescription;
-        protected string[] Tabs1 = new string[] { "General", "Events"/*, "Reactions" */};
+        SerializedProperty m_ID, m_InteractorID, m_Auto, m_singleInteraction, m_Delay, m_Destroy,
+            m_CoolDown, OnFocused, OnUnfocused, OnInteractWithGO, OnInteractWithID, debug, reactions,
+            OnCoolDown, Editor_Tabs1, Description, ShowDescription;
+        protected string[] Tabs1 = new string[] { "General", "Events", "Reactions" };
         MInteract M;
 
         public static GUIStyle StyleBlue => MTools.Style(new Color(0, 0.5f, 1f, 0.3f));
         private GUIStyle style;
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             M = (MInteract)target;
             m_ID = serializedObject.FindProperty("m_ID");
@@ -200,17 +217,20 @@ namespace MalbersAnimations.Utilities
             m_singleInteraction = serializedObject.FindProperty("m_singleInteraction");
             m_Delay = serializedObject.FindProperty("m_Delay");
             m_CoolDown = serializedObject.FindProperty("m_CoolDown");
-            events = serializedObject.FindProperty("events");
             OnFocused = serializedObject.FindProperty("OnFocused");
             OnUnfocused = serializedObject.FindProperty("OnUnfocused");
             Editor_Tabs1 = serializedObject.FindProperty("Editor_Tabs1");
             ShowDescription = serializedObject.FindProperty("ShowDescription");
             Description = serializedObject.FindProperty("Description");
             m_Destroy = serializedObject.FindProperty("m_Destroy");
-          //  InteractReaction = serializedObject.FindProperty("InteractReaction");
-           // FocusedReaction = serializedObject.FindProperty("FocusedReaction");
-           // UnFocusedReaction = serializedObject.FindProperty("UnFocusedReaction");
+            OnCoolDown = serializedObject.FindProperty("OnCoolDown");
 
+
+            OnInteractWithGO = serializedObject.FindProperty("OnInteractWithGO");
+            OnInteractWithID = serializedObject.FindProperty("OnInteractWithID");
+            debug = serializedObject.FindProperty("debug");
+
+            reactions = serializedObject.FindProperty("reactions");
         }
 
         public override void OnInspectorGUI()
@@ -228,44 +248,55 @@ namespace MalbersAnimations.Utilities
                         alignment = TextAnchor.MiddleLeft,
                         stretchWidth = true
                     };
+                    style.normal.textColor = EditorStyles.label.normal.textColor;
                 }
 
-                style.normal.textColor = EditorStyles.label.normal.textColor;
                 Description.stringValue = UnityEditor.EditorGUILayout.TextArea(Description.stringValue, style);
             }
 
             //MalbersEditor.DrawDescription("Interactable Element that invoke events when an Interactor interact with it");
             Editor_Tabs1.intValue = GUILayout.Toolbar(Editor_Tabs1.intValue, Tabs1);
 
+            if (Application.isPlaying)
+            {
+                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                {
+                    using (new EditorGUI.DisabledGroupScope(true))
+                    {
+                        EditorGUILayout.ObjectField("Current Interactor",
+                            M.FocusedBy?.Owner, typeof(GameObject), false);
+
+                        Repaint();
+                    }
+                }
+            }
+
             switch (Editor_Tabs1.intValue)
             {
                 case 0: DrawGeneral(); break;
                 case 1: DrawEvents(); break;
-               // case 2: DrawReactions(); break;
+                case 2: DrawReactions(); break;
                 default:
                     break;
             }
-
-
-
-            if (Application.isPlaying)
-            {
-                using (new EditorGUI.DisabledGroupScope(true))
-                {
-                    EditorGUILayout.ObjectField("Interactor",
-                        M.CurrentInteractor != null ? M.CurrentInteractor.Owner : null, typeof(GameObject), false);
-
-                }
-            }
-
             serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawReactions()
+        {
+            EditorGUILayout.PropertyField(reactions);
         }
 
         private void DrawGeneral()
         {
             using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                EditorGUILayout.PropertyField(m_InteractorID, new GUIContent("Interactor ID"));
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PropertyField(m_InteractorID, new GUIContent("Interactor ID"));
+                    MalbersEditor.DrawDebugIcon(debug);
+                }
                 EditorGUILayout.PropertyField(m_ID, new GUIContent("Index"));
 
                 EditorGUILayout.PropertyField(m_Auto, new GUIContent("Auto Interact"));
@@ -284,25 +315,18 @@ namespace MalbersAnimations.Utilities
             EditorGUIUtility.labelWidth = 0;
         }
 
-        //private void DrawReactions()
-        //{
-        //    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
-        //    {
-        //        EditorGUILayout.PropertyField(InteractReaction);
-        //        EditorGUILayout.PropertyField(FocusedReaction);
-        //        EditorGUILayout.PropertyField(UnFocusedReaction);
-        //    }
-        //}
-
         private void DrawEvents()
         {
-            EditorGUILayout.PropertyField(events, true);
-            if (events.isExpanded)
-            {
-                EditorGUILayout.PropertyField(OnFocused);
-                EditorGUILayout.PropertyField(OnUnfocused);
-            }
+            EditorGUILayout.PropertyField(OnInteractWithGO);
+            EditorGUILayout.PropertyField(OnInteractWithID);
+            EditorGUILayout.PropertyField(OnFocused);
+            EditorGUILayout.PropertyField(OnUnfocused);
+
+            if (M.Cooldown > 0)
+                EditorGUILayout.PropertyField(OnCoolDown);
         }
     }
 #endif
+    //-------------------------------------------------------------------------------------------------------------------------------------------------------
+    #endregion
 }

@@ -8,9 +8,10 @@ namespace MalbersAnimations.Utilities
     [AddComponentMenu("Malbers/Utilities/Multiple Time Checker")]
     public class MultipleTimeChecker : MonoBehaviour
     {
-        [Tooltip("Amount of taps/click/checks you need to ")]
+        [Tooltip("Amount of taps/clicks/checks needed to trigger the event.")]
         [Min(1)] public int MaxChecks = 2;
-        [Min(0.1f)] public float interval = 0.3f;
+        [Min(0.1f)] public float interval = 0.6f;
+        public bool debug;
 
         public int CurrentCheck { get; private set; }
         public float CurrentTime { get; private set; }
@@ -19,53 +20,41 @@ namespace MalbersAnimations.Utilities
         public UnityEvent CheckSuccessful = new();
 
 
-        public bool debug;
-
-
+        [MButton("Check", "Test", true)]
+        public bool TestButton;
 
         public void Check()
         {
-            //Means that is the first Tap
-            if (CurrentTime != 0)
+            if (MTools.ElapsedTime(CurrentTime, interval))
             {
-                if (!MTools.ElapsedTime(CurrentTime, interval))
-                {
-                    //Check if we have made the multiple Clicks/Taps/checks
-                    if (CurrentCheck == MaxChecks)
-                    {
-                        if (debug) Debug.Log("Max Checks Successful!");
-                        CheckSuccessful.Invoke();
-                        ResetCheck();
-                    }
-                    else
-                    {
-                        CheckAdd();
-                    }
-                }
-                else //Is not in the interval so reset the Checker
-                {
-                    ResetCheck();
-                    CheckAdd();
-                }
+                // Reset if the interval is exceeded
+                ResetCheck();
+            }
+
+            // Increase check count
+            CurrentCheck++;
+
+            if (debug) Debug.Log($"Check [{CurrentCheck}] at time: {Time.time}");
+
+            CheckStep.Invoke(CurrentCheck);
+
+            if (CurrentCheck >= MaxChecks)
+            {
+                if (debug) Debug.Log("Max Checks Successful!");
+                CheckSuccessful.Invoke();
+                ResetCheck();
             }
             else
             {
-                CheckAdd();
+                // Store the current time for interval tracking
+                CurrentTime = Time.time;
             }
         }
 
         void ResetCheck()
         {
-            CurrentCheck = 1;
-            CurrentTime = 0;
-        }
-
-        void CheckAdd()
-        {
-            CurrentCheck++;
-            if (debug) Debug.Log($"Check [{CurrentCheck}]");
+            CurrentCheck = 0; // Start fresh from zero
             CurrentTime = Time.time;
-            CheckStep.Invoke(CurrentCheck);
         }
     }
 }

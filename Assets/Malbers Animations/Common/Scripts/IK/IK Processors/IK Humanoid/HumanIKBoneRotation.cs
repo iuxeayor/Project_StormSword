@@ -1,4 +1,7 @@
 using UnityEngine;
+using MalbersAnimations.Scriptables;
+
+
 
 
 #if UNITY_EDITOR
@@ -28,23 +31,18 @@ namespace MalbersAnimations.IK
         public RotationOffsetType rotationType;
 
         [SearcheableEnum] public HumanBodyBones humanBone;
+
+
         [Tooltip("Rotation Offset applied to the bone")]
-        public Vector3 offset;
+        public Vector3Reference Offset;
 
         public bool gizmos = true;
-
-
-        //HumanPoseHandler humanPoseHandler;
-        //HumanPose humanPose;
 
         public override bool RequireTargets => false;
 
         public override void Start(IKSet IKSet, Animator anim, int index)
         {
             IKSet.Var[index].rotations.TryAdd((int)humanBone, Quaternion.identity);
-
-            //humanPoseHandler = new HumanPoseHandler(anim.avatar, anim.transform);
-            //humanPoseHandler.GetHumanPose(ref humanPose);
         }
 
         public override void OnAnimatorIK(IKSet set, Animator anim, int index, float weight)
@@ -56,10 +54,8 @@ namespace MalbersAnimations.IK
 
             set.Var[index].rotations[(int)humanBone] = Bone.rotation; //Store the Current World Rotation
 
-
-            var OffsetRot = Quaternion.Euler(offset);
+            var OffsetRot = Quaternion.Euler(Offset.Value);
             var InverseRot = Quaternion.Inverse(Bone.parent.rotation); //This is the Bone Rotation in world coordinates
-
 
             Quaternion finalRotation = Quaternion.identity;
 
@@ -93,19 +89,11 @@ namespace MalbersAnimations.IK
                 case RotationOffsetType.RootRelativeRotationAdditive:
                     finalRotation = Bone.localRotation * root.rotation * OffsetRot;
                     break;
-                //case BoneOffset.IKType.LootAtYAxis:
-                //    Vector3 RotationAxis = Vector3.Cross(transform.up, Direction).normalized;
-                //    var VerticalAngle = (Vector3.Angle(transform.up, Direction) - 90);   //Get the Normalized value for the look direction
-                //    finalRotation = Quaternion.AngleAxis(VerticalAngle, RotationAxis); // * transform.rotation;
-                //    finalRotation = InverseRot * finalRotation * OffsetRot;
-                //    MDebug.DrawRay(offset.Bone.position, RotationAxis, Color.red);
-                //    MDebug.DrawRay(offset.Bone.position, Direction, Color.green);
-                //    break;
                 default:
                     break;
             }
 
-            // if (!(System.Single.IsNaN(finalRotation.x) || System.Single.IsNaN(finalRotation.y) || System.Single.IsNaN(finalRotation.z)))
+            if (!(System.Single.IsNaN(finalRotation.x) || System.Single.IsNaN(finalRotation.y) || System.Single.IsNaN(finalRotation.z)))
             {
                 var result = Quaternion.Slerp(Bone.localRotation, finalRotation, weight);
                 anim.SetBoneLocalRotation(humanBone, result);
@@ -179,25 +167,25 @@ namespace MalbersAnimations.IK
                             {
                                 case RotationOffsetType.LocalAdditive:
                                     startRotation = set.Var[index].rotations[(int)humanBone]; //Get the Rotation before IK 
-                                    NewRotation = Handles.RotationHandle(startRotation * Quaternion.Euler(offset), Pos);
+                                    NewRotation = Handles.RotationHandle(startRotation * Quaternion.Euler(Offset.Value), Pos);
                                     NewRotation = Quaternion.Inverse(startRotation) * NewRotation;
                                     break;
 
                                 case RotationOffsetType.LocalOverride:
                                     startRotation = RootBone.parent.rotation;
-                                    NewRotation = Handles.RotationHandle(startRotation * Quaternion.Euler(offset), Pos);
+                                    NewRotation = Handles.RotationHandle(startRotation * Quaternion.Euler(Offset.Value), Pos);
                                     NewRotation = Quaternion.Inverse(startRotation) * NewRotation;
                                     break;
 
                                 case RotationOffsetType.RootRelativeRotationOverride:
                                     startRotation = animator.rootRotation; ;
-                                    NewRotation = Handles.RotationHandle(startRotation * Quaternion.Euler(offset), Pos);
+                                    NewRotation = Handles.RotationHandle(startRotation * Quaternion.Euler(Offset.Value), Pos);
                                     NewRotation = Quaternion.Inverse(startRotation) * NewRotation;
                                     break;
 
                                 case RotationOffsetType.RootRelativeRotationAdditive:
                                     startRotation = animator.rootRotation * set.Var[index].rotations[(int)humanBone]; //Get the Rotation before IK 
-                                    NewRotation = Handles.RotationHandle(startRotation * Quaternion.Euler(offset), Pos);
+                                    NewRotation = Handles.RotationHandle(startRotation * Quaternion.Euler(Offset.Value), Pos);
                                     NewRotation = Quaternion.Inverse(startRotation) * NewRotation;
                                     break;
 
@@ -208,7 +196,7 @@ namespace MalbersAnimations.IK
                             if (cc.changed)
                             {
                                 Undo.RecordObject(Target, "Change Rot");
-                                offset = NewRotation.eulerAngles;
+                                Offset.Value = NewRotation.eulerAngles;
                                 EditorUtility.SetDirty(Target);
                             }
                         }

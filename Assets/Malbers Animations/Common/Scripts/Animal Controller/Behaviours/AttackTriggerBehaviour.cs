@@ -8,21 +8,20 @@ namespace MalbersAnimations.Controller
         [Tooltip("0: Disable All Attack Triggers\n-1: Enable All Attack Triggers\nx: Enable the Attack Trigger by its index")]
         public int AttackTrigger = 1;                           //ID of the Attack Trigger to Enable/Disable during the Attack Animation
         [Tooltip("Profile to activate on the Damager")]
-        [Min(0)]public int Profile = 0;                           
+        [Min(0)] public int Profile = 0;
 
         [Tooltip("Range on the Animation that the Attack Trigger will be Active")]
         [MinMaxRange(0, 1)]
-        public RangedFloat AttackActivation = new RangedFloat(0.3f, 0.6f);
-       
+        public RangedFloat AttackActivation = new(0.3f, 0.6f);
+
         private bool isOn, isOff;
         private IMDamagerSet[] damagers;
-
 
         override public void OnStateEnter(Animator anim, AnimatorStateInfo stateInfo, int layerIndex)
         {
             isOn = isOff = false;                                   //Reset the ON/OFF parameters (to be used on the Range of the animation
 
-            if (damagers == null) damagers = anim.GetComponents<IMDamagerSet>();
+            damagers ??= anim.GetComponents<IMDamagerSet>();
 
             //Let know everybody that an attack trigger animation has started (Needed for the Weapon Manager)
             if (damagers != null)
@@ -36,7 +35,7 @@ namespace MalbersAnimations.Controller
 
             if (!isOn && (time >= AttackActivation.minValue))
             {
-                foreach (var d in damagers) d.ActivateDamager(AttackTrigger,Profile);
+                foreach (var d in damagers) d.ActivateDamager(AttackTrigger, Profile);
                 isOn = true;
             }
 

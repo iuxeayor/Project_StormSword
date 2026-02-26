@@ -291,7 +291,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.005
+      scalar: 0.01
       minScalar: 0.05
       maxCurve:
         serializedVersion: 2
@@ -4758,10 +4758,13 @@ ParticleSystemRenderer:
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2882798700a712745a82f089f5dc74b6, type: 2}
+  - {fileID: 2100000, guid: c10b1630d5621ec48a17223c3c102023, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4825,7 +4828,8 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: a8010093efff97f4dbadb67921c7f4b9, type: 3}
-  m_PlayOnAwake: 1
+  m_Resource: {fileID: 8300000, guid: a8010093efff97f4dbadb67921c7f4b9, type: 3}
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -9727,6 +9731,9 @@ ParticleSystemRenderer:
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -9835,15 +9842,13 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 198000010737321038, guid: f0185de6019ebaa4db45528f37bad8d2,
-        type: 3}
+    - target: {fileID: 198000010737321038, guid: f0185de6019ebaa4db45528f37bad8d2, type: 3}
       propertyPath: stopAction
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 198000010737321038, guid: f0185de6019ebaa4db45528f37bad8d2,
-        type: 3}
+    - target: {fileID: 198000010737321038, guid: f0185de6019ebaa4db45528f37bad8d2, type: 3}
       propertyPath: InitialModule.startColor.maxColor.a
-      value: 1
+      value: 0.16862746
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9852,8 +9857,7 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: f0185de6019ebaa4db45528f37bad8d2, type: 3}
 --- !u!4 &2169840606521288859 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 4000012418388856, guid: f0185de6019ebaa4db45528f37bad8d2,
-    type: 3}
+  m_CorrespondingSourceObject: {fileID: 4000012418388856, guid: f0185de6019ebaa4db45528f37bad8d2, type: 3}
   m_PrefabInstance: {fileID: 2167048858228554723}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5840033381471904074
@@ -9908,6 +9912,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 477778, guid: 58b3b7a5c5273e24aa8931f09e57c303, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.0027
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9915,7 +9923,6 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 58b3b7a5c5273e24aa8931f09e57c303, type: 3}
 --- !u!4 &5840033381471521520 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 453562, guid: 58b3b7a5c5273e24aa8931f09e57c303,
-    type: 3}
+  m_CorrespondingSourceObject: {fileID: 453562, guid: 58b3b7a5c5273e24aa8931f09e57c303, type: 3}
   m_PrefabInstance: {fileID: 5840033381471904074}
   m_PrefabAsset: {fileID: 0}

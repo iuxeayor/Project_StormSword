@@ -47,7 +47,7 @@ namespace MalbersAnimations.Utilities
 
             if (e.animatorClipInfo.weight < 0.1) return; // if is too small the weight of the animation clip do nothing
 
-            if (debug) Debug.Log($"Play Audio: Clip - [{e.animatorClipInfo.clip.name}]",e.animatorClipInfo.clip);
+            if (debug) Debug.Log($"Play Audio: Clip - [{e.animatorClipInfo.clip.name}]", e.animatorClipInfo.clip);
 
             var SoundEvent = m_EventSound.Find(item => item.name == e.stringParameter && item.active == true);
 
@@ -182,7 +182,7 @@ namespace MalbersAnimations.Utilities
         private SerializedProperty m_EventSound, debug;
         private AnimatorEventSounds M;
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             M = ((AnimatorEventSounds)target);
 
@@ -203,8 +203,8 @@ namespace MalbersAnimations.Utilities
 
             EditorGUI.BeginChangeCheck();
             {
-               // EditorGUILayout.BeginVertical(MTools.StyleGray);
-                { 
+                // EditorGUILayout.BeginVertical(MTools.StyleGray);
+                {
                     list.DoLayoutList();
 
                     if (list.index != -1)
@@ -225,7 +225,7 @@ namespace MalbersAnimations.Utilities
                         EditorGUILayout.PropertyField(serializedObject.FindProperty("_audioSource"), new GUIContent("Global Source", "AudioSource"), true);
 
                 }
-              //  EditorGUILayout.EndVertical();
+                //  EditorGUILayout.EndVertical();
             }
             if (EditorGUI.EndChangeCheck())
             {

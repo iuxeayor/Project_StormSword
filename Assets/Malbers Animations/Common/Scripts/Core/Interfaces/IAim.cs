@@ -49,6 +49,9 @@ namespace MalbersAnimations
 
         /// <summary>Calculate the Aiming Logic</summary>
         void CalculateAiming();
+
+        /// <summary>Remove the Target</summary>
+        void ClearTarget();
     }
 
     public interface IAimTarget

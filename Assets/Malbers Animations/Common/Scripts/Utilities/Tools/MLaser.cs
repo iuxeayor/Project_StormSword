@@ -2,7 +2,7 @@
 
 namespace MalbersAnimations.Utilities
 {
-    [AddComponentMenu("Malbers/Utilities/Laser")] 
+    [AddComponentMenu("Malbers/Utilities/Laser")]
     public class MLaser : MonoBehaviour
     {
         [RequiredField] public TrailRenderer trail;
@@ -42,6 +42,6 @@ namespace MalbersAnimations.Utilities
             trail.widthMultiplier = 0.1f;
         }
 
-       
+
     }
 }

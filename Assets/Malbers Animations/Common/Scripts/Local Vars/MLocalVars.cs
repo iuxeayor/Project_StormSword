@@ -59,11 +59,11 @@ namespace MalbersAnimations
             }
         }
 
-        public void SetVar<T>(string name, object value)
+        public void SetVar<T>(string name, T value)
         {
             if (vars.ContainsKey(name))
             {
-                vars[name] = (T)value;
+                vars[name] = value;
 #if UNITY_EDITOR
                 //Update the variables list with the new value. The list is not needed at runtime
                 variables.Find(v => v.name == name).SetValue(value);
@@ -71,7 +71,7 @@ namespace MalbersAnimations
             }
             else
             {
-                vars.Add(name, (T)value); //Update the dictionary
+                vars.Add(name, value); //Update the dictionary
 
 #if UNITY_EDITOR
                 //Add the variables list with the new value. The list is not needed at runtime
@@ -90,6 +90,10 @@ namespace MalbersAnimations
             return vars.Get<T>(name);
         }
 
+
+        public virtual bool HasVar(string name) => vars.ContainsKey(name);
+        public virtual bool HasVar(LocalVar var) => vars.ContainsKey(var.name);
+
         public void Pin_Var(string name)
         {
             if (vars.ContainsKey(name))
@@ -99,7 +103,7 @@ namespace MalbersAnimations
             }
             else
             {
-                Debug.LogWarning($"[{transform.name}] - [Local Variables]  does not contain the var <{name}>", this);
+                Debug.LogWarning($"[{transform.name}] - [Local Variables]  does not contain the var <{name}>. <B><color=orange>Vars are Case sensitive!!</color></B> ", this);
                 PinVar.name = string.Empty;
                 PinVar.index = -1;
             }
@@ -109,14 +113,20 @@ namespace MalbersAnimations
         public void Var_Set_True(string name)
         {
             Pin_Var(name);
-            if (!string.IsNullOrEmpty(PinVar.name)) vars[PinVar.name] = true;
+            if (!string.IsNullOrEmpty(PinVar.name))
+            {
+                SetVar(name, true);
+            }
         }
+
         public void Var_Set_False(string name)
         {
             Pin_Var(name);
-            if (!string.IsNullOrEmpty(PinVar.name)) vars[PinVar.name] = false;
+            if (!string.IsNullOrEmpty(PinVar.name))
+            {
+                SetVar(name, false);
+            }
         }
-
 
         public virtual void Pin_SetValue(int value)
         {
@@ -126,7 +136,6 @@ namespace MalbersAnimations
                 if (PinVar.index != -1) variables[PinVar.index].intValue = value; //update variable list
             }
         }
-
 
         public virtual void Pin_SetValue(float value)
         {
@@ -350,7 +359,6 @@ namespace MalbersAnimations
         public enum VarType { Int, Float, Bool, String, Vector3, Vector2, GameObject, Transform, Material, UnityObject }
     }
 
-
     #region EDITOR STUFF
 
 #if UNITY_EDITOR
@@ -447,21 +455,34 @@ namespace MalbersAnimations
     public class MLocalVarsEditor : Editor
     {
         SerializedProperty variables;
+        MLocalVars M;
 
         private void OnEnable()
         {
             variables = serializedObject.FindProperty("variables");
+
+            M = target as MLocalVars;
         }
+
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
 
-            EditorGUILayout.PropertyField(variables);
+            using (var cc = new EditorGUI.ChangeCheckScope())
+            {
+                EditorGUILayout.PropertyField(variables);
 
+                if (cc.changed && Application.isPlaying)
+                {
+                    serializedObject.ApplyModifiedProperties(); //update the value then pass it to the dictionary  (EDITOR ONLY)
+                    foreach (var item in M.variables)
+                    {
+                        M.vars[item.name] = item.GetValue();
+                    }
+                }
+            }
             serializedObject.ApplyModifiedProperties();
-
-
         }
     }
 #endif

@@ -1,5 +1,6 @@
 ﻿using MalbersAnimations.Reactions;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MalbersAnimations.Controller.AI
 {
@@ -14,22 +15,21 @@ namespace MalbersAnimations.Controller.AI
         [Tooltip("Use the Interval value to repeat the reaction")]
         public bool repeat = false;
 
-        [SerializeReference, SubclassSelector]
         [Tooltip("Reaction when the AI Task begin")]
-        public Reaction reaction;
+        [FormerlySerializedAs("reaction")]
+        [SerializeReference] public Reaction reactionOnEnter;
 
-        [SerializeReference, SubclassSelector]
         [Tooltip("Reaction when the AI State ends")]
-        public Reaction reactionOnExit;
+        [SerializeReference] public Reaction reactionOnExit;
 
         public override void StartTask(MAnimalBrain brain, int index)
         {
             brain.TasksVars[index].Components = new Component[1];
 
             //Store the Component for the reaction here so its easy to find later
-            brain.TasksVars[index].Components[0] = reaction.VerifyComponent((affect == Affected.Self ? brain.Animal : brain.Target));
+            brain.TasksVars[index].Components[0] = reactionOnEnter.VerifyComponent((affect == Affected.Self ? brain.Animal : brain.Target));
 
-            React(brain, index, reaction);
+            React(brain, index, reactionOnEnter);
 
             if (!repeat)
                 brain.TaskDone(index);
@@ -44,7 +44,7 @@ namespace MalbersAnimations.Controller.AI
         public override void UpdateTask(MAnimalBrain brain, int index)
         {
             //repeat the reaction using the Update Interaval (If Repeat is false) this will be skipped
-            React(brain, index, reaction);
+            React(brain, index, reactionOnEnter);
         }
 
         public override void ExitAIState(MAnimalBrain brain, int index)

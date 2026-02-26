@@ -19,7 +19,7 @@ MonoBehaviour:
   EyesWeight: 1
   ClampWeight: 0.5
   Distance: 100
-  HorizontalOffset: 5
+  HorizontalOffset: 20
   horizontalToVOffset:
     serializedVersion: 2
     m_Curve:
@@ -53,7 +53,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  VerticalOffset: -15.5
+  VerticalOffset: -20
   verticalToHOffset:
     serializedVersion: 2
     m_Curve:

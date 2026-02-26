@@ -14,10 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Active: 1
   animal: {fileID: 0}
-  Input: Glide
+  Input: 
   ExitInput:
     UseConstant: 1
-    ConstantValue: 
+    ConstantValue: Dodge
+    Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
     Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
@@ -30,9 +38,12 @@ MonoBehaviour:
   Priority: 7
   resetInputOnFailed: 1
   ResetLastState: 0
+  RemoveForceOnEnter: 0
+  ForceDamping: 0
   General:
-    modify: 7423
-    RootMotion: 1
+    modify: 15615
+    RootMotion: 0
+    RootMotionRotation: 0
     Sprint: 0
     Gravity: 0
     Grounded: 0
@@ -56,10 +67,28 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8078fbdb01991b44b9c1351f444b5efe, type: 2}
   - {fileID: 11400000, guid: 9ae07cd2f8f4c054687fecf634f8e5b3, type: 2}
   SleepFromMode: []
+  DisableModes:
+  - {fileID: 11400000, guid: 7888596ce3530b145bc15622fac8a6c4, type: 2}
+  - {fileID: 11400000, guid: 4dc5ca673dc60d346a62529c8a9bd8ff, type: 2}
+  noModes:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   QueueFrom: []
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 1
@@ -91,8 +120,10 @@ MonoBehaviour:
   IdleStrafe: 1
   m_debug: 1
   Editor_Tabs1: 0
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets:
-  - name: Glide Humbrella
+  - name: Glide Umbrella
     StartVerticalIndex:
       UseConstant: 1
       ConstantValue: 1
@@ -187,6 +218,12 @@ MonoBehaviour:
         ConstantValue: 4
         Variable: {fileID: 0}
   ID: {fileID: 11400000, guid: e540d0fa5cbb6d148aaf89c2cf966b6a, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   GravityDrag:
     UseConstant: 1
     ConstantValue: 3
@@ -202,10 +239,6 @@ MonoBehaviour:
   InertiaLerp:
     UseConstant: 1
     ConstantValue: 2
-    Variable: {fileID: 0}
-  KeepForward:
-    UseConstant: 1
-    ConstantValue: 0
     Variable: {fileID: 0}
   UseCameraInput:
     UseConstant: 1
@@ -230,3 +263,6 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 6
     Variable: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

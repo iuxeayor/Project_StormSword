@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: d3aa6de16e8fb9a4ca8d48506859e701
+guid: 6c7a70b07cc96cb42bf7239369521199
 timeCreated: 1559609353
 licenseType: Store
 NativeFormatImporter:
@@ -7,3 +7,11 @@ NativeFormatImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Horse AnimSet Pro/4 - Prefabs/Horses/Horse
+    Realistic.prefab
+  uploadId: 848732

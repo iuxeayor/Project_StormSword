@@ -1,14 +1,14 @@
 ﻿using MalbersAnimations.Reactions;
-using MalbersAnimations.Scriptables;
 using UnityEngine;
 
 namespace MalbersAnimations
 {
     /// <summary>Damagee interface for components that can be damaged</summary>
-    public interface IMDamage
-    { 
+    public interface IMDamage : ISurface
+    {
         /// <summary>Last Direction the Damage came from</summary>
         Vector3 HitDirection { get; set; }
+
         /// <summary>Position of the Interaction </summary>
         Vector3 HitPosition { get; }
 
@@ -16,9 +16,6 @@ namespace MalbersAnimations
 
         ///// <summary>Last Position of the actual hit</summary>
         //Vector3 HitPosition { get; set; }
-
-        /// <summary>Surface of the Damageable</summary>
-        SurfaceID Surface { get; }
 
         /// <summary>Who is doing the Damage?</summary>
         GameObject Damager { get; set; }
@@ -32,27 +29,26 @@ namespace MalbersAnimations
         /// <summary>Last Force Applied to the Damager</summary>
         ForceMode LastForceMode { get; set; }
 
-        /// <summary>  Method to receive damage from an Atacker  </summary>
+        /// <summary>  Method to receive damage from an Attacker  </summary>
         /// <param name="Direction">Direction where the damage comes from</param>
         /// <param name="Damager">Who is sending the Damage?</param>
         /// <param name="stat">What stat to modify</param>
         /// <param name="IsCritical">was the damage critical</param>
-        /// <param name="react">does the Animal use default reaction? </param>
         /// <param name="ignoreDamageeM">Ignore Damagee Multiplier</param>
         /// <param name="element">Element sent by the </param>
         void ReceiveDamage(
             Vector3 Direction,
             Vector3 Position,
-            GameObject Damager, 
-            StatModifier stat, 
-            bool IsCritical, 
-            bool Default_react, 
-            Reaction custom,  
+            GameObject Damager,
+            StatModifier stat,
+            bool IsCritical,
+            Reaction2 custom,
             bool ignoreDamageeM,
-            StatElement element);
+            StatElement element, bool missed);
 
+        //void ReceiveDamage(DamageData damage);
 
-        /// <summary>Method to receive damage from an Atacker (Simplified)</summary>
+        /// <summary>Method to receive damage from an Attacker (Simplified)</summary>
         void ReceiveDamage(StatID stat, float amount);
 
         /// <summary>Sets a Damage Profile on the main Damageable</summary>
@@ -69,7 +65,7 @@ namespace MalbersAnimations
         int Index { get; }
 
         /// <summary>Enable/Disable the Damager</summary>
-        bool Enabled { get; set; }
+        bool Active { get; set; }
 
         /// <summary>Owner of the Damager, Usually the Character. This is used to avoid Hitting yourself</summary>
         GameObject Owner { get; set; }
@@ -91,12 +87,8 @@ namespace MalbersAnimations
         void DamagerAnimationEnd(int hash);
     }
 
-
-    [System.Serializable]
-    public class EffectType
+    public interface ISurface
     {
-        public SurfaceID surface;
-        public AudioClipReference sound;
-        public GameObjectReference effect;
+        SurfaceID Surface { get; }
     }
 }

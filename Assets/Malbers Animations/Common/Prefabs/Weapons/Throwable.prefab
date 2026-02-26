@@ -60,14 +60,16 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 3499098417
     Variable: {fileID: 11400000, guid: f489db1856e43dc47b175dd125135bdc, type: 2}
+  Tags: []
   AttackDirection: 0
   triggerInteraction: 1
   owner: {fileID: 1000012395104798}
   m_HitEffect:
     UseConstant: 1
-    ConstantValue: {fileID: 0}
+    ConstantValue: {fileID: 1091566395842728, guid: 400e06051701a8c4998087ae421728e3,
+      type: 3}
     Variable: {fileID: 0}
-  hitEffects: []
+  hitEffects: {fileID: 11400000, guid: 52be97e3602adfa449f7dc5cda82984b, type: 2}
   hitSound:
     UseConstant: 1
     ConstantValue: {fileID: 0}
@@ -78,17 +80,13 @@ MonoBehaviour:
     ConstantValue: 1
     Variable: {fileID: 0}
   CustomReaction:
-    rid: -2
+    reactions: []
   element: {fileID: 11400000, guid: 951aaa6113759be4f86dbc0c288e7a04, type: 2}
   interactorID:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
   interact:
-    UseConstant: 1
-    ConstantValue: 1
-    Variable: {fileID: 0}
-  react:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
@@ -111,6 +109,12 @@ MonoBehaviour:
       UseConstant: 1
       ConstantValue: 1
       Variable: {fileID: 0}
+    Base: {fileID: 0}
+    useBase: 0
+  m_MissChance:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_cChance:
     UseConstant: 1
     ConstantValue: 0.2
@@ -128,6 +132,7 @@ MonoBehaviour:
     ConstantValue: 20
     Variable: {fileID: 0}
   forceMode: 0
+  preventDuplicateDamage: 0
   OnHit:
     m_PersistentCalls:
       m_Calls: []
@@ -138,6 +143,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnProfileChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAttackMissed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCritical:
     m_PersistentCalls:
       m_Calls: []
   animator: {fileID: 0}
@@ -184,7 +195,13 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 1
         Variable: {fileID: 0}
+      Base: {fileID: 0}
+      useBase: 0
     m_cChance:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    m_MissChance:
       UseConstant: 1
       ConstantValue: 0
       Variable: {fileID: 0}
@@ -206,7 +223,7 @@ MonoBehaviour:
       ConstantValue: {fileID: 0}
       Variable: {fileID: 0}
     CustomReaction:
-      rid: -2
+      reactions: []
     element: {fileID: 0}
   debug: 0
   m_audio: {fileID: 0}
@@ -249,9 +266,16 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   GroundArmPose: 1
+  groundHandID: {fileID: 0}
   RidingArmPose: 1
   GroundCombo: {fileID: 0}
   RidingCombo: {fileID: 0}
+  PreAttackConditions:
+    conditions: []
+    active: 0
+  PreAimConditions:
+    conditions: []
+    active: 0
   m_AimOrigin: {fileID: 4000011008835940}
   m_AimSide: 0
   weaponType: {fileID: 11400000, guid: e9eaa24ae7382eb4f97d3484ea3e6e57, type: 2}
@@ -287,13 +311,21 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
+  strafeOnUnequip:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   AimIKRight: {fileID: 11400000, guid: 4fd94c1920c197849b8938c181d53a5c, type: 2}
   AimIKLeft: {fileID: 0}
   TwoHandIK:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  IKHandPoint:
+  IKHandLeft:
+    UseConstant: 1
+    ConstantValue: {fileID: 0}
+    Variable: {fileID: 0}
+  IKHandRight:
     UseConstant: 1
     ConstantValue: {fileID: 0}
     Variable: {fileID: 0}
@@ -332,33 +364,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-      - m_Target: {fileID: 11400000, guid: de2d0ec684288bf4991c5760679163b3, type: 2}
-        m_TargetAssemblyTypeName: MalbersAnimations.Events.MEvent, Assembly-CSharp
-        m_MethodName: Invoke
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
   OnUnequiped:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 11400000, guid: de2d0ec684288bf4991c5760679163b3, type: 2}
-        m_TargetAssemblyTypeName: MalbersAnimations.Events.MEvent, Assembly-CSharp
-        m_MethodName: Invoke
-        m_Mode: 3
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   OnCharged:
     m_PersistentCalls:
       m_Calls: []
@@ -371,14 +379,27 @@ MonoBehaviour:
   OnAiming:
     m_PersistentCalls:
       m_Calls: []
+  OnAttackStarted:
+    m_PersistentCalls:
+      m_Calls: []
   OnUseFreeHand:
     m_PersistentCalls:
       m_Calls: []
   OnReleaseFreeHand:
     m_PersistentCalls:
       m_Calls: []
-  Editor_Tabs1: 3
-  Editor_Tabs2: 4
+  EquippedReaction:
+    reactions: []
+  UnequipedReaction:
+    reactions: []
+  OnAttackStartedReaction:
+    reactions: []
+  OnAimingStartReaction:
+    reactions: []
+  OnAimingEndReaction:
+    reactions: []
+  Editor_Tabs1: 4
+  Editor_Tabs2: 3
   releaseProjectile: 2
   equipProjectile: 75
   aimAction: 0
@@ -395,6 +416,26 @@ MonoBehaviour:
     ConstantValue: {fileID: 1000013609580904, guid: c97c6d173679511419480107fa6d566a,
       type: 3}
     Variable: {fileID: 11400000, guid: 0e938d2fa6715534d96aa7109c41dd7f, type: 2}
+  spreadAngle:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  spreadMult:
+    UseConstant: 1
+    ConstantValue: {x: 1, y: 1, z: 1}
+    Variable: {fileID: 0}
+  spreadMiss:
+    UseConstant: 1
+    ConstantValue: 5
+    Variable: {fileID: 0}
+  m_ProjectileInitialPoolSize:
+    UseConstant: 1
+    ConstantValue: 10
+    Variable: {fileID: 0}
+  m_ProjectileMaxPoolSize:
+    UseConstant: 1
+    ConstantValue: 1000
+    Variable: {fileID: 0}
   m_ProjectileParent: {fileID: 4000011008835940}
   gravity:
     UseConstant: 1
@@ -447,24 +488,42 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
+  OnBeforeFireProjectile:
+    m_PersistentCalls:
+      m_Calls: []
   OnLoadProjectile:
     m_PersistentCalls:
       m_Calls: []
   OnFireProjectile:
     m_PersistentCalls:
       m_Calls: []
+  OnReloadStart:
+    m_PersistentCalls:
+      m_Calls: []
   OnReload:
     m_PersistentCalls:
       m_Calls: []
+  BeforeFireProjectileReaction:
+    reactions: []
+  LoadProjectileReaction:
+    reactions: []
+  FireProjectileReaction:
+    reactions: []
+  ReloadStartReaction:
+    reactions: []
+  ReloadReaction:
+    reactions: []
   m_UnequipOnAim:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  m_AfterDistance:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
   references:
     version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    RefIds: []
 --- !u!82 &82784942622768678
 AudioSource:
   m_ObjectHideFlags: 0
@@ -476,6 +535,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -599,6 +659,9 @@ LineRenderer:
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -750,6 +813,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -857,3 +923,9 @@ MonoBehaviour:
   DebugColor: {r: 0.2225166, g: 1, b: 0.16509432, a: 0.18039216}
   DrawAxis: 0
   AxisSize: 0.1
+  _colliders: []
+  HasColliders: 0
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1

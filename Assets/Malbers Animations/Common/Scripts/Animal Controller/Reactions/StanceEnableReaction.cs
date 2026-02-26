@@ -6,7 +6,10 @@ namespace MalbersAnimations.Reactions
     [System.Serializable]
     [AddTypeMenu("Malbers/Animal/Stance Enable-Disable")]
     public class StanceEnableReaction : MReaction
-    { 
+    {
+        override public string DynamicName =>
+        $"Enable-Disable stances [Total: {(stances != null ? stances.Length : 0)}]";
+
         public IDEnable<StanceID>[] stances;
 
         protected override bool _TryReact(Component component)
@@ -16,10 +19,7 @@ namespace MalbersAnimations.Reactions
             foreach (var id in stances)
             {
                 var st = animal.Stance_Get(id.ID);
-                if (st != null)
-                {
-                    st.Enable(id.enable); 
-                }
+                st?.Enable(id.enable);
             }
             return true;
         }

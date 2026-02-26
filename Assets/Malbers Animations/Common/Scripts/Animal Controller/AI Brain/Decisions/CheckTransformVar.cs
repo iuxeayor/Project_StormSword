@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace MalbersAnimations.Controller.AI
 {
+    public enum CompareTransformVar { IsNull, IsCurrentTarget, IsInRuntimeSet }
+
     [CreateAssetMenu(menuName = "Malbers Animations/Pluggable AI/Decision/Check Transform Var", order = 6)]
     public class CheckTransformVar : MAIDecision
     {
@@ -11,7 +13,7 @@ namespace MalbersAnimations.Controller.AI
 
         public TransformVar Var;
         public CompareTransformVar compare;
-        [Hide("compare",2 )]
+        [Hide("compare", 2)]
         public RuntimeGameObjects Set;
 
         public override bool Decide(MAnimalBrain brain, int Index)
@@ -42,6 +44,6 @@ namespace MalbersAnimations.Controller.AI
             showSet = compare == CompareTransformVar.IsInRuntimeSet;
 
         }
-        public enum CompareTransformVar { IsNull, IsCurrentTarget,  IsInRuntimeSet }
+
     }
 }

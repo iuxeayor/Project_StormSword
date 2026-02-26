@@ -1,5 +1,6 @@
 ﻿using MalbersAnimations.Scriptables;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -10,11 +11,12 @@ namespace MalbersAnimations.UI
     [DefaultExecutionOrder(501)]
     public class MFloatingNumbers : MonoBehaviour
     {
-        public class MDamageableUI
+        public struct MDamageableUI
         {
             public MDamageable damageable;
             public Transform followTransform;
-            public UnityAction<float> OnValueChange = delegate { };
+            public UnityAction<float> OnValueChange;
+            public readonly bool IsNull => damageable == null;
         }
 
         [Tooltip("Runtime Set that store all the DamageNumber you want to monitor")]
@@ -26,6 +28,7 @@ namespace MalbersAnimations.UI
         [Tooltip("Damage Number Prefab to show the Critical damage float value")]
         [RequiredField] public UIFollowTransform CriticalNumber;
 
+        public StringReference MissedText = new("Missed!"); //Text to show when the Damage was Missed
 
         [Tooltip("Reference for the Camera")]
         public TransformReference Camera;
@@ -36,7 +39,7 @@ namespace MalbersAnimations.UI
         [Tooltip("if the damage was zero do not show the floating number")]
         public bool ignoreZero = true;
 
-        private List<MDamageableUI> TrackedStats;
+        private HashSet<MDamageableUI> TrackedStats;
 
         [Tooltip("Change the Scale of the UI if the hit is critical")]
         public Vector3 CriticalScale = Vector3.one;
@@ -45,7 +48,7 @@ namespace MalbersAnimations.UI
 
         private void Awake()
         {
-            TrackedStats = new List<MDamageableUI>();
+            TrackedStats = new();
 
             Set.Clear();
 
@@ -64,15 +67,37 @@ namespace MalbersAnimations.UI
 
         private void OnEnable()
         {
+            //CustomPatch: used cached delegates to avoid repeated memory allocations
             Set.OnItemAdded.AddListener(OnAddedMDamageable);
             Set.OnItemRemoved.AddListener(OnRemovedStat);
+
+            Set.OnMissed += OnMissed;
         }
+
+
 
         private void OnDisable()
         {
+            //CustomPatch: cached delegates to avoid repeated memory allocations
             Set.OnItemAdded.RemoveListener(OnAddedMDamageable);
             Set.OnItemRemoved.RemoveListener(OnRemovedStat);
+            Set.OnMissed -= OnMissed;
         }
+
+        private void OnMissed(GameObject go)
+        {
+            UIFollowTransform FU = Instantiate(DamageNumber);
+            FU.SetTransform(go.transform);
+            FU.transform.SetParent(transform);
+
+            var text = FU.GetComponentInChildren<Text>();
+
+            if (text)
+            {
+                text.text = MissedText.Value;
+            }
+        }
+
 
         private void OnAddedMDamageable(MDamageable dam)
         {
@@ -89,9 +114,11 @@ namespace MalbersAnimations.UI
 
                 UIFollowTransform FU = null;
 
-                var WasCritical = item.damageable.LastDamage.WasCritical; //Store if the Damage was Critical
+                var WasCritical = item.damageable.LastDamage.critical; //Store if the Damage was Critical
 
-                var FloatingDamage = WasCritical ? CriticalNumber : DamageNumber;
+                var WasMiss = item.damageable.LastDamage.Missed; //Store if the Damage was Missed
+
+                var FloatingDamage = WasCritical && !WasMiss ? CriticalNumber : DamageNumber;
 
                 if (FloatingDamage != null)
                 {
@@ -99,45 +126,58 @@ namespace MalbersAnimations.UI
                     FU.SetTransform(item.followTransform);
                     FU.transform.SetParent(transform);
 
+
+#if UNITY_EDITOR   //CustomPatch: removed editor related logic with redundant memory allocations and text replacement from non-dev builds
                     FU.name = FU.name.Replace("(Clone)", "");
-
                     FU.name += ": " + floatValue.ToString("F0");
-
-                    // Debug.Log("floatValue = " + floatValue);
+#endif
 
                     var text = FU.GetComponentInChildren<Text>();
+
                     if (text)
                     {
-                        text.text = floatValue.ToString("F0");
+                        if (WasMiss)
+                        {
+                            text.text = MissedText.Value;
+                        }
+                        else
+                        {
+                            text.text = floatValue.ToString("F0");
 
-                        //Draw the color of the Damage
-                        if (item.damageable.LastDamage.Element.element != null)
-                            text.color = item.damageable.LastDamage.Element.element.color;
+                            //Draw the color of the Damage
+                            if (item.damageable.LastDamage.Element.element != null)
+                                text.color = item.damageable.LastDamage.Element.element.color;
+                        }
                     }
                 }
             };
 
+            if (item.OnValueChange != null) //CustomPatch: avoided redundant listener add call if no delegate registered here
+                item.damageable.events.OnReceivingDamage.AddListener(item.OnValueChange);
 
-            item.damageable.events.OnReceivingDamage.AddListener(item.OnValueChange);
             TrackedStats.Add(item);
         }
 
         //Remove stat from the Set
         private void OnRemovedStat(MDamageable stats)
         {
-            var item = TrackedStats.Find(x => x.damageable == stats);
+            var item = TrackedStats.FirstOrDefault(x => x.damageable == stats);
 
-            if (item != null) RemoveFromGroup(item);
+            if (!item.IsNull) RemoveFromGroup(item);
         }
 
         private void RemoveFromGroup(MDamageableUI item)
         {
             //Debug.Log($"Removed From Group {item.slider}", item.slider );
 
-            item.damageable.events.OnReceivingDamage.RemoveListener(item.OnValueChange);
+            if (item.OnValueChange != null) //CustomPatch: avoided redundant listener remove call if no delegate registered here
+                item.damageable.events.OnReceivingDamage.RemoveListener(item.OnValueChange);
+
             item.OnValueChange = null;
 
-            TrackedStats.Remove(item);
+            //best performance code to remove the item from TrackedStats
+            TrackedStats.RemoveWhere(x => x.damageable == item.damageable);
+
             Set.Item_Remove(item.damageable);
         }
 

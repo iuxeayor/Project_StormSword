@@ -94,6 +94,10 @@ MonoBehaviour:
     Variable: {fileID: 0}
   aim: {fileID: 0}
   Targets: {fileID: 11400000, guid: 1a69e13d366af4b49bc1d9e96ca49bbc, type: 2}
+  NextTargetTime:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   debug: 0
   OnTargetChanged:
     m_PersistentCalls:
@@ -109,7 +113,7 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 0
+        m_CallState: 2
       - m_Target: {fileID: 11400000, guid: a53f41947a81d0e43a2abf9c2e87a2bc, type: 2}
         m_TargetAssemblyTypeName: MalbersAnimations.Scriptables.TransformVar, Assembly-CSharp
         m_MethodName: SetValue
@@ -151,7 +155,7 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 2
+        m_CallState: 0
 --- !u!114 &7609262087823140131
 MonoBehaviour:
   m_ObjectHideFlags: 0

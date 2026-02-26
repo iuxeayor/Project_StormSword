@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -12,69 +11,31 @@ namespace MalbersAnimations.IK
     public class HumanIKGoalOffset : IKProcessor
     {
         public override bool RequireTargets => false;
+
         [Tooltip("Target to to lock any of the limbs ")]
         public AvatarIKGoal goal = AvatarIKGoal.RightHand;
 
-
         public bool RelativeToRoot = true;
 
-        [Hide("RelativeToRoot", true), SearcheableEnum]
+        [Hide(nameof(RelativeToRoot), true), SearcheableEnum]
         public HumanBodyBones RelativeTo = HumanBodyBones.UpperChest;
 
         public Vector3 GoalOffset;
         public Vector3 GoalRotation;
 
-
         public bool FixHint = true;
 
-        [Hide("FixHint", false)]
+        [Hide(nameof(FixHint), false)]
         public Vector3 HintOffset;
-
 
         public bool position = true;
         public bool rotation = true;
-
         public bool gizmos = true;
-        // public bool handles = false;
-
-        [Tooltip("States that the IK Set will be active")]
-        public List<StateID> states;
-        private List<int> statesID;
-
-        [Tooltip("Stances that the IK Set will be active")]
-        public List<StanceID> stances;
-        private List<int> stancesID;
-
-        [Tooltip("Lerp the Goal Offset")]
-        public float lerp = 10f;
 
         public override void Start(IKSet set, Animator animator, int index)
         {
             //Cache the RootBone
             set.Var[index].RootBone = RelativeToRoot ? animator.transform : animator.GetBoneTransform(RelativeTo);
-
-
-            if (states != null)
-            {
-                statesID = new List<int>();
-                foreach (var state in states)
-                {
-                    statesID.Add(state.ID);
-                }
-            }
-
-            if (stances != null)
-            {
-                stancesID = new List<int>();
-                foreach (var stance in stances)
-                {
-                    stancesID.Add(stance.ID);
-                }
-            }
-
-            set.sharedVars.TryAdd($"GoalOffset{index}", GoalOffset); //Store the Goal Offset in the Shared Variables
-            set.sharedVars.TryAdd($"HintOffset{index}", HintOffset); //Store the Hint Offset in the Shared Variables
-            set.sharedVars.TryAdd($"GoalRotation{index}", GoalRotation); //Store the Goal Rotation in the Shared Variables
         }
 
 
@@ -90,53 +51,13 @@ namespace MalbersAnimations.IK
             };
         }
 
-        private Transform GetGoal(Animator ani)
-        {
-            return goal switch
-            {
-                AvatarIKGoal.LeftFoot => ani.GetBoneTransform(HumanBodyBones.LeftFoot),
-                AvatarIKGoal.RightFoot => ani.GetBoneTransform(HumanBodyBones.RightFoot),
-                AvatarIKGoal.LeftHand => ani.GetBoneTransform(HumanBodyBones.LeftHand),
-                AvatarIKGoal.RightHand => ani.GetBoneTransform(HumanBodyBones.RightHand),
-                _ => ani.GetBoneTransform(HumanBodyBones.LeftFoot),
-            };
-        }
 
 
         public override void OnAnimatorIK(IKSet set, Animator animator, int index, float weight)
         {
-
-            var CheckStates = true;
-            var CheckStances = true;
-
-
-            if (statesID != null && statesID.Count > 0)
-            {
-                CheckStates = statesID.Contains(set.CurrentState);
-                weight = CheckStates ? weight : 0;
-            }
-
-            if (stancesID != null && stancesID.Count > 0)
-            {
-                CheckStances = stancesID.Contains(set.CurrentStance);
-                weight = CheckStances ? weight : 0;
-            }
-
-            if (weight == 0) return;
-
             var root = set.Var[index].RootBone;
-
-            var SharedGoalOffset = set.sharedVars.Get<Vector3>($"GoalOffset{index}");
-            var SharedHintOffset = set.sharedVars.Get<Vector3>($"HintOffset{index}");
-            var SharedGoalRotation = set.sharedVars.Get<Vector3>($"GoalRotation{index}");
-
-            set.sharedVars[$"GoalOffset{index}"] = Vector3.Lerp(SharedGoalOffset, GoalOffset, lerp * Time.deltaTime);
-            set.sharedVars[$"HintOffset{index}"] = Vector3.Lerp(SharedHintOffset, HintOffset, lerp * Time.deltaTime);
-            set.sharedVars[$"GoalRotation{index}"] = Vector3.Lerp(SharedGoalRotation, GoalRotation, lerp * Time.deltaTime);
-
-
-            var GoalPosition = root.TransformPoint(SharedGoalOffset);
-            var HintPosition = root.TransformPoint(SharedHintOffset);
+            var GoalPosition = root.TransformPoint(GoalOffset);
+            var HintPosition = root.TransformPoint(HintOffset);
 
             if (position)
             {
@@ -148,14 +69,13 @@ namespace MalbersAnimations.IK
                 {
                     animator.SetIKHintPositionWeight(GetHint(), weight);
                     animator.SetIKHintPosition(GetHint(), HintPosition);
-
                     MDebug.DrawWireSphere(HintPosition, Color.green, 0.05f);
                 }
             }
             if (rotation)
             {
                 animator.SetIKRotationWeight(goal, weight);
-                animator.SetIKRotation(goal, root.rotation * Quaternion.Euler(SharedGoalRotation));
+                animator.SetIKRotation(goal, root.rotation * Quaternion.Euler(GoalRotation));
             }
         }
 
@@ -164,6 +84,8 @@ namespace MalbersAnimations.IK
         {
             if (gizmos)
             {
+                if (anim == null || !anim.isHuman) return;
+
                 var RootBone = RelativeToRoot ? anim.transform : anim.GetBoneTransform(RelativeTo);
 
                 var goalTransform = GetGoal(anim);
@@ -199,13 +121,31 @@ namespace MalbersAnimations.IK
             }
         }
 
+
+
+        private Transform GetGoal(Animator ani)
+        {
+            return goal switch
+            {
+                AvatarIKGoal.LeftFoot => ani.GetBoneTransform(HumanBodyBones.LeftFoot),
+                AvatarIKGoal.RightFoot => ani.GetBoneTransform(HumanBodyBones.RightFoot),
+                AvatarIKGoal.LeftHand => ani.GetBoneTransform(HumanBodyBones.LeftHand),
+                AvatarIKGoal.RightHand => ani.GetBoneTransform(HumanBodyBones.RightHand),
+                _ => null,
+            };
+        }
+
+
 #if UNITY_EDITOR
         internal override void OnSceneGUI(IKSet set, Animator animator, UnityEngine.Object Target, int index)
         {
             if (gizmos)
             {
+                if (animator == null || !animator.isHuman) return;
                 var RootBone = RelativeToRoot ? animator.transform : animator.GetBoneTransform(RelativeTo);
                 var goalTransform = GetGoal(animator);
+
+                if (RootBone == null || goalTransform == null) return;
 
                 if (Tools.current == Tool.Move)
                 {

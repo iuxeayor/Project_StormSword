@@ -4,9 +4,11 @@ using UnityEngine;
 namespace MalbersAnimations.Reactions
 {
     [System.Serializable]
-    [AddTypeMenu("Malbers/Stats Enable-Disable")]
+    [AddTypeMenu("Malbers/Stats/Stat (Enable-Disable)")]
     public class StatEnableReaction : Reaction
     {
+        public override string DynamicName => $"Enable/Disable Stats. Total [{stats.Length}]"; //Name of the Reaction
+
         public IDEnable<StatID>[] stats;
 
         public override Type ReactionType => typeof(Stats);

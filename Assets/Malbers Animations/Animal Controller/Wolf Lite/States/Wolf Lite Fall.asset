@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -33,6 +41,7 @@ MonoBehaviour:
   General:
     modify: 7423
     RootMotion: 0
+    RootMotionRotation: 0
     Sprint: 0
     Gravity: 1
     Grounded: 0
@@ -49,9 +58,10 @@ MonoBehaviour:
   TagModifiers:
   - AnimationTag: FallEdge
     modifier:
-      modify: 1151
+      modify: 3199
       RootMotion: 1
-      Sprint: 1
+      RootMotionRotation: 0
+      Sprint: 0
       Gravity: 0
       Grounded: 0
       OrientToGround: 0
@@ -68,6 +78,7 @@ MonoBehaviour:
     modifier:
       modify: 95
       RootMotion: 1
+      RootMotionRotation: 0
       Sprint: 1
       Gravity: 0
       Grounded: 1
@@ -97,9 +108,20 @@ MonoBehaviour:
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
-    ConstantValue: 3
+    ConstantValue: 1
     Variable: {fileID: 0}
   Duration:
     UseConstant: 1
@@ -120,16 +142,24 @@ MonoBehaviour:
     Variable: {fileID: 0}
   ExitCooldown:
     UseConstant: 1
-    ConstantValue: 0.2
+    ConstantValue: 0
     Variable: {fileID: 0}
   CanStrafe: 1
   StrafeAnimations: 1
   MovementStrafe: 1
   IdleStrafe: 1
   m_debug: 1
-  Editor_Tabs1: 0
+  Editor_Tabs1: 4
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets: []
   ID: {fileID: 11400000, guid: 8078fbdb01991b44b9c1351f444b5efe, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   AirControl:
     UseConstant: 0
     ConstantValue: 1
@@ -183,6 +213,9 @@ MonoBehaviour:
   StuckAnimal: 1
   PushForward:
     UseConstant: 1
-    ConstantValue: 2
+    ConstantValue: 4
     Variable: {fileID: 0}
   ShowFront: 1
+  references:
+    version: 2
+    RefIds: []

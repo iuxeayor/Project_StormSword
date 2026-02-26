@@ -20,24 +20,21 @@ namespace MalbersAnimations.IK
             public Transform RootBone;
             public Transform Bone;
 
-            public Dictionary<int, int> ints;
-            public Dictionary<int, float> floats;
-            public Dictionary<int, Vector3> vectors;
-            public Dictionary<int, Transform> transforms;
             public Dictionary<int, Quaternion> rotations;
 
-            public IKVars(string name)
+            public IKVars(string _)
             {
-                ints = new();
-                floats = new();
-                vectors = new();
-                transforms = new();
                 rotations = new();
                 RootBone = Bone = null;
             }
         }
 
-        public string name;
+        //[FormerlySerializedAs("name")]
+        //public string m_name;
+
+        public StringReference name;
+
+        public string Name => name.Value;
 
         public bool active = true;
 
@@ -49,33 +46,39 @@ namespace MalbersAnimations.IK
 
         [Range(0f, 1f)]
         [Tooltip("Weight of the IK Set")]
-        public float weight = 1f;
+        [SerializeField] private float weight = 1f;
 
         [Tooltip("Use this Targets array to assign IK goals, Targets or Transform References to the IK Processors")]
         public TransformReference[] Targets;
+
+        [Tooltip("Clears all Targets on the Set if the Set gets disabled")]
+        public bool ClearTargetsOnDisable = false;
+
+        //Cache the values of the Targets right after animation and before IK
+        public TransformValues[] CacheTargets { get; set; }
 
         [Tooltip("Reference for the Aimer Component to get Directions")]
         public Aim aimer;
 
         [SerializeReference]
-        public List<IKProcessor> IKProcesors;
+        public List<IKProcessor> IKProcesors = new();
 
 
-        [SerializeReference, SubclassSelector]
-        public List<WeightProcessor> weightProcessors;
+        [SerializeReference]//, SubclassSelector]
+        public List<WeightProcessor> weightProcessors = new();
 
         [HideInInspector] public int SelectedIKProcessor; // Inspector Only!!
 
         /// <summary> Local Variables used on the IK Processors</summary>
         public IKVars[] Var;
 
-        [Tooltip("States that the IK Set will be active")]
-        public List<StateID> states;
-        private List<int> statesID;
+        //[Tooltip("States that the IK Set will be active")]
+        //public List<StateID> states;
+        //private List<int> statesID;
 
-        [Tooltip("Stances that the IK Set will be active")]
-        public List<StanceID> stances;
-        private List<int> stancesID;
+        //[Tooltip("Stances that the IK Set will be active")]
+        //public List<StanceID> stances;
+        //private List<int> stancesID;
 
         [Tooltip("Lerp the Weight of the IK Set. Set the value to zero to ignore lerping")]
         [Min(0)] public float LerpWeight = 5f;
@@ -106,27 +109,58 @@ namespace MalbersAnimations.IK
         //[Tooltip("Use a Local IK Processor when true, or use a global (Scriptable  Variable)")]
         //public bool local = true;
 
-        //public IKProccesorProfile GlobalVar;
-
+        //public IKProcessorProfile GlobalVar;
 
         public List<IKProcessor> Processors => IKProcesors;
-        //public List<IKProcessor> Processors
-        //{
-        //    get
-        //    {
-        //        if (local || GlobalVar == null) return IKProcesors;
-        //        else return GlobalVar.IKProcesors;
-        //    }
-        //}
+
+        public float Weight
+        {
+            get => weight;
+            set
+            {
+                weight = value;
+                // Debug.Log($"weight: {weight}"); 
+            }
+        }
+
+        public virtual void OnEnable(Animator anim, HashSet<int> animParams)
+        {
+            for (int i = 0; i < weightProcessors.Count; i++)
+            {
+                weightProcessors[i].OnEnable(this, anim);
+            }
 
 
-        public void Initialize(Animator anim, HashSet<int> animParams)
+            for (int i = 0; i < Processors.Count; i++)
+            {
+                Processors[i].OnEnable(this, anim, i);
+            }
+        }
+
+        public virtual void OnDisable(Animator anim, HashSet<int> animParams)
+        {
+            for (int i = 0; i < weightProcessors.Count; i++)
+            {
+                weightProcessors[i].OnDisable(this, anim);
+            }
+
+            for (int i = 0; i < Processors.Count; i++)
+            {
+                Processors[i].OnDisable(this, anim, i);
+            }
+        }
+
+
+        public virtual void Initialize(Animator anim, HashSet<int> animParams)
         {
             Targets ??= new TransformReference[0]; //Make sure the Target list is not Null
+
+            CacheTargets = new TransformValues[Targets.Length]; //Use the same Size
+
             Animator = anim; //Cache the Animator
             Var = new IKVars[Processors.Count]; //Initialize the IKVars
 
-            FinalWeight = weight; //Initialize the Cache Weight from the current weight
+            FinalWeight = 0; //Initialize the Cache Weight on zero
 
             for (int i = 0; i < Processors.Count; i++)
             {
@@ -140,26 +174,6 @@ namespace MalbersAnimations.IK
                     link.Start(this, anim, i);
                 }
             }
-
-
-            //Store the ID of the States and Stances in a List of Integers, so the Methods can read it instead the scriptable IDs
-            if (states != null && states.Count > 0)
-            {
-                statesID = new List<int>(states.Count);
-                foreach (var state in states)
-                {
-                    statesID.Add(state.ID);
-                }
-            }
-
-            if (stances != null && stances.Count > 0)
-            {
-                stancesID = new List<int>(stances.Count);
-                foreach (var stance in stances)
-                {
-                    stancesID.Add(stance.ID);
-                }
-            }
         }
 
 
@@ -170,16 +184,31 @@ namespace MalbersAnimations.IK
             return animParams.Contains(AnimHash) ? AnimHash : 0;
         }
 
-        public void OnAnimatorIK(Animator anim, float GlobalWeight)
+        public void CacheValues(Animator anim)
         {
-            float preWeight = weight * GlobalWeight;
-
-            if (weightProcessors != null)
+            if (active)
             {
-                for (int i = 0; i < weightProcessors.Count; i++)
-                    if (weightProcessors[i].Active)
-                        preWeight = weightProcessors[i].Process(this, preWeight);
+                for (int i = 0; i < Targets.Length; i++)
+                {
+                    if (Targets[i] != null && Targets[i].Value != null)
+                        CacheTargets[i] = new TransformValues(Targets[i].Value);
+                }
             }
+        }
+
+        public void OnAnimatorIK(Animator anim, float GlobalWeight, float deltaTime)
+        {
+            DoProcessor(anim, GlobalWeight, deltaTime, true);
+        }
+
+        public void LateUpdate(Animator anim, float GlobalWeight, float deltaTime)
+        {
+            DoProcessor(anim, GlobalWeight, deltaTime, false);
+        }
+
+        protected virtual void DoProcessor(Animator anim, float GlobalWeight, float deltaTime, bool OnAnimatorIK)
+        {
+            float preWeight = GetWeightProcessor(GlobalWeight);
 
             if (active)
             {
@@ -191,66 +220,58 @@ namespace MalbersAnimations.IK
                     {
                         var IKProcessorWeight = FinalWeight * processor.Weight;
 
-                        if (IKProcessorWeight > 0)
-                            processor.OnAnimatorIK(this, anim, i, IKProcessorWeight); // Process first the IK Logic after the weight
+                        IKProcessorWeight *= processor.GetProcessorAnimWeight(anim); //Process Local Weight
 
-                        GetFinalWeight(anim, preWeight, processor);
+                        if (IKProcessorWeight > 0)
+                        {
+                            if (FinalWeight > 0.999f) FinalWeight = 1;
+                            else if (FinalWeight < 0.001f) FinalWeight = 0;
+
+                            if (OnAnimatorIK)
+                                processor.OnAnimatorIK(this, anim, i, IKProcessorWeight); // Process first the IK Logic after the weight
+                            else
+                                processor.LateUpdate(this, anim, i, IKProcessorWeight); // Process first the IK Logic after the weight
+                        }
+                        GetFinalWeight(preWeight, deltaTime);
                     }
                 }
             }
         }
 
-        public void LateUpdate(Animator anim, float GlobalWeight)
+        protected virtual float GetWeightProcessor(float GlobalWeight)
         {
-            float preWeight = weight * GlobalWeight;
+            float preWeight = Weight * GlobalWeight;
 
             if (weightProcessors != null)
             {
                 for (int i = 0; i < weightProcessors.Count; i++)
-                    if (weightProcessors[i].Active)
-                        preWeight = weightProcessors[i].Process(this, preWeight);
-            }
-
-            if (active)
-            {
-                for (int i = 0; i < Processors.Count; i++)
                 {
-                    var processor = Processors[i];
-                    if (processor.Active)
+                    if (weightProcessors[i].Active)
                     {
-                        var IKProcessorWeight = FinalWeight * processor.Weight;
+                        var result = weightProcessors[i].Process(this, preWeight);
+                        //Invert the weight
+                        if (weightProcessors[i].Invert) result = (1 - result);
 
-                        if (IKProcessorWeight > 0)
-                            processor.LateUpdate(this, anim, i, IKProcessorWeight); // Process first the IK Logic after the weight
+                        preWeight *= result;
 
-                        GetFinalWeight(anim, preWeight, processor);
+                        if (preWeight <= 0.001f) return 0; //If the weight is too low then return 0 and don't continue processing the IK Processors (this is to avoid unnecessary calculations)
                     }
                 }
             }
+
+            return preWeight;
         }
 
-        private void GetFinalWeight(Animator anim, float finalWeight, IKProcessor processor)
+        private void GetFinalWeight(float finalWeight, float deltaTime)
         {
             if (FinalWeight == finalWeight) return; //If the final weight is the same as the current weight then ignore the rest
 
-            finalWeight *= processor.GetProcessorAnimWeight(anim);
+            //finalWeight *= processor.GetProcessorAnimWeight(anim); //Process the Anim Weight
 
-            FinalWeight = LerpWeight > 0 ? Mathf.Lerp(FinalWeight, finalWeight, Time.deltaTime * LerpWeight) : finalWeight; //Lerp when the LerpWeight is higher than 0
-
-
-            if (FinalWeight > 0.9999f) FinalWeight = 1;
-            else if (FinalWeight < 0.0001f) FinalWeight = 0;
-
+            FinalWeight = LerpWeight > 0 ? Mathf.Lerp(FinalWeight, finalWeight, deltaTime * LerpWeight) : finalWeight; //Lerp when the LerpWeight is higher than 0
 
             OnWeightChanged.Invoke(FinalWeight);
-
-            //if (FinalWeight == 0)
-            //{
-            //    OnSetDisable.Invoke();
-            //    active = false;
-            //}
         }
-
 
         public virtual void Enable(bool value)
         {
@@ -259,15 +280,17 @@ namespace MalbersAnimations.IK
 
             C_EnableSmooth = value ? EnableSmooth() : DisableSmooth(); //Set Enable or Disable Smooth Coroutine
 
-
-            Owner.StartCoroutine(C_EnableSmooth);
+            if (Owner.gameObject.activeInHierarchy && Owner.enabled)
+                Owner.StartCoroutine(C_EnableSmooth);
         }
+
+
 
         public virtual void SetWeight(bool value)
         {
             if (!active) return; //Ignore if the set is not active
 
-            weight = value ? 1 : 0;
+            Weight = value ? 1 : 0;
         }
 
         private IEnumerator C_EnableSmooth;
@@ -275,20 +298,18 @@ namespace MalbersAnimations.IK
         private IEnumerator EnableSmooth()
         {
             var elapsedTime = 0f;
-            var startWeight = weight;
+            var startWeight = Weight;
             active = true;
 
             OnSetEnable.Invoke();
 
-            while (weight != 1 && (EnableTime > 0) && (elapsedTime <= EnableTime))
+            while (Weight != 1 && /*(EnableTime > 0) &&*/ (elapsedTime <= EnableTime))
             {
-                weight = Mathf.Lerp(startWeight, 1, EnterLerp.Evaluate(elapsedTime / EnableTime));
+                Weight = Mathf.Lerp(startWeight, 1, EnterLerp.Evaluate(elapsedTime / EnableTime));
                 elapsedTime += Time.deltaTime;
-
                 yield return null;
             }
-
-            weight = 1;
+            Weight = 1;
 
             yield return null;
         }
@@ -297,17 +318,23 @@ namespace MalbersAnimations.IK
         private IEnumerator DisableSmooth()
         {
             var elapsedTime = 0f;
-            var startWeight = weight;
+            var startWeight = Weight;
 
-            while (weight != 0 && (DisableTime > 0) && (elapsedTime <= DisableTime))
+            while (Weight != 0 && (DisableTime > 0) && (elapsedTime <= DisableTime))
             {
-                weight = Mathf.Lerp(startWeight, 0, ExitLerp.Evaluate(elapsedTime / DisableTime));
+                Weight = Mathf.Lerp(startWeight, 0, ExitLerp.Evaluate(elapsedTime / DisableTime));
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
 
-            weight = 0;
+            Weight = 0;
             yield return null;
+
+            if (ClearTargetsOnDisable) //Clear all targets if the IK was disabled
+            {
+                var length = Targets.Length;
+                Targets = new TransformReference[length];
+            }
 
             OnSetDisable.Invoke();
             active = false;
@@ -320,20 +347,19 @@ namespace MalbersAnimations.IK
 
         public virtual void ClearTarget(int index)
         {
-            Targets[index] = null;
+            Targets[index].Value = null;
         }
 
         public virtual void ClearAllTargets()
         {
             for (int i = 0; i < Targets.Length; i++)
-            {
                 Targets[i] = null;
-            }
         }
 
         public virtual void SetTargets(Transform[] newTargets)
         {
             Targets = new TransformReference[newTargets.Length];
+            CacheTargets = new TransformValues[newTargets.Length];
 
             for (int i = 0; i < Targets.Length; i++)
             {
@@ -355,92 +381,10 @@ namespace MalbersAnimations.IK
             }
         }
 
-
-
-        public void OnModeStart(int Mode, int Ability)
-        {
-            //Need to be implemented yet
-        }
-
-        public void OnModeEnd(int Mode, int Ability)
-        {
-            //Need to be implemented yet
-        }
-
-        public void OnStanceChange(int stance)
-        {
-            CurrentStance = stance;
-            bool ValidState;
-            bool ValidStance;
-
-            //Check if the State is on the list of states to enable the IK Set
-            if (stancesID != null && stancesID.Count > 0)
-            {
-                ValidStance = (stancesID.Contains(stance));
-            }
-            else
-            {
-                return; //Meaning that you can ignore the Valid Stance since there is none
-            }
-
-            //Check if the State is on the list of states to enable the IK Set
-            if (statesID != null && statesID.Count > 0)
-            {
-                ValidState = (statesID.Contains(CurrentState));
-            }
-            else
-            {
-                ValidState = true; //Meaning that you can ignore the Valid State since there is none
-            }
-
-            SetWeight(ValidState && ValidStance);
-        }
-
-        public void OnStateChange(int state)
-        {
-            CurrentState = state;
-
-            bool ValidStance;
-            bool ValidState;
-            //Check if the State is on the list of states to enable the IK Set
-            if (statesID != null && statesID.Count > 0)
-            {
-                ValidState = statesID.Contains(state);
-            }
-            else
-            {
-                return; //Meaning that you can ignore the Valid State since there is none
-            }
-
-            //Check if the State is on the list of states to enable the IK Set
-            if (stancesID != null && stancesID.Count > 0)
-            {
-                ValidStance = (stancesID.Contains(CurrentStance));
-            }
-            else
-            {
-                ValidStance = true; //Meaning that you can ignore the Valid Stance since there is none
-            }
-            SetWeight(ValidState && ValidStance);
-        }
-
         internal void Verify(Animator animator)
         {
             for (int i = 0; i < Processors.Count; i++)
-            {
                 Processors[i].Validate(this, animator, i);
-            }
         }
-
-
-        ///// <summary> Process the Animation Curve in case there's one </summary>
-        //protected virtual float GetSetAnimWeight(Animator animator)
-        //{
-        //    var result = AnimParameterHash != 0 ? animator.GetFloat(AnimParameterHash) : 1;
-
-        //    if (InvertAnimParameter) result = 1 - result;
-
-        //    return result;
-        //}
     }
 }

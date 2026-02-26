@@ -11,7 +11,7 @@ namespace MalbersAnimations.Scriptables
         [SerializeField] private int value = 0;
 
         /// <summary>Invoked when the value changes </summary>
-        public Action<int> OnValueChanged  = delegate { };
+        public Action<int> OnValueChanged;
 
         /// <summary>Value of the Int Scriptable variable</summary>
         public virtual int Value
@@ -19,12 +19,12 @@ namespace MalbersAnimations.Scriptables
             get => value;
             set
             {
-               // if (this.value != value)         //If the value is different change it
+                // if (this.value != value)         //If the value is different change it
                 {
                     this.value = value;
-                    OnValueChanged(value);         //If we are using OnChange event Invoked
+                    OnValueChanged?.Invoke(value);         //If we are using OnChange event Invoked
 #if UNITY_EDITOR
-                    if (debug) Debug.Log($"<B>{name} -> [<color=yellow> {value} </color>] </B>",this);
+                    if (debug) Debug.Log($"<B>{name} -> [<color=yellow> {value} </color>] </B>", this);
 #endif
                 }
             }
@@ -33,6 +33,7 @@ namespace MalbersAnimations.Scriptables
 
         /// <summary>Set the Value using another IntVar</summary>
         public virtual void SetValue(IntVar var) => Value = var.Value;
+        public virtual void SetValue(int var) => Value = var;
 
         /// <summary>Add or Remove the passed var value</summary>
         public virtual void Add(IntVar var) => Value += var.Value;
@@ -44,12 +45,17 @@ namespace MalbersAnimations.Scriptables
         public virtual void Divide(IntVar var) => Value /= var;
 
         public static implicit operator int(IntVar reference) => reference.Value;
+
+
+        public virtual void Randomize01() => Value = UnityEngine.Random.Range(0, 1);
+
+        public virtual void Randomize(IntRangeVar range) => Value = range.Value;
     }
 
 
     [System.Serializable]
     public class IntReference : ReferenceVar
-    {  
+    {
         public int ConstantValue;
 #pragma warning disable CA2235 // Mark all non-serializable fields
         [RequiredField] public IntVar Variable;

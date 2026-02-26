@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 558c52fb80d72814bbd94a05998c957f
 ModelImporter:
-  serializedVersion: 19301
+  serializedVersion: 22200
   internalIDToNameTable:
   - first:
       1: 100000
@@ -473,6 +473,7 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
     motionNodeName: 
     rigImportErrors: 
     rigImportWarnings: 
@@ -513,7 +514,32 @@ ModelImporter:
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: LookAt
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          preInfinity: 3
+          postInfinity: 3
+          rotationOrder: 4
       events: []
       transformMask:
       - path: 
@@ -554,13 +580,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear
         weight: 1
@@ -590,7 +610,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3
         weight: 1
-      - path: M
+      - path: Root
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
@@ -618,7 +638,32 @@ ModelImporter:
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: LookAt
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          preInfinity: 3
+          postInfinity: 3
+          rotationOrder: 4
       events: []
       transformMask:
       - path: 
@@ -659,13 +704,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear
         weight: 1
@@ -695,9 +734,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3
         weight: 1
-      - path: Magic
-        weight: 1
-      - path: Wolf
+      - path: Root
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
@@ -725,7 +762,32 @@ ModelImporter:
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: LookAt
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          preInfinity: 3
+          postInfinity: 3
+          rotationOrder: 4
       events: []
       transformMask:
       - path: 
@@ -766,13 +828,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear
         weight: 1
@@ -802,7 +858,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3
         weight: 1
-      - path: M
+      - path: Root
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
@@ -871,13 +927,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear
         weight: 1
@@ -907,7 +957,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3
         weight: 1
-      - path: M
+      - path: Root
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
@@ -976,13 +1026,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear
         weight: 1
@@ -1012,7 +1056,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3
         weight: 1
-      - path: M
+      - path: Root
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
@@ -1040,7 +1084,32 @@ ModelImporter:
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: LookAt
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          preInfinity: 3
+          postInfinity: 3
+          rotationOrder: 4
       events: []
       transformMask:
       - path: 
@@ -1081,13 +1150,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear
         weight: 1
@@ -1117,7 +1180,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3
         weight: 1
-      - path: M
+      - path: Root
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
@@ -1145,7 +1208,32 @@ ModelImporter:
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: LookAt
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          preInfinity: 3
+          postInfinity: 3
+          rotationOrder: 4
       events: []
       transformMask:
       - path: 
@@ -1186,13 +1274,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear
         weight: 1
@@ -1222,7 +1304,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3
         weight: 1
-      - path: M
+      - path: Root
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
@@ -1250,7 +1332,32 @@ ModelImporter:
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: LookAt
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          preInfinity: 3
+          postInfinity: 3
+          rotationOrder: 4
       events: []
       transformMask:
       - path: 
@@ -1291,13 +1398,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear
         weight: 1
@@ -1327,7 +1428,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3
         weight: 1
-      - path: M
+      - path: Root
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
@@ -1355,7 +1456,32 @@ ModelImporter:
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: LookAt
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          preInfinity: 3
+          postInfinity: 3
+          rotationOrder: 4
       events: []
       transformMask:
       - path: 
@@ -1396,13 +1522,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw
         weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/Jaw/Tongue
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Cheek
-        weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/L Ear
-        weight: 1
-      - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Cheek
         weight: 1
       - path: CG/Pelvis/Spine/Spine1/Spine2/Neck/Head/R Ear
         weight: 1
@@ -1432,7 +1552,7 @@ ModelImporter:
         weight: 1
       - path: CG/Pelvis/Spine/Tail/Tail1/Tail2/Tail3
         weight: 1
-      - path: M
+      - path: Root
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
@@ -1460,7 +1580,32 @@ ModelImporter:
       heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: LookAt
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          preInfinity: 3
+          postInfinity: 3
+          rotationOrder: 4
       events: []
       transformMask:
       - path: 
@@ -1550,27 +1695,35 @@ ModelImporter:
     addColliders: 0
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
+    importPhysicalCameras: 1
     importVisibility: 0
     importBlendShapes: 0
     importCameras: 0
     importLights: 0
+    nodeNameCollisionStrategy: 0
     fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
     keepQuads: 0
     weldVertices: 0
+    bakeAxisConversion: 0
     preserveHierarchy: 0
     skinWeightsMode: 0
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
+    optimizeBones: 1
     meshOptimizationFlags: 1
     indexFormat: 1
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 0
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -1603,7 +1756,17 @@ ModelImporter:
   animationType: 2
   humanoidOversampling: 1
   avatarSetup: 2
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Animal Controller/Wolf Lite/Animations/WL_Sleep.FBX
+  uploadId: 848732

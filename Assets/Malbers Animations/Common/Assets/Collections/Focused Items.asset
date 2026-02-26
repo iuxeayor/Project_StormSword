@@ -17,6 +17,7 @@ MonoBehaviour:
   OnSetEmpty:
     m_PersistentCalls:
       m_Calls: []
+  debug: 0
   OnItemAdded:
     m_PersistentCalls:
       m_Calls: []

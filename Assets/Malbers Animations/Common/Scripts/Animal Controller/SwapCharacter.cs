@@ -46,13 +46,15 @@ namespace MalbersAnimations.Controller
 
             var NewCharacter = Characters[NextIndex];
 
-
             if (currentChar != NewCharacter)
             {
+                var LastInputAxis = currentChar.RawInputAxis;
                 Swap(currentChar, NewCharacter);
                 currentChar = NewCharacter;
                 currentCharIndex = NextIndex;
+
                 OnSwap.Invoke(NewCharacter.gameObject);
+                NewCharacter.InputSource.MoveAxis = LastInputAxis;
             }
         }
 
@@ -81,22 +83,25 @@ namespace MalbersAnimations.Controller
 
             //   Debug.Log($" MoveSmoth: {New.MovementAxisRaw}");
 
-            New.Move_Direction = Old.Move_Direction;
-            New.MovementAxisRaw = Old.MovementAxisRaw;
-            New.MovementAxis = Old.MovementAxis;
-            New.DeltaPos = Old.DeltaPos;
-            New.DeltaRootMotion = Old.DeltaRootMotion;
-            New.InertiaPositionSpeed = Old.HorizontalVelocity * New.DeltaTime;
-            New.t.position = Old.t.position;
+            this.Delay_Action(() =>
+            {
+                //New.State_Force(New.OverrideStartState); //Force the new State
+                New.Move_Direction = Old.Move_Direction;
+                New.MovementAxisRaw = Old.MovementAxisRaw;
+                New.MovementAxis = Old.MovementAxis;
+                New.DeltaPos = Old.DeltaPos;
+                New.DeltaRootMotion = Old.DeltaRootMotion;
+                New.InertiaPositionSpeed = Old.HorizontalVelocity * New.DeltaTime;
+                New.t.position = Old.t.position;
 
-            New.SetMaxMovementSpeed();
-            New.TargetSpeed = Old.TargetSpeed;
-            New.Gravity = Old.Gravity;
-            New.GravityTime = Old.GravityTime;
-            New.HorizontalSpeed = Old.HorizontalSpeed;
-            New.HorizontalVelocity = Old.HorizontalVelocity;
+                New.SetMaxMovementSpeed();
+                New.TargetSpeed = Old.TargetSpeed;
+                New.Gravity = Old.Gravity;
+                New.GravityTime = Old.GravityTime;
+                New.HorizontalSpeed = Old.HorizontalSpeed;
+                New.HorizontalVelocity = Old.HorizontalVelocity;
+            });
             // Debug.Log($" MoveSmoth After: {New.MovementAxisRaw}");
-
             //if (Old.Grounded)  New.State_Force(Old.ActiveStateID); //Force the new State
 
             Old.gameObject.SetActive(false);

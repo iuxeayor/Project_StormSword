@@ -9,9 +9,10 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Horse_Mane_Gray
   m_Shader: {fileID: 4800000, guid: 895fbe0b808f6da458acf12788de0555, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
-  - _ALPHATEST_ON
   - _NORMALMAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -19,6 +20,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -102,12 +104,25 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _AOExp: 1
     - _AOPower: 1
     - _AlbedoPower: 0
     - _AlphaClip: 0.267
+    - _AlphaCutoff: 0.5
     - _AnisotropyFalloff: 55
     - _AnisotropyOffset: 0.24
     - _AnisotropyPower: -0.91
@@ -116,6 +131,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _EmmisionPower: 0
+    - _EnvironmentReflections: 1
     - _GlossMapScale: 1
     - _Glossiness: 0.604
     - _GlossyReflections: 1
@@ -127,12 +143,21 @@ Material:
     - _NormalPowerFur: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _ReceiveShadows: 1
     - _SmoothMult: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularAdditive: 0
     - _SpecularHighlights: 1
     - _SpecularPower: 0.335
     - _SrcBlend: 1
+    - _TransAmbient: 0.1
+    - _TransDirect: 0.9
+    - _TransNormal: 0.5
+    - _TransScattering: 2
+    - _TransShadow: 0.5
+    - _TransStrength: 1
     - _UVSec: 0
     - _ZWrite: 1
     - __dirty: 0
@@ -147,3 +172,4 @@ Material:
     - _Tint: {r: 0.9245283, g: 0.7798414, b: 0.5538448, a: 1}
     - _TipColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

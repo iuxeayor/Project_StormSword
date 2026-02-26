@@ -25,11 +25,14 @@ namespace MalbersAnimations
         public virtual void SetIgnoreTransform(Transform t) => IgnoreTransform = t;
         public virtual void ClearIgnoreTransform() => IgnoreTransform = null;
 
-
         public virtual void Holster_SetActive(int ID)
         {
-            ActiveHolster = holsters.Find(x => x.GetID == ID);
+            Holster_SetActive(holsters.Find(x => x.GetID == ID));
+        }
 
+        public virtual void Holster_SetActive(Holster newHolster)
+        {
+            ActiveHolster = newHolster;
 
             ActiveHolsterIndex = ActiveHolster != null ? ActiveHolster.Index : 0;
 
@@ -62,12 +65,13 @@ namespace MalbersAnimations
         }
 
         /// <summary>  Checks if the weapon action is one of the list items Bool Comparer! </summary>
-        internal bool IsWeaponAction(params Weapon_Action[] w_actions)
+        protected bool IsWeaponAction(params Weapon_Action[] w_actions)
         {
             for (int i = 0; i < w_actions.Length; i++)
                 if (WeaponAction == w_actions[i]) return true;
             return false;
         }
+
         // public virtual void WeaponReady(bool value) => Weapon.WeaponReady(value);
 
         /// <summary> Equip a weapon that is located in a Holster  </summary>
@@ -75,25 +79,48 @@ namespace MalbersAnimations
 
         /// <summary>Clear a Holster by its ID</summary> 
         public virtual void Holster_Clear(HolsterID HolsterID) => Holster_Clear(HolsterID.ID);
-        /// <summary>Clear the current equipped weapon Holser</summary> 
+
+        /// <summary>Clear the current equipped weapon Holster</summary> 
         public virtual void Holster_Clear()
         {
-            if (Weapon != null && Weapon.IsEquiped)
+            if (Weapon != null && Weapon.IsEquipped)
             {
                 Holster_Clear(Weapon.Holster);
             }
         }
 
+        /// <summary>Drop the Current Equipped weapon</summary> 
+        public virtual void Drop_Weapon()
+        {
+            if (UseHolsters)
+            {
+                Holster_Clear();
+            }
+            else if (UseExternal)
+            {
+                UnEquip();
+            }
+        }
+
+        /// <summary>  Set the Current Weapon Active State. Disable weapons cannot work</summary>
+        /// <param name="value"></param>
+        public virtual void Weapon_SetActive(bool value)
+        {
+            if (Weapon != null) Weapon.Active = value; //Set the Active State of the Weapon
+        }
+
         /// <summary> Equip a weapon that is located in a Holster (INPUT CONNECTION)  </summary>
         protected virtual void Holster_Equip(HolsterID HolsterID, bool value) { if (value) Holster_Equip(HolsterID.ID); }
 
-        public virtual void HolsterClearAll()
+        public virtual void HolsterClearAll() => Holster_Clear_All();
+
+        public virtual void Holster_Clear_All()
         {
             if (UseHolsters && Active && !Paused)
             {
                 foreach (var holster in holsters)
                 {
-                    if (holster.Weapon && holster.Weapon.IsEquiped)
+                    if (holster.Weapon && holster.Weapon.IsEquipped)
                         UnEquip_Fast(); //Make sure to unequip any equipped weapon on a holster
 
                     Holster_AddWeapon(holster, null);
@@ -106,7 +133,7 @@ namespace MalbersAnimations
         {
             if (UseHolsters && Active && !Paused)
             {
-                //Do nothing if the Action is NOT Idle or None( DO NOT INCLUDE AIMING because Assasing Creed Style)
+                //Do nothing if the Action is NOT Idle or None( DO NOT INCLUDE AIMING because Assassin Creed Style)
                 if (!IsWeaponAction(Weapon_Action.None, Weapon_Action.Idle)) return;
 
                 var ActiveHolster = holsters.Find(x => x.GetID == HolsterID);
@@ -114,10 +141,10 @@ namespace MalbersAnimations
                 if (ActiveHolster != null)
                 {
                     //Make sure to unequip that weapon
-                    if (ActiveHolster.Weapon && ActiveHolster.Weapon.IsEquiped)
+                    if (ActiveHolster.Weapon && ActiveHolster.Weapon.IsEquipped)
                         UnEquip_Fast();
 
-                    Holster_AddWeapon(ActiveHolster, null);
+                    Holster_AddWeapon(ActiveHolster, null); //DROP the WEAPON
                 }
             }
         }
@@ -125,24 +152,34 @@ namespace MalbersAnimations
         /// <summary> Equip a weapon that is located in a Holster  </summary> 
         public virtual void Holster_Equip(int HolsterID)
         {
-            if (UseHolsters && Active && !Paused// && !ExitByAnim
-                )
+            //Do nothing if the character is drawing or storing a weapon. THIS WILL BREAK THE ASSASSIN CREED STYLE
+            // if (!IsWeaponAction(Weapon_Action.None, Weapon_Action.Idle)) return;
+
+            if (IsWeaponAction(Weapon_Action.Aim)) return;
+
+
+            if (UseHolsters && Active && !Paused)
             {
-                Debugging("Holster Equip", "green");
+                var NewHolster = holsters.Find(x => x.GetID == HolsterID);
+                if (NewHolster != null && NewHolster.Weapon == null) return; //Do nothing if the new holster has no weapons
 
-                if (Weapon && !Weapon.CanUnequip) return;
+                if (Weapon)
+                {
+                    if (!Weapon.CanUnequip) return; //Do not change holsters if the weapon cannot unequip
+                    if (!StoreSelfHolster && Weapon.HolsterID == HolsterID) return; //Meaning the weapon is already equipped
+                }
 
-                //Do nothing if the Action is NOT Idle or None( DO NOT INCLUDE AIMING because Assasing Creed Style)
-                // if (!IsWeaponAction(Weapon_Action.None, Weapon_Action.Idle)) return;
-                // if (IsWeaponAction(Weapon_Action.Aim, Weapon_Action.Reload)) return;
+                // if (IsWeaponAction(Weapon_Action.Draw, Weapon_Action.Store)) return;
+
+                Debugging($"Holster Equip [{HolsterID}]", "green");
 
                 if (IgnoreDraw)
                 {
                     //  Debug.Log("IgnoreDraw");
                     if (!CombatMode)                    //There's no weapon equipped
                     {
-                        //Debug.Log("NO weapon equiiped");
-                        Holster_SetActive(HolsterID);
+                        //Debug.Log("NO weapon equipped");
+                        Holster_SetActive(NewHolster);
                         Weapon = ActiveHolster.Weapon;
                         Equip_Fast();                   //So Equip
                     }
@@ -152,16 +189,16 @@ namespace MalbersAnimations
                         {
                             //  Debug.Log("Unequip different holster");
                             UnEquip_Fast();
-                            Holster_SetActive(HolsterID);
+                            Holster_SetActive(NewHolster);
                             Weapon = ActiveHolster.Weapon;
                             Equip_Fast();
                         }
                         else
                         {
                             Weapon.StopAllCoroutines(); //Important! do not leave any pending works!!
-                                                        //Disable this for Assasin Creed Mode
-                            if (StoreSelfHolster)
-                                UnEquip_Fast(); //So Unequip  
+
+                            //Disable this for Assassin Creed Mode
+                            if (StoreSelfHolster) Store_Weapon(); //So store the same Active Weapon
                         }
                     }
                 }
@@ -169,7 +206,7 @@ namespace MalbersAnimations
                 {
                     if (!CombatMode)        //There's no weapon equipped
                     {
-                        Holster_SetActive(HolsterID);
+                        Holster_SetActive(NewHolster);
                         Draw_Weapon();      //Draw a weapon if we are on Action None
                     }
                     else
@@ -181,13 +218,18 @@ namespace MalbersAnimations
                         }
                         else
                         {
-                            StartCoroutine(SwapWeaponsHolster(HolsterID));
+                            if (I_SwappingWeapons != null) StopCoroutine(I_SwappingWeapons); //Stop the previous Swapping Weapons Coroutine
+
+                            I_SwappingWeapons = SwapWeaponsHolster(HolsterID); //Swap the weapon on the Holster
+
+                            StartCoroutine(I_SwappingWeapons);
                         }
                     }
                 }
             }
         }
 
+        IEnumerator I_SwappingWeapons;
 
         /// <summary> Store a weapon on its holster</summary>
         public virtual void Holster_SetWeapon(GameObject WeaponGO)
@@ -204,11 +246,11 @@ namespace MalbersAnimations
             {
                 if (Next_Weapon.gameObject.IsPrefab())
                 {
-                    Debugging($"[Weapon {Next_Weapon.name} is a Prefab] → [Instantianting]", "green");
+                    Debugging($"[Weapon {Next_Weapon.name} is a Prefab] → [Instantiating]", "green");
                     Next_Weapon = Instantiate(Next_Weapon);              //if is a prefab instantiate on the scene
                 }
 
-                var holster = holsters.Find(x => x.ID == Next_Weapon.HolsterID); //Find the holster you want the new weapon to be eqquipped
+                var holster = holsters.Find(x => x.ID == Next_Weapon.HolsterID); //Find the holster you want the new weapon to be equipped
 
                 if (holster != null)
                 {
@@ -223,19 +265,18 @@ namespace MalbersAnimations
                     }
 
                     //Set the new Weapon in the Correct Holster Spot
-                    Next_Weapon.gameObject.transform.parent = holster.GetSlot(Next_Weapon.HolsterSlot);
-                    Next_Weapon.gameObject.transform.SetLocalTransform(Next_Weapon.HolsterOffset);
+                    SetWeaponParent(Next_Weapon, holster.GetSlot(Next_Weapon.HolsterSlot));
+                    //Set the Local Position and Rotation of the Weapon
+                    Next_Weapon.transform.SetLocalTransform(Next_Weapon.HolsterOffset);
 
                     Holster_AddWeapon(holster, Next_Weapon);
 
                     holster.Weapon.DisablePhysics();
 
-                    //   Debug.Log("**********************WasEquipped = " + WasEquipped);
-
                     if (WasEquipped) //Was the old weapon Equipped?
                     {
                         Weapon = Next_Weapon;
-                        Equip_Fast(); //Equip the new weapon if the last one was eqqiuped
+                        Equip_Fast(); //Equip the new weapon if the last one was equipped
                     }
                 }
                 //Means that the weapon does not have a holster;
@@ -244,13 +285,11 @@ namespace MalbersAnimations
                 {
                     UnEquip_Fast();
                     Weapon = Next_Weapon;
-                    Equip_Fast(); //Equip the new weapon if the last one was eqqiuped
+                    Equip_Fast(); //Equip the new weapon if the last one was equipped
                 }
             }
         }
-
-
-        private void Holster_AddWeapon(Holster holster, MWeapon weap)
+        protected virtual void Holster_AddWeapon(Holster holster, MWeapon weap)
         {
             if (holster.Weapon) //Meaning there's a OLD weapon already on the holster
             {
@@ -279,14 +318,14 @@ namespace MalbersAnimations
 
             holster.Weapon = weap;
 
+            //PICk WEAPN>>
+
             if (holster.Weapon != null)
             {
                 if (holster.Weapon.IsCollectable != null)
-                    holster.Weapon.IsCollectable?.OnPickDisablePhysics();
+                    holster.Weapon.IsCollectable?.Physics_Disable();
 
                 holster.OnWeaponInHolster.Invoke(weap);
-                //holster.Weapon.InHolster = true;
-
 
                 if (holster.AutoEquip.Value)
                 {
@@ -310,12 +349,12 @@ namespace MalbersAnimations
             var Next_Weapon = WeaponGo != null ? WeaponGo.GetComponent<MWeapon>() : null;
             Equip_External(Next_Weapon);
         }
-
-
         public virtual void Equip_External(MWeapon Next_Weapon)
         {
-            //Do nothing if the Action is NOT Idle or None( DO NOT INCLUDE AIMING because Assasing Creed Style)
-            if (!IsWeaponAction(Weapon_Action.None, Weapon_Action.Idle)) return;
+            //Do nothing if the Action is NOT Idle or None( DO NOT INCLUDE AIMING because Assassin Creed Style)
+
+            if ((Weapon != null && !Weapon.CanUnequip)) return;
+            // else if (!IsWeaponAction(Weapon_Action.None, Weapon_Action.Idle)) return;
 
             if (Active && UseExternal && !Paused)
             {
@@ -332,7 +371,7 @@ namespace MalbersAnimations
                     Draw_Weapon();
 
                 }
-                else if (Weapon.Equals(Next_Weapon))                         //You are trying to draw the same weapon
+                else if (Weapon.WeaponID == (Next_Weapon.WeaponID))                         //You are trying to draw the same weapon
                 {
                     if (!CombatMode)
                     {
@@ -355,11 +394,11 @@ namespace MalbersAnimations
 
 
         /// <summary> Don't remember why I'm using this ??</summary>
-        private void TryInstantiateWeapon(MWeapon Next_Weapon)
+        protected virtual void TryInstantiateWeapon(MWeapon Next_Weapon)
         {
             if (InstantiateOnEquip || Next_Weapon.gameObject.IsPrefab())
             {
-                var WeaponGO = Instantiate(Next_Weapon.gameObject, transform);      //Instanciate the Weapon GameObject
+                var WeaponGO = Instantiate(Next_Weapon.gameObject, transform);      //Instantiate the Weapon GameObject
                 WeaponGO.SetActive(false);                                          //Hide it to show it later
                 Next_Weapon = WeaponGO.GetComponent<MWeapon>();                     //UPDATE THE REFERENCE
                 Debugging($"{WeaponGO.name} Instantiated");
@@ -368,11 +407,11 @@ namespace MalbersAnimations
         }
 
         /// <summary>Is called to swap weapons</summary>
-        private IEnumerator SwapWeaponsInventory(MWeapon nextWeapon)
+        protected virtual IEnumerator SwapWeaponsInventory(MWeapon nextWeapon)
         {
             Store_Weapon();
 
-            while (WeaponAction == Weapon_Action.Store) yield return null;    // Wait for the weapon is Unequiped Before it can Draw Another
+            while (WeaponAction == Weapon_Action.Store) yield return null;    // Wait for the weapon is Unequipped Before it can Draw Another
 
             TryInstantiateWeapon(nextWeapon);
 
@@ -391,7 +430,7 @@ namespace MalbersAnimations
 
         public virtual void Equip_Fast(MWeapon Next_Weapon)
         {
-            //Do nothing if the Action is NOT Idle or None( DO NOT INCLUDE AIMING because Assasing Creed Style)
+            //Do nothing if the Action is NOT Idle or None( DO NOT INCLUDE AIMING because Assassin Creed Style)
             if (!IsWeaponAction(Weapon_Action.None, Weapon_Action.Idle)) return;
             if (!Active) return;
             if (Next_Weapon == null) return;
@@ -467,32 +506,60 @@ namespace MalbersAnimations
             if (!Active) return;
             if (MountingDismounting) return; //Do nothing if the character is mounting or dismounting
 
+            if (IsWeaponAction(Weapon_Action.Draw, Weapon_Action.Store)) return; //Do nothing if the Action storing or drawing
+
+            //Check the Pre Attack Conditions in the Character and if they are valid and false skip the code
+            if (PreAttackConditions.Valid && !PreAttackConditions.Evaluate(Weapon)) return;
+            //Check the Pre Attack Conditions in the Weapon and if they are valid and false skip the code
+            if (HasWeapon && Weapon.PreAttackConditions.Valid && !Weapon.PreAttackConditions.Evaluate(this)) return;
+
             if (comboManager) comboManager.SetBranch(Branch); //Set the Branch in the combo 
+
+            OnAttackStart.Invoke(HasWeapon ? Weapon.gameObject : null);
 
             Attack();
         }
 
-        /// <summary>Called to release the Main Attack (Ex release the Arrow on the Bow, the Melee Atack)</summary>
+        /// <summary>Called to release the Main Attack (Ex release the Arrow on the Bow, the Melee Attack)</summary>
         public virtual void MainAttackReleased()
         {
-            if (WeaponIsActive)
+            //Reset Mode and abilities Input Values
+            if (WeaponMode != null)
             {
-                // Debug.Log("Attack Release");
-                Weapon.MainAttack_Released(this);
+                WeaponMode.ActivatebyInput(false);
+                WeaponMode.GetAbility((int)Weapon_Action.Attack)?.SetInputValue(false); //Reset the Input Value for the Attack Ability
+            }
 
-                if (HasAnimal && animal.ActiveMode == WeaponMode) //if the animal is in the same mode as the weapon
-                {
-                    WeaponMode.ActivatebyInput(false);
-                }
+            if (!HasWeapon) return; //Do nothing if there's no weapon
+
+            if (IsWeaponAction(Weapon_Action.Draw, Weapon_Action.Store)) return; //Do nothing if the Action  storing or drawing
+
+            //Check the Pre Attack Conditions in the Character and if they are valid and false skip the code
+            if (PreAttackConditions.Valid && !PreAttackConditions.Evaluate(Weapon)) return;
+            //Check the Pre Attack Conditions in the Weapon and if they are valid and false skip the code
+            if (Weapon.PreAttackConditions.Valid && !Weapon.PreAttackConditions.Evaluate(this)) return;
+
+            OnAttackReleased.Invoke(Weapon.gameObject);     //Invoke the Attack Released Event
+
+            if (WeaponIsActive && !HigherPriorityMode)
+            {
+                Weapon.MainAttack_Released(this);
             }
         }
 
 
         /// <summary>   Reset the Combo Manager Branch values to their Default </summary>
-        public void ComboBranchReset() { MainAttackBranch = 0; SecondAttackBranch = 1; }
+        public virtual void ComboBranchReset() { MainAttackBranch = 0; SecondAttackBranch = 1; }
 
         public virtual void SecondAttackReleased()
         {
+            // Reset Mode and abilities Input Values
+            if (WeaponMode != null)
+            {
+                WeaponMode.ActivatebyInput(false);
+                WeaponMode.GetAbility((int)Weapon_Action.Attack)?.SetInputValue(false); //Reset the Input Value for the Attack Ability
+            }
+
             if (WeaponIsActive)
             {
                 Weapon.SecondAttack_Released(this);
@@ -514,6 +581,8 @@ namespace MalbersAnimations
         /// <summary>Reload the Weapon in case it can be reloaded</summary>
         public virtual void ReloadWeapon()
         {
+            if (HasAnimal && HigherPriorityMode) return; //Do not reload if the Animal is in a Higher Mode
+
             if (JustChangedAction) return; //DO Nothing if you just change actions
 
             if (WeaponIsActive && WeaponAction != Weapon_Action.Reload) //Only Reload Once!
@@ -521,6 +590,8 @@ namespace MalbersAnimations
                 Weapon.TryReload();
             }
         }
+
+
 
         /// <summary> Start the Main Attack Logic </summary>
         protected virtual void Attack()
@@ -535,12 +606,16 @@ namespace MalbersAnimations
                 // {
                 if (!Aimer.Active) Aimer.CalculateAiming(); //Quick Aim Calculation in case the Aimer is Disabled
                 Weapon.MainAttack_Start(this);
+
+                Weapon.OnAttackStarted.Invoke(gameObject);
+                Weapon.OnAttackStartedReaction.React(gameObject);
+
                 // OnMainAttackStart.Invoke(Weapon.gameObject);
                 // }
             }
             else //Meaning there's no WEAPON!!!! you are doing NO WEAPONS ATTACKS (ONLY DO THIS WITH ANIMAL CONTROLLER)
             {
-                if (Weapon && !Weapon.Enabled) { return; } //Meaning the weapon was Disabled!!!
+                if (Weapon && !Weapon.Active) { return; } //Meaning the weapon was Disabled!!!
 
                 //Do Unharmed Attacks in case there's no weapons (Different from attacking with a weapon
                 if (HasAnimal && !IsRiding)
@@ -560,7 +635,7 @@ namespace MalbersAnimations
         }
 
         /// <summary>Repeat while the Input is down. This is called in fixed update</summary>
-        protected virtual void WeaponCharged(float time)
+        public virtual void WeaponCharged(float time)
         {
             //If there's a Weapon Active
             if (Active && CombatMode && WeaponIsActive && Weapon.Input)
@@ -570,13 +645,13 @@ namespace MalbersAnimations
         }
 
         /// <summary>This is the first task for reloading... (Connected to the Input)</summary>
-        private void Reload(bool value)
+        protected virtual void Reload(bool value)
         {
             if (value) ReloadWeapon();
             //  else ReloadInterrupt();
         }
 
-        private void ReloadInterrupt()
+        protected virtual void ReloadInterrupt()
         {
             if (WeaponIsActive && IsReloading) //Only Reload Once!
             {
@@ -592,9 +667,15 @@ namespace MalbersAnimations
 
         #region Inputs
 
+        public virtual void ResetInputSource()
+        {
+            ConnectInput(MInput, false); //Disconnect
+            ConnectInput(MInput, true); //Reconnect
+        }
+
 
         /// <summary>Connects the State with the External Inputs Source</summary>
-        internal void ConnectInput(IInputSource InputSource, bool connect)
+        protected virtual void ConnectInput(IInputSource InputSource, bool connect)
         {
             //Connect Aim Input
             if (connect)
@@ -651,8 +732,7 @@ namespace MalbersAnimations
         /// <summary>  Sets on the Animator Controller the Hand Value (Left:true or Right:false)  </summary>
         public void SetWeaponHand(bool value)
         {
-            if (Hash_LeftHand != 0)
-                SetBoolParameter(Hash_LeftHand, value);
+            TryAnimParameter(Hash_LeftHand, value);
         }
 
         public void SetAnimParameter(int hash, int value) => Anim.SetInteger(hash, value);
@@ -677,16 +757,46 @@ namespace MalbersAnimations
             return AnimHash;
         }
 
-        public virtual void TryAnimParameter(int Hash, float value) { if (Hash != 0) SetFloatParameter(Hash, value); }
+        public virtual void TryAnimParameter(int Hash, float value) { if (Hash != 0) SetFloatParameter?.Invoke(Hash, value); }
 
-        public virtual void TryAnimParameter(int Hash, int value) { if (Hash != 0) SetIntParameter(Hash, value); }
+        public virtual void TryAnimParameter(int Hash, int value) { if (Hash != 0) SetIntParameter?.Invoke(Hash, value); }
 
-        public virtual void TryAnimParameter(int Hash, bool value) { if (Hash != 0) SetBoolParameter(Hash, value); }
+        public virtual void TryAnimParameter(int Hash, bool value)
+        {
+            if (Hash != 0)
+            {
+                SetBoolParameter?.Invoke(Hash, value);
+            }
+        }
 
-        public virtual void TryAnimParameter(int Hash) { if (Hash != 0) SetTriggerParameter(Hash); }
+        public virtual void TryAnimParameter(int Hash) { if (Hash != 0) SetTriggerParameter?.Invoke(Hash); }
         #endregion
 
         /// <summary>Get a Callback From the RiderCombat Layer Weapons States</summary>
         public virtual void WeaponSound(int SoundID) => Weapon?.PlaySound(SoundID);
+
+        public virtual void Weapon_SetChamberSize(int size)
+        {
+            if (HasWeapon && Weapon is MShootable ShootWeapon)
+            {
+                ShootWeapon.ChamberSize = size;
+            }
+        }
+
+        public virtual void Weapon_SetTotalAmmo(int totalAmmo)
+        {
+            if (HasWeapon && Weapon is MShootable ShootWeapon)
+            {
+                ShootWeapon.TotalAmmo = totalAmmo;
+            }
+        }
+
+        public virtual void Weapon_SetAmmoInChamber(int ammoInChamber)
+        {
+            if (HasWeapon && Weapon is MShootable ShootWeapon)
+            {
+                ShootWeapon.AmmoInChamber = ammoInChamber;
+            }
+        }
     }
 }

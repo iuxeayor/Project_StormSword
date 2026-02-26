@@ -24,13 +24,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1039435466290130}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -0.93}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4085882510917378}
-  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114726694204898644
 MonoBehaviour:
@@ -50,6 +50,12 @@ MonoBehaviour:
   DebugColor: {r: 0, g: 0, b: 1, a: 1}
   DrawAxis: 1
   AxisSize: 1.56
+  _colliders: []
+  HasColliders: 0
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!1 &1119361401508160
 GameObject:
   m_ObjectHideFlags: 0
@@ -82,7 +88,6 @@ RectTransform:
   m_Children:
   - {fileID: 224508962589274818}
   m_Father: {fileID: 4085882510917378}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -106,7 +111,9 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -158,13 +165,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1237408549391376}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.03, y: -0.01, z: -0.07}
   m_LocalScale: {x: 2.054319, y: 0.033306498, z: 2.054319}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4085882510917378}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &33276376445878846
 MeshFilter:
@@ -191,6 +198,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -229,7 +239,7 @@ GameObject:
   - component: {fileID: 65104197991804016}
   - component: {fileID: 23019183747046554}
   - component: {fileID: 208762255710878736}
-  m_Layer: 1
+  m_Layer: 0
   m_Name: Push Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -243,13 +253,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1308514641764850}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.24, y: 2.13, z: -1.17}
   m_LocalScale: {x: 3.769764, y: 4.223324, z: 1.1867305}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4620373688437852}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &33852766200122788
 MeshFilter:
@@ -267,9 +277,17 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1308514641764850}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 0.99999994}
   m_Center: {x: -0.00000023841858, y: 0, z: 0.49999997}
 --- !u!23 &23019183747046554
@@ -289,6 +307,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -358,10 +379,11 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1421639488966868}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 224332744515574506}
   - {fileID: 4068540002352634}
@@ -369,7 +391,6 @@ Transform:
   - {fileID: 4620373688437852}
   - {fileID: 70405223662893263}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &65741771177404858
 BoxCollider:
@@ -379,9 +400,17 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1421639488966868}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 1
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Size: {x: 1.24, y: 2.7894516, z: 1.55}
   m_Center: {x: 0.13667092, y: 1.3947258, z: 0.01}
 --- !u!114 &114696168541147788
@@ -402,6 +431,13 @@ MonoBehaviour:
   DebugColor: {r: 1, g: 0, b: 0, a: 0.22352941}
   DrawAxis: 0
   AxisSize: 1.01
+  _colliders:
+  - {fileID: 65741771177404858}
+  HasColliders: 1
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!114 &114700312682545948
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -439,6 +475,7 @@ MonoBehaviour:
   stateActionExit: 6
   stanceActionEnter: 0
   stanceActionExit: 1
+  SetStanceAsDefault: 0
   Layer:
     UseConstant: 1
     ConstantValue:
@@ -458,14 +495,13 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  ZoneID: 0
   m_abilityStatus: 0
   AbilityTime: 3
   Force:
     UseConstant: 1
     ConstantValue: 10
     Variable: {fileID: 0}
-  EnterAceleration:
+  EnterAcceleration:
     UseConstant: 1
     ConstantValue: 2
     Variable: {fileID: 0}
@@ -486,10 +522,13 @@ MonoBehaviour:
     ConstantValue: 1
     Variable: {fileID: 0}
   ForceMode: 0
-  CheckConditions: {fileID: 0}
+  ActivationConditions:
+    conditions: []
+    active: 0
   JustExitAnimal: {fileID: 0}
   ModeFloat: 0
   RemoveAnimalOnActive: 0
+  PrepareModeZone: 1
   OnEnter:
     m_PersistentCalls:
       m_Calls:
@@ -569,7 +608,7 @@ MonoBehaviour:
   ActivationReaction:
     rid: -2
   ZoneCollider: {fileID: 65741771177404858}
-  Editor_Tabs1: 0
+  Editor_Tabs1: 1
   references:
     version: 2
     RefIds:
@@ -597,7 +636,9 @@ MonoBehaviour:
     Variable: {fileID: 0}
   LookAtRadius: 0
   AlignTime: 0.25
+  AlignMinDistance: 0
   AngleOffset: 0
+  ignoreY: 0
   AlignCurve:
     serializedVersion: 2
     m_Curve:
@@ -641,7 +682,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Delayed:
     UseConstant: 1
-    ConstantValue: 0
+    ConstantValue: 3.4
     Variable: {fileID: 0}
   RepeatTime:
     UseConstant: 1
@@ -655,6 +696,18 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: 
         m_MethodName: Play
         m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Cube Push
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 114700312682545948}
+        m_TargetAssemblyTypeName: UnityEngine.Behaviour, UnityEngine
+        m_MethodName: set_enabled
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -689,6 +742,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1489204049902790}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 2.56}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -696,11 +750,10 @@ Transform:
   m_Children:
   - {fileID: 4890580924945520}
   m_Father: {fileID: 4085882510917378}
-  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &95308462637708190
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -714,6 +767,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -750,7 +804,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 224332744515574506}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -806,6 +859,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 4085882510917378}
     m_Modifications:
     - target: {fileID: 1175903420998626740, guid: 1c7a0f3efad6ffd4898f40074ea5bcc2,
@@ -868,7 +922,15 @@ PrefabInstance:
       propertyPath: m_Name
       value: OnFocused
       objectReference: {fileID: 0}
+    - target: {fileID: 9181817740155613070, guid: 1c7a0f3efad6ffd4898f40074ea5bcc2,
+        type: 3}
+      propertyPath: onEnable.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_StringArgument
+      value: Push
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c7a0f3efad6ffd4898f40074ea5bcc2, type: 3}
 --- !u!4 &70405223662893263 stripped
 Transform:

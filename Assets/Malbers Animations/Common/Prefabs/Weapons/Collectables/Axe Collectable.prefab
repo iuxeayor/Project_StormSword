@@ -66,6 +66,31 @@ PrefabInstance:
       propertyPath: Editor_Tabs2
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 9207878466321987045, guid: 6327f99012e09404f86ebeb2c7bff1db,
+        type: 3}
+      propertyPath: m_Size.x
+      value: 0.5918957
+      objectReference: {fileID: 0}
+    - target: {fileID: 9207878466321987045, guid: 6327f99012e09404f86ebeb2c7bff1db,
+        type: 3}
+      propertyPath: m_Size.y
+      value: 0.44108307
+      objectReference: {fileID: 0}
+    - target: {fileID: 9207878466321987045, guid: 6327f99012e09404f86ebeb2c7bff1db,
+        type: 3}
+      propertyPath: m_Center.x
+      value: -0.13948697
+      objectReference: {fileID: 0}
+    - target: {fileID: 9207878466321987045, guid: 6327f99012e09404f86ebeb2c7bff1db,
+        type: 3}
+      propertyPath: m_Center.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9207878466321987045, guid: 6327f99012e09404f86ebeb2c7bff1db,
+        type: 3}
+      propertyPath: m_Center.z
+      value: -0.08372715
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -183,9 +208,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Align: 0
-  AlignPos: 0
   AlignTime: 0.15
-  AlignDistance: 1
   PickDelay:
     UseConstant: 1
     ConstantValue: 0.15
@@ -211,6 +234,10 @@ MonoBehaviour:
     ConstantValue: 0
     Variable: {fileID: 0}
   m_Amount:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  canBePicked:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
@@ -260,6 +287,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  OnPickedFailed:
+    m_PersistentCalls:
+      m_Calls: []
   OnPrePicked:
     m_PersistentCalls:
       m_Calls:
@@ -294,9 +324,21 @@ MonoBehaviour:
   PreDroppedReaction:
     rid: -2
   rb: {fileID: 1280272531397504058}
+  DestroyRbOnPick:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_colliders:
   - {fileID: 6906300268119253409}
   - {fileID: 4405352245439151013}
+  kinematicOnPick:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  disableColliders:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
   EditorTabs: 0
   references:
     version: 2
@@ -321,6 +363,10 @@ MonoBehaviour:
   DebugColor: {r: 0, g: 0.6545739, b: 1, a: 0.27058825}
   DrawAxis: 0
   AxisSize: 0.65
+  _collider: {fileID: 4405352245439151013}
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
 --- !u!4 &1359103756538855361 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4000010068590236, guid: 6327f99012e09404f86ebeb2c7bff1db,

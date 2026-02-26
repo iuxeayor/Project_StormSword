@@ -20,8 +20,6 @@ namespace MalbersAnimations.Utilities
         [Space, Header("Bones Properties")]
         public List<MiniTransform> Bones;
 
-
-
         public virtual void SmoothBlendBones(Transform root)
         {
             StartCoroutine(root, C_SmoothBlendBones(root, BlendTime, BlendCurve));
@@ -74,22 +72,16 @@ namespace MalbersAnimations.Utilities
                     var NewPos = Vector3.Lerp(AnimalStartBones[i].Position, AnimalEndBones[i].Position, result);
                     var NewScale = Vector3.Lerp(AnimalStartBones[i].Scale, AnimalEndBones[i].Scale, result);
 
-                    var Bone_Found = AnimalBonesTransforms[i];
+                    var bn = AnimalBonesTransforms[i];
 
-                    //                    Debug.Log($" name: {Bone_Found.name}: {Bone_Found.localScale} ..[{i}]");
-
-                    if (scales) Bone_Found.localScale = NewScale;
-                    if (positions) Bone_Found.localPosition = NewPos;
+                    if (scales) bn.localScale = NewScale;
+                    if (positions) bn.localPosition = NewPos;
                 }
 
                 elapsedTime += Time.deltaTime;
 
                 yield return null;
             }
-
-            Load(root);
-
-            yield return null;
 
             Stop(root);
         }

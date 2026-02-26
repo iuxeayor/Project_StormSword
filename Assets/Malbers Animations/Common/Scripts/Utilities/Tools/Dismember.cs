@@ -18,7 +18,7 @@ namespace MalbersAnimations
 
         /// <summary>  The Current Material Item on the Animal to Update the Limbs Material Items </summary>
         public string MaterialItemName;
-        
+
         /// <summary>  Store the Index of the Current Material Item on the Animal to Update on the Limbs Material Items </summary>
         protected int CurrentMaterialItemIndex;
 
@@ -51,7 +51,7 @@ namespace MalbersAnimations
         /// <summary>  Dismember a limb given an Index from the body part list </summary>
         public void _DismemberLimb(int bodypartIndex)
         {
-            if (bodypartIndex < bodyParts.Count && bodypartIndex>=0)
+            if (bodypartIndex < bodyParts.Count && bodypartIndex >= 0)
             {
                 _DismemberLimb(bodyParts[bodypartIndex]);
             }
@@ -64,7 +64,7 @@ namespace MalbersAnimations
         /// <summary>  Dismember a limb given an Name from the body part list </summary>
         public void _DismemberLimb(string bodypartName)
         {
-            BodyPart bodyPart = bodyParts.Find(item => item.name.ToLower() == bodypartName.ToLower()); 
+            BodyPart bodyPart = bodyParts.Find(item => item.name.ToLower() == bodypartName.ToLower());
 
             if (bodyPart != null)
             {
@@ -72,7 +72,7 @@ namespace MalbersAnimations
             }
             else
             {
-                Debug.LogWarning("There's no body part named "+bodypartName);
+                Debug.LogWarning("There's no body part named " + bodypartName);
             }
         }
 
@@ -108,13 +108,13 @@ namespace MalbersAnimations
 
                 UpdateMaterialDismemberLimb(Limb);
             }
-           
+
 
             bodypart.dismembered = true;
 
             if (bodypart.AttachedLimb) bodypart.AttachedLimb.SetActive(false);  //Hide the Attached Body Part 
 
-            if (Limb && bodypart.life>0)
+            if (Limb && bodypart.life > 0)
             {
                 Destroy(Limb, bodypart.life);
             }
@@ -202,7 +202,7 @@ namespace MalbersAnimations
 
             EditorGUI.BeginChangeCheck();
             {
-               // EditorGUILayout.BeginVertical(MalbersEditor.StyleGray);
+                // EditorGUILayout.BeginVertical(MalbersEditor.StyleGray);
                 {
                     MalbersEditor.DrawScript(script);
 
@@ -214,9 +214,9 @@ namespace MalbersAnimations
                         BodyPart item = M.bodyParts[list.index];
                         SerializedProperty Element = LimbList.GetArrayElementAtIndex(list.index);
 
-                        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                         {
-                            EditorGUILayout.BeginHorizontal();
+                            using (new GUILayout.HorizontalScope())
                             {
                                 EditorGUIUtility.labelWidth = 20;
 
@@ -232,7 +232,7 @@ namespace MalbersAnimations
                                     item.Instantiate = GUILayout.Toggle(item.Instantiate, new GUIContent("Instantiate", "if True the separated limb will be instantiated... else is already on scene and it will be enabled"), EditorStyles.miniButton);
                                 }
                             }
-                            EditorGUILayout.EndHorizontal();
+
 
                             Limb member = M.bodyParts[list.index].member;
 
@@ -253,49 +253,42 @@ namespace MalbersAnimations
 
                             if (member != null) //If theres a member on it
                             {
-                                EditorGUILayout.BeginVertical(MalbersEditor.StyleGreen);
-                                EditorGUILayout.HelpBox("[Attached Bones] Bones on the animal \n[Dismember Bones] Bones on the Detached Limb\n\n The order of elements of both List must match", MessageType.None);
-                                EditorGUILayout.EndVertical();
+                                using (new GUILayout.VerticalScope(MalbersEditor.StyleGreen))
+                                    EditorGUILayout.HelpBox("[Attached Bones] Bones on the animal \n[Dismember Bones] Bones on the Detached Limb\n\n The order of elements of both List must match", MessageType.None);
 
 
-                                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                                MalbersEditor.Arrays(Element.FindPropertyRelative("AttachedLimbBones"), new GUIContent("Attached Bones", "Attached Limb Bones... They are use for alinging the Dismembered bones"));
-                                EditorGUILayout.EndVertical();
+
+                                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                                    MalbersEditor.Arrays(Element.FindPropertyRelative("AttachedLimbBones"), new GUIContent("Attached Bones", "Attached Limb Bones... They are use for alinging the Dismembered bones"));
+
 
 
                                 MemberScript = new SerializedObject(member);
 
 
-                                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                                 {
-                                    EditorGUI.BeginDisabledGroup(true);
-                                    MalbersEditor.Arrays(MemberScript.FindProperty("Bones"), new GUIContent("Dismember Bones", "The bones has to be on the same order than the Attached bones on the Dismember Script"));
-                                    EditorGUI.EndDisabledGroup();
+                                    using (new EditorGUI.DisabledGroupScope(true))
+                                        MalbersEditor.Arrays(MemberScript.FindProperty("Bones"), new GUIContent("Dismember Bones", "The bones has to be on the same order than the Attached bones on the Dismember Script"));
                                 }
-                                EditorGUILayout.EndVertical();
+
                             }
                             EditorGUILayout.PropertyField(Element.FindPropertyRelative("OnDismember"), new GUIContent("On Dismember", "Invoked when Dismember is called"), true);
                         }
                     }
                 }
-               //EditorGUILayout.EndVertical();
+
 
                 if (changer)
                 {
-                    EditorGUILayout.BeginVertical(MalbersEditor.StyleGreen);
-                    {
+                    using (new GUILayout.VerticalScope(MalbersEditor.StyleGreen))
+
                         EditorGUILayout.HelpBox("This animal has [MaterialChanger] component.\nSet a Material-Item name to match the materials on the Dismembered Limbs ", MessageType.None);
-                    }
-                    EditorGUILayout.EndVertical();
 
 
-                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                    {
+                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                         EditorGUILayout.PropertyField(serializedObject.FindProperty("MaterialItemName"), new GUIContent("Material-Item", "The Current Material Item on the Animal to Update the Limbs Material Items"));
-                    }
-                    EditorGUILayout.EndVertical();
                 }
-                EditorGUILayout.EndVertical();
             }
 
             if (EditorGUI.EndChangeCheck())

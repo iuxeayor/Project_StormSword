@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -27,12 +35,15 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  Priority: 12
+  Priority: 13
   resetInputOnFailed: 0
   ResetLastState: 0
+  RemoveForceOnEnter: 0
+  ForceDamping: 0
   General:
     modify: 7423
     RootMotion: 0
+    RootMotionRotation: 0
     Sprint: 1
     Gravity: 0
     Grounded: 0
@@ -51,13 +62,30 @@ MonoBehaviour:
   IncludeChildren: 1
   AllowExitFromAnim: 0
   CanTransitionToItself: 0
-  IncludeSleepState: 1
-  SleepFromState: []
+  IncludeSleepState: 0
+  SleepFromState:
+  - {fileID: 11400000, guid: 7e364e53b77644c47aa3abdaa2e2c08c, type: 2}
   SleepFromMode: []
+  DisableModes: []
+  noModes:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   QueueFrom: []
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 1
@@ -81,7 +109,7 @@ MonoBehaviour:
     Variable: {fileID: 0}
   ExitCooldown:
     UseConstant: 1
-    ConstantValue: 0
+    ConstantValue: 1
     Variable: {fileID: 0}
   CanStrafe: 0
   StrafeAnimations: 1
@@ -89,6 +117,8 @@ MonoBehaviour:
   IdleStrafe: 1
   m_debug: 1
   Editor_Tabs1: 4
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets:
   - name: UnderWater
     StartVerticalIndex:
@@ -226,7 +256,16 @@ MonoBehaviour:
         ConstantValue: 4
         Variable: {fileID: 0}
   ID: {fileID: 11400000, guid: 4dba83308a0851f4897d08125b3b9420, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   Bank: 15
   Ylimit: 85
   EnterWaterDrag: 10
   AllowFallOnExit: 0
+  references:
+    version: 2
+    RefIds: []

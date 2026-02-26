@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -33,6 +41,7 @@ MonoBehaviour:
   General:
     modify: 7423
     RootMotion: 0
+    RootMotionRotation: 0
     Sprint: 0
     Gravity: 1
     Grounded: 0
@@ -51,6 +60,7 @@ MonoBehaviour:
     modifier:
       modify: 95
       RootMotion: 1
+      RootMotionRotation: 0
       Sprint: 1
       Gravity: 0
       Grounded: 0
@@ -68,6 +78,7 @@ MonoBehaviour:
     modifier:
       modify: 95
       RootMotion: 1
+      RootMotionRotation: 0
       Sprint: 1
       Gravity: 0
       Grounded: 1
@@ -166,7 +177,7 @@ MonoBehaviour:
   BlendFall: 0
   LowerBlendDistance:
     UseConstant: 1
-    ConstantValue: 0.5
+    ConstantValue: 1
     Variable: {fileID: 0}
   AffectStat: {fileID: 11400000, guid: d6b3e636d59a6c547a2cad40b69f4432, type: 2}
   FallMinDistance:

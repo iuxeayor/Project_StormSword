@@ -11,6 +11,18 @@ namespace MalbersAnimations.IK
     [AddTypeMenu("Humanoid/IK Human Bone Rotation <LookAt>")]
     public class IKHumanBoneLookAt : IKProcessor
     {
+        public enum IKRotationType
+        {
+            [InspectorName("Local Look At (Aim)")]
+            LookAt,
+            LookAtUpDown,
+            [InspectorName("Local Rotation Additive")]
+            AdditiveOffset,
+            [InspectorName("Local Rotation Override")]
+            RotationOverride
+        }
+
+
         public override bool RequireTargets => false;
 
         public enum UpVectorType { VectorUp, Local, Global }
@@ -22,15 +34,15 @@ namespace MalbersAnimations.IK
 
 
         [Tooltip("Use the Aimer Direction to calculate the LookAt Direction")]
-        [Hide("IK", (int)IKGenerigType.LookAt)]
+        [Hide("IK", (int)IKRotationType.LookAt)]
         public bool UseAimDirection = true;
 
 
-        [Hide("IK", (int)IKGenerigType.LookAt)]
-        [Tooltip("Limits the Look At from the Min to Max Value")]
-        public RangedFloat LookAtLimit = new(90, 120);
+        //[Hide("IK", (int)IKGenerigType.LookAt)]
+        //[Tooltip("Limits the Look At from the Min to Max Value")]
+        //public RangedFloat LookAtLimit = new(90, 120);
 
-        [Hide("IK", (int)IKGenerigType.LookAt)]
+        [Hide("IK", (int)IKRotationType.LookAt)]
         public UpVectorType upVector = UpVectorType.VectorUp;
         [Hide("upVector", (int)UpVectorType.Local)]
         public Vector3 LocalUp = new(0, 1, 0);
@@ -62,8 +74,8 @@ namespace MalbersAnimations.IK
 
             var angle = Vector3.Angle(anim.transform.forward, Direction);
 
-            if (LookAtLimit.maxValue != 0 && LookAtLimit.minValue != 0) //Check the Limit in case there is a limit
-                weight *= angle.CalculateRangeWeight(LookAtLimit.minValue, LookAtLimit.maxValue);
+            //if (LookAtLimit.maxValue != 0 && LookAtLimit.minValue != 0) //Check the Limit in case there is a limit
+            //    weight *= angle.CalculateRangeWeight(LookAtLimit.minValue, LookAtLimit.maxValue);
 
             if (Gizmos) MDebug.DrawRay(Bone.transform.position, Direction.normalized, Color.Lerp(Color.black, Color.green, weight));
 
@@ -88,7 +100,7 @@ namespace MalbersAnimations.IK
         {
             if (set.aimer == null)
             {
-                Debug.LogError($"The IK Set <B>[{set.name}]</B> has no Aimer set on the [Aimer] field." +
+                Debug.LogError($"The IK Set <B>[{set.Name}]</B> has no Aimer set on the [Aimer] field." +
                     $" <B>[IK Processor: {name}]</B> Needs an Aimer to work." +
                     $" Please add a reference for that index in the [Aimer] field", animator);
             }
@@ -99,53 +111,50 @@ namespace MalbersAnimations.IK
         }
 
 #if UNITY_EDITOR && MALBERS_DEBUG
-        public override void OnDrawGizmos(IKSet IKSet, Animator anim, float weight)
-        {
-            // bool AppIsPlaying = Application.isPlaying;
-            if (anim == null || !Gizmos) return;
+        //public override void OnDrawGizmos(IKSet IKSet, Animator anim, float weight)
+        //{
+        //    // bool AppIsPlaying = Application.isPlaying;
+        //    if (anim == null || anim.avatar == null || !Gizmos) return;
 
-            var Bone = anim.GetBoneTransform(humanBone);
-
-
-
-            var FinalWeight = weight * Weight * GetProcessorAnimWeight(anim);
-
-            Handles.color = new Color(0, 1, 0, 0.1f);
-            Handles.DrawSolidArc(Bone.position, UpVector,
-                Quaternion.Euler(0, -LookAtLimit.minValue, 0) * anim.transform.forward, LookAtLimit.minValue * 2, 1);
+        //    var Bone = anim.GetBoneTransform(humanBone);
 
 
 
-            Handles.color = Color.green;
-            Handles.DrawWireArc(Bone.position,
-                UpVector, Quaternion.Euler(0, -LookAtLimit.minValue, 0) * anim.transform.forward, LookAtLimit.minValue * 2, 1);
+        //    var FinalWeight = weight * Weight * GetProcessorAnimWeight(anim);
 
-
-            Handles.color = new Color(0, 0.3f, 0, 0.2f);
-            var Maxlimit = (LookAtLimit.minValue - LookAtLimit.maxValue);
-
-            Handles.DrawSolidArc(Bone.position,
-                UpVector, Quaternion.Euler(0, -(LookAtLimit.minValue), 0) * anim.transform.forward, (Maxlimit), 1);
-
-            Handles.DrawSolidArc(Bone.position,
-                UpVector, Quaternion.Euler(0, (LookAtLimit.minValue), 0) * anim.transform.forward, -(Maxlimit), 1);
-
-
-            Handles.color = Color.black;
-
-            Handles.DrawWireArc(Bone.position,
-                UpVector, Quaternion.Euler(0, -(LookAtLimit.minValue), 0) * anim.transform.forward, (Maxlimit), 1);
-
-            Handles.DrawWireArc(Bone.position,
-                UpVector, Quaternion.Euler(0, (LookAtLimit.minValue), 0) * anim.transform.forward, -(Maxlimit), 1);
+        //    Handles.color = new Color(0, 1, 0, 0.1f);
+        //    Handles.DrawSolidArc(Bone.position, UpVector,
+        //        Quaternion.Euler(0, -LookAtLimit.minValue, 0) * anim.transform.forward, LookAtLimit.minValue * 2, 1);
 
 
 
-        }
+        //    Handles.color = Color.green;
+        //    Handles.DrawWireArc(Bone.position,
+        //        UpVector, Quaternion.Euler(0, -LookAtLimit.minValue, 0) * anim.transform.forward, LookAtLimit.minValue * 2, 1);
+
+
+        //    Handles.color = new Color(0, 0.3f, 0, 0.2f);
+        //    var Maxlimit = (LookAtLimit.minValue - LookAtLimit.maxValue);
+
+        //    Handles.DrawSolidArc(Bone.position,
+        //        UpVector, Quaternion.Euler(0, -(LookAtLimit.minValue), 0) * anim.transform.forward, (Maxlimit), 1);
+
+        //    Handles.DrawSolidArc(Bone.position,
+        //        UpVector, Quaternion.Euler(0, (LookAtLimit.minValue), 0) * anim.transform.forward, -(Maxlimit), 1);
+
+
+        //    Handles.color = Color.black;
+
+        //    Handles.DrawWireArc(Bone.position,
+        //        UpVector, Quaternion.Euler(0, -(LookAtLimit.minValue), 0) * anim.transform.forward, (Maxlimit), 1);
+
+        //    Handles.DrawWireArc(Bone.position,
+        //        UpVector, Quaternion.Euler(0, (LookAtLimit.minValue), 0) * anim.transform.forward, -(Maxlimit), 1);
+        //}
 
         internal override void OnSceneGUI(IKSet set, Animator animator, Object target, int index)
         {
-            if (Gizmos)
+            if (Gizmos && animator && animator.avatar)
             {
                 var Bone = animator.GetBoneTransform(humanBone);
 
@@ -182,10 +191,6 @@ namespace MalbersAnimations.IK
                 }
             }
         }
-
-
 #endif
-
-
     }
 }

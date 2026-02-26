@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecc37372d7c6c6f4cb3acdf88f84d99d, type: 3}
   m_Name: Ally
   m_EditorClassIdentifier: 
+  DisplayName: Ally
   ID: 69877976
-  DisplayName: 
-  showID: 0
+  TagName: Ally

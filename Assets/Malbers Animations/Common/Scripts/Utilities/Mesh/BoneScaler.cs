@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using MalbersAnimations.Scriptables;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -20,15 +22,10 @@ namespace MalbersAnimations.Utilities
         [ContextMenuItem("Refresh Bones", "SetBones")]
         public Transform Root;
 
-        [Delayed]
-        public string[] Filter = new string[]
-        { "Pivot", "Attack", "Track", "Trigger", "Camera", "Target",
-            "Fire", "Debug","AI","Look","Appearance","Interaction",
-            "Internal","Mesh","Rotator", "Effect","Stamina","Sound","Cinemachine" , "Audio", "Particle"};
+        [Tooltip("Skip bones with these names")]
+        public StringArrayVar filter;
 
-        // public bool rotations;
         public List<Transform> Bones = new();
-
 
         [ContextMenu("Refresh Bones")]
         /// <summary>Called when the Root bone Changes </summary>
@@ -37,7 +34,9 @@ namespace MalbersAnimations.Utilities
             if (Root)
                 Bones = Root.GetComponentsInChildren<Transform>().ToList();
 
-            List<Transform> newbones = new();
+            List<Transform> newBones = new();
+            List<Transform> filteredBones = new();
+
             foreach (var b in Bones)
             {
                 bool foundOne = false;
@@ -45,26 +44,35 @@ namespace MalbersAnimations.Utilities
                 if (b.GetComponent<SkinnedMeshRenderer>()) continue; //Means is a Mesh so skip it!
                 if (!b.gameObject.activeSelf) continue; //Means is a Mesh so skip it!
 
-                for (int i = 0; i < Filter.Length; i++)
+                if (filter != null)
                 {
-                    if (b.name.ToLower().Contains(Filter[i].ToLower()))
+                    for (int i = 0; i < filter.Length; i++)
                     {
-                        foundOne = true;
-                        break;
+                        if (b.name.Contains(filter[i]))
+                        {
+                            foundOne = true;
+                            filteredBones.Add(b);
+                            break;
+                        }
                     }
                 }
+
                 if (!foundOne)
-                    newbones.Add(b);
+                {
+                    if (filteredBones.Find(item => b.SameHierarchy(item))) continue; //Do not add any from the same hierarchy of the filtered bones
+
+                    newBones.Add(b);
+                }
             }
 
-            Bones = newbones;
+            Bones = newBones;
         }
 
         public void SavePreset()
         {
             if (preset)
             {
-                preset.Bones = new ();
+                preset.Bones = new();
 
                 for (int i = 0; i < Bones.Count; i++)
                 {
@@ -89,6 +97,7 @@ namespace MalbersAnimations.Utilities
         void Reset()
         {
             Root = transform;
+            filter = MTools.GetInstance<StringArrayVar>("Bone Filter");
             SetBones();
         }
 
@@ -98,13 +107,13 @@ namespace MalbersAnimations.Utilities
             {
                 Bones = transform.GetComponentsInChildren<Transform>().ToList(); ;
 
-                List<Transform> newbones = new();
+                List<Transform> newBones = new();
 
                 if (preset.Bones[0].name == "Root")
                 {
                     if (preset.scales) transform.localScale = preset.Bones[0].Scale;
                     Root = transform;
-                    newbones.Add(transform);
+                    newBones.Add(transform);
 
                     //#if UNITY_EDITOR
                     //                    UnityEditor.EditorUtility.SetDirty(Root);
@@ -121,7 +130,7 @@ namespace MalbersAnimations.Utilities
                         //if (rotations) Bone_Found.rotation = bone.rotation;
                         if (preset.scales) Bone_Found.localScale = bone.Scale;
 
-                        newbones.Add(Bone_Found);
+                        newBones.Add(Bone_Found);
 
                         //#if UNITY_EDITOR
                         //                        UnityEditor.EditorUtility.SetDirty(Bone_Found);
@@ -129,7 +138,7 @@ namespace MalbersAnimations.Utilities
                     }
                 }
 
-                Bones = newbones;
+                Bones = newBones;
 
 
                 Debug.Log("Preset: " + preset.name + " Loaded on " + name);
@@ -146,13 +155,13 @@ namespace MalbersAnimations.Utilities
 
     //INSPECTOR!
 #if UNITY_EDITOR
-    [CustomEditor(typeof(BoneScaler))]
+    [CustomEditor(typeof(BoneScaler)), CanEditMultipleObjects]
     public class BoneScalerEditor : Editor
     {
         BoneScaler M;
         // private MonoScript script;
 
-        SerializedProperty /*positions, scales,*/ preset, Root;
+        SerializedProperty /*positions, scales,*/ preset, Root, filter;
         protected int index = 0;
 
         private void OnEnable()
@@ -162,80 +171,75 @@ namespace MalbersAnimations.Utilities
 
             preset = serializedObject.FindProperty("preset");
             Root = serializedObject.FindProperty("Root");
+            filter = serializedObject.FindProperty("filter");
+
         }
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
 
-            MalbersEditor.DrawDescription("Save/Load Bones Transormations into a Preset");
+            MalbersEditor.DrawDescription("Save/Load Bones Transform values into a Preset");
 
-            // EditorGUILayout.BeginVertical(MTools.StyleGray);
+
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                // MalbersEditor.DrawScript(script);
+                EditorGUILayout.PropertyField(preset);
 
-                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                bool disable_ = preset.objectReferenceValue == null;
+
+                using (new GUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.PropertyField(preset);
-
-                    bool disable_ = preset.objectReferenceValue == null;
-
-                    EditorGUILayout.BeginHorizontal();
+                    EditorGUI.BeginDisabledGroup(disable_);
                     {
-                        EditorGUI.BeginDisabledGroup(disable_);
+                        if (GUILayout.Button("Save"))
                         {
-                            if (GUILayout.Button("Save"))
-                            {
-                                M.SavePreset();
-                                EditorUtility.SetDirty(M.preset);
-                            }
-
-                            if (GUILayout.Button("Load"))
-                            {
-                                foreach (var bn in M.Bones)
-                                {
-                                    Undo.RecordObject(bn, "Bones Loaded"); // Save the bones loaded
-                                }
-
-                                M.LoadPreset();
-                            }
+                            M.SavePreset();
+                            EditorUtility.SetDirty(M.preset);
                         }
-                        EditorGUI.EndDisabledGroup();
-                    }
-                    EditorGUILayout.EndHorizontal();
-                }
-                EditorGUILayout.EndVertical();
 
-                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                {
-                    EditorGUILayout.LabelField("Bones (" + M.Bones.Count.ToString() + ")");
-                    EditorGUI.BeginChangeCheck();
-                    {
-                        EditorGUILayout.PropertyField(Root);
-                    }
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        Undo.RecordObject(target, "Root Changed");
-                        EditorUtility.SetDirty(M);
-                        serializedObject.ApplyModifiedProperties();
-                        M.SetBones();
-                    }
+                        if (GUILayout.Button("Load"))
+                        {
+                            foreach (var bn in M.Bones)
+                            {
+                                Undo.RecordObject(bn, "Bones Loaded"); // Save the bones loaded
+                            }
 
-                    MalbersEditor.Arrays(serializedObject.FindProperty("Filter"), new GUIContent("Filter |Skip bones with these names|"));
+                            M.LoadPreset();
+                        }
+                    }
+                    EditorGUI.EndDisabledGroup();
                 }
-                EditorGUILayout.EndVertical();
-
-                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                {
-                    MalbersEditor.Arrays(serializedObject.FindProperty("Bones"));
-                }
-                EditorGUILayout.EndVertical();
             }
-            //   EditorGUILayout.EndVertical();
+
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Bones (" + M.Bones.Count.ToString() + ")");
+                EditorGUI.BeginChangeCheck();
+                {
+                    EditorGUILayout.PropertyField(Root);
+                }
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(target, "Root Changed");
+                    EditorUtility.SetDirty(M);
+                    serializedObject.ApplyModifiedProperties();
+                    M.SetBones();
+                }
+
+                EditorGUILayout.PropertyField(filter);
+            }
+
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                MalbersEditor.Arrays(serializedObject.FindProperty("Bones"));
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
     }
-#endif
-
+#endif 
 }

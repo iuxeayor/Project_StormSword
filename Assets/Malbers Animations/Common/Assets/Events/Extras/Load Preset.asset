@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Description: Int-> Sends an Int ID value for the Animal to listen and change BlendShapes
     presets
-  debug: 0
+  debug: 1
   m_int:
     UseConstant: 1
     ConstantValue: 0

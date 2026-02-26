@@ -50,6 +50,13 @@ namespace MalbersAnimations
                 if (Scaler) Scaler.enabled = false;
             }
 
+            if (time == 0)
+            {
+                Full.fillAmount = value;
+
+                // Debug.Log($"{name} Fill Amount: {value}");
+                return;
+            }
 
             StopAllCoroutines(); //Just in case for 
             StartCoroutine(FillValue(value, time));
@@ -70,6 +77,7 @@ namespace MalbersAnimations
                     yield return null;
                 }
             }
+
             Full.fillAmount = newValue;
 
             yield return null;

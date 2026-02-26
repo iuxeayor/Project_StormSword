@@ -35,13 +35,13 @@ namespace MalbersAnimations
         }
 
 
-        public void TransformUp(Transform tr) => tr.up = Value;
-        public void TransforDown(Transform tr) => tr.up = -Value;
-        public void TransforForward(Transform tr) => tr.forward = Value;
-        public void TransformBackwards(Transform tr) => tr.forward = -Value;
-        public void TransformRight(Transform tr) => tr.right = Value;
-        public void TransformLeft(Transform tr) => tr.right = -Value;
-        public void SetValueDirectionFromObject(Transform Target) => Value = transform.DirectionTo(Target);
+        public void TransformUp(Transform tr) => tr.up = Value.normalized;
+        public void TransforDown(Transform tr) => tr.up = -Value.normalized;
+        public void TransforForward(Transform tr) => tr.forward = Value.normalized;
+        public void TransformBackwards(Transform tr) => tr.forward = -Value.normalized;
+        public void TransformRight(Transform tr) => tr.right = Value.normalized;
+        public void TransformLeft(Transform tr) => tr.right = -Value.normalized;
+        public void SetValueDirectionFromObject(Transform Target) => Value = transform.DirectionTo(Target).normalized;
         public void SetValueDirectionFromObjectInverse(Transform Target) => Value = Target.DirectionTo(transform);
         public void SetValueDirectionFromObject(GameObject Target) => SetValueDirectionFromObject(Target.transform);
         public void SetValueDirectionFromObjectInverse(GameObject Target) => SetValueDirectionFromObjectInverse(Target.transform);
@@ -81,7 +81,7 @@ namespace MalbersAnimations
             OnTrue = serializedObject.FindProperty("OnValue");
         }
 
-        protected override void DrawEvents()
+        protected override void DrawElements()
         {
             UnityEditor.EditorGUILayout.PropertyField(OnTrue);
         }

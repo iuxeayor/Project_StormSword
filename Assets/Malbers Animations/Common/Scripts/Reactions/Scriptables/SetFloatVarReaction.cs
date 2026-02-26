@@ -1,7 +1,7 @@
 using MalbersAnimations.Reactions;
 using MalbersAnimations.Scriptables;
 using System.Linq;
-using UnityEngine; 
+using UnityEngine;
 
 namespace MalbersAnimations
 {
@@ -9,30 +9,34 @@ namespace MalbersAnimations
     [AddTypeMenu("Malbers/Scriptables/Set Float Var Listener")]
     public class SetFloatVarReaction : Reaction
     {
+        public override string DynamicName => $"Set Float Var Listener [ID: {(ID.Value == -1 ? "Any" : ID.Value)}] to [{newValue.Value}]"; //Name of the Reaction
+
         public override System.Type ReactionType => typeof(FloatVarListener); //set the Type of component this Reaction Needs
 
-        [Header("Set Float Var Listener")]
         [Tooltip("ID for the Var Listener. If is set to -1 it will get the first Bool Listener found")]
         public IntReference ID = new(-1);
         public FloatReference newValue = new();
 
-         
+
         protected override bool _TryReact(Component reactor)
         {
-            var listeners = reactor.GetComponents<FloatVarListener>().ToList();
+            var listenersP = reactor.GetComponentsInParent<FloatVarListener>().ToList();
+            var listenersC = reactor.GetComponentsInChildren<FloatVarListener>().ToList();
+
+            var mergeList = listenersP.Union(listenersC).ToList(); //Merge the two lists
 
             if (ID != -1)
             {
-                listeners = listeners.FindAll(x => x.ID.Value == ID.Value);
+                mergeList = mergeList.FindAll(x => x.ID.Value == ID.Value); //Find all in Parent
             }
 
-            if (listeners != null)
+            if (mergeList != null)
             {
-                foreach (var item in listeners)
+                foreach (var item in mergeList)
                 {
-                    item.SetValue(newValue.Value);
+                    item.Value = (newValue.Value);
                 }
-                return true; //Reaction succesful!!
+                return true; //Reaction successful!!
             }
 
             return false;

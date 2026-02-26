@@ -26,53 +26,64 @@ namespace MalbersAnimations
         {
             serializedObject.Update();
 
-            MalbersEditor.DrawDescription("Inputs connected to component functions via UnityEvents");
 
-            if (Application.isPlaying)
+#if !ENABLE_LEGACY_INPUT_MANAGER
+            EditorGUILayout.HelpBox("Old Input System is Disabled. If you want to use this component. Go to Edit/Project Settings/Player/Active Input Handler = Use Both", MessageType.Error);
+
+            using (new EditorGUI.DisabledGroupScope(true))
             {
-                showOnPlayMode =
-                    GUILayout.Toggle(showOnPlayMode,
-                    new GUIContent("Show Buttons on Play Mode", "This makes the Inspector bit faster"), EditorStyles.miniButton);
-            }
+#endif
+                MalbersEditor.DrawDescription("Inputs connected to component functions via UnityEvents");
 
-            if (!Application.isPlaying || (showOnPlayMode && Application.isPlaying))
-            {
-
-                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                if (Application.isPlaying)
                 {
-                    EditorGUILayout.PropertyField(IgnoreOnPause);
-                    EditorGUILayout.PropertyField(ResetOnFocusLost);
-                    EditorGUILayout.PropertyField(ResetAllInputsOnDisable);
+                    showOnPlayMode =
+                        GUILayout.Toggle(showOnPlayMode,
+                        new GUIContent("Show Buttons on Play Mode", "This makes the Inspector bit faster"), EditorStyles.miniButton);
                 }
 
-                DrawRewired();
-
-                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                if (!Application.isPlaying || (showOnPlayMode && Application.isPlaying))
                 {
-                    EditorGUILayout.PropertyField(Horizontal, new GUIContent("Horizontal", "Axis for the Horizontal Movement"));
-                    EditorGUILayout.PropertyField(Vertical, new GUIContent("Vertical", "Axis for the Forward/Backward Movement"));
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        EditorGUILayout.PropertyField(UpDown, new GUIContent("UpDown", "Axis for the Up and Down Movement"));
 
-                        if (GUILayout.Button(new GUIContent("Create", "Creates 'UpDown' on the Input Manager"), GUILayout.Width(55)))
-                            CreateInputAxe();
+                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                    {
+                        EditorGUILayout.PropertyField(IgnoreOnPause);
+                        EditorGUILayout.PropertyField(ResetOnFocusLost);
+                        EditorGUILayout.PropertyField(ResetAllInputsOnDisable);
+                    }
+
+                    DrawRewired();
+
+                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                    {
+                        EditorGUILayout.PropertyField(Horizontal, new GUIContent("Horizontal", "Axis for the Horizontal Movement"));
+                        EditorGUILayout.PropertyField(Vertical, new GUIContent("Vertical", "Axis for the Forward/Backward Movement"));
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.PropertyField(UpDown, new GUIContent("UpDown", "Axis for the Up and Down Movement"));
+
+                            if (GUILayout.Button(new GUIContent("Create", "Creates 'UpDown' on the Input Manager"), GUILayout.Width(55)))
+                                CreateInputAxe();
+                        }
+                    }
+
+                    DrawList();
+
+                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                    {
+                        if (MalbersEditor.Foldout(showInputEvents, "[Events]"))
+                        {
+                            EditorGUILayout.PropertyField(OnInputEnabled);
+                            EditorGUILayout.PropertyField(OnInputDisabled);
+                            EditorGUILayout.PropertyField(OnUsingGamePad);
+                            EditorGUILayout.PropertyField(MovementEvent);
+                        }
                     }
                 }
 
-                DrawList();
-
-                using (new GUILayout.VerticalScope(EditorStyles.helpBox))
-                {
-                    if (MalbersEditor.Foldout(showInputEvents, "[Events]"))
-                    {
-                        EditorGUILayout.PropertyField(OnInputEnabled);
-                        EditorGUILayout.PropertyField(OnInputDisabled);
-                        EditorGUILayout.PropertyField(OnUsingGamePad);
-                        EditorGUILayout.PropertyField(MovementEvent);
-                    }
-                }
+#if !ENABLE_LEGACY_INPUT_MANAGER
             }
+#endif
             serializedObject.ApplyModifiedProperties();
         }
 

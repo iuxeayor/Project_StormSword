@@ -20,8 +20,6 @@ namespace MalbersAnimations.Reactions
             }
         }
 
-       
-
         override public void OnStateUpdate(Animator anim, AnimatorStateInfo state, int layer)
         {
             var NextAnim = anim.GetNextAnimatorStateInfo(layer).shortNameHash;
@@ -59,7 +57,7 @@ namespace MalbersAnimations.Reactions
             if (anim.GetCurrentAnimatorStateInfo(layer).fullPathHash == state.fullPathHash) return; //means is transitioning to it self
 
             foreach (var reaction in reactions)
-            {  
+            {
                 if (reaction.Time == 1 && !reaction.sent)
                 {
                     reaction.React();
@@ -116,22 +114,21 @@ namespace MalbersAnimations.Reactions
 
         [Range(0, 1)]
         public float Time;
-        [SubclassSelector, SerializeReference]
-        public Reaction reaction;
+        [SerializeReference] public Reaction reaction;
 
         public bool sent { get; set; }
         public Component target { get; set; }
 
-        [Tooltip("If the animation is interrupted by a transition and the time has not played yet, execute the Effect anyways")]
+        [Tooltip("If the animation was interrupted by a transition and the Time has not played yet, execute the Reaction anyways")]
         [Hide(nameof(showExecute))]
         public bool ExecuteOnExit = true;
 
-        [Tooltip("If the animation is interrupted, Execute the Effect as soon as it start transition to another Animation State")]
+        [Tooltip("If the animation is interrupted, Execute the Reaction as soon as it start transition to another Animation State")]
         [Hide(nameof(showExitInTransition))]
         public bool ExitInTransition = true;
 
-        [Tooltip("Ignore the effect if  execute is called in Transition and the next transition is that one")]
-        public List<string> IgnoreInTransition = new List<string>();
+        [Tooltip("Ignore the Reaction if Execute is called in a transition for the next anim state. included in any of these State List")]
+        public List<string> IgnoreInTransition = new();
         public List<int> IgnoreInTransitionHash { get; set; }
 
 

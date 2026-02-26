@@ -28,6 +28,8 @@ namespace MalbersAnimations.Utilities
 
         public ActiveSMesh Pinned;
 
+        public Int2Event OnMeshChanged = new();
+
         /// <summary> All Active Meshes Index stored on a string separated by a space ' '  </summary>
         public string AllIndex
         {
@@ -73,17 +75,8 @@ namespace MalbersAnimations.Utilities
         #region EDITOR CALL FUNCTIONS
         public bool SyncMeshItem()
         {
-            ////Review the names first
-            //foreach (var item in Meshes)
-            //{
-            //    if (item.name.Value == string.Empty && item.name != "NameHere")
-            //    {
-            //        item.name.Value = item.Name;
-            //    }
-            //}
-
-
             if (MeshItemUpdated) return false; //Do this only when the MeshItemUpdated is false
+
 
             var needsUpdate = false;
 
@@ -207,10 +200,17 @@ namespace MalbersAnimations.Utilities
         /// <summary>  Randomize all the Active Meshes on the list </summary>
         public void Randomize()
         {
-            foreach (var mat in Meshes)
+            for (int i = 0; i < Meshes.Count; i++)
             {
+                var mat = Meshes[i];
+
                 if (mat.MeshItems == null || mat.MeshItems.Count == 0) continue;
-                mat.ChangeMesh(UnityEngine.Random.Range(0, mat.MeshItems.Count));
+
+                var newIndex = UnityEngine.Random.Range(0, mat.MeshItems.Count);
+
+                mat.ChangeMesh(newIndex);
+
+                OnMeshChanged.Invoke(i, mat.Current); ; //Invoke the Event
             }
         }
 
@@ -220,47 +220,80 @@ namespace MalbersAnimations.Utilities
         {
             if (MeshesIndex.Length != Count)
             {
-                Debug.LogError("Meshes Index array Lenghts don't match");
+                Debug.LogError("Meshes Index array Lengths don't match");
                 return;
             }
 
             for (int i = 0; i < MeshesIndex.Length; i++)
             {
                 Meshes[i].ChangeMesh(MeshesIndex[i]);
+
+                OnMeshChanged.Invoke(i, Meshes[i].Current); ; //Invoke the Event
             }
         }
 
 
         /// <summary>Select an Element from the List by its index, and change to the next variation.  </summary>
-        public virtual void ChangeMesh(int index) => Meshes[index % Count].ChangeMesh();
+        public virtual void ChangeMesh(int index)
+        {
+            var mesh = Meshes[index % Count];
+            mesh.ChangeMesh();
+
+            OnMeshChanged.Invoke(index % Count, mesh.Current); //Invoke the Event
+        }
 
         /// <summary>Select an Element from the List by the index, and change to a variation. using its index</summary>
-        public virtual void ChangeMesh(int indexList, int IndexMesh) => Meshes[indexList % Count].ChangeMesh(IndexMesh - 1);
+        public virtual void ChangeMesh(int index, int IndexMesh)
+        {
+            var mesh = Meshes[index % Count];
+
+            mesh.ChangeMesh(IndexMesh - 1);
+
+            OnMeshChanged.Invoke(index % Count, mesh.Current); //Invoke the Event
+        }
 
 
         /// <summary> Change to next mesh using the name</summary>
         public virtual void ChangeMesh(string name, bool next)
         {
-            ActiveSMesh mesh = Meshes.Find(item => item.Name == name);
+            int index = Meshes.FindIndex(item => item.Name == name);
 
-            mesh?.ChangeMesh(next);
+            if (index != -1)
+            {
+                Meshes[index].ChangeMesh(next);
+                OnMeshChanged.Invoke(index, Meshes[index].Current); //Invoke the Event
+            }
         }
 
         public virtual void ChangeMesh(string name) => ChangeMesh(name, true);
 
         public virtual void ChangeMesh(string name, int CurrentIndex)
         {
-            ActiveSMesh mesh = Meshes.Find(item => item.Name == name);
-            mesh?.ChangeMesh(CurrentIndex);
+            int index = Meshes.FindIndex(item => item.Name == name);
+
+            if (index != -1)
+            {
+                Meshes[index].ChangeMesh(CurrentIndex);
+                OnMeshChanged.Invoke(index, Meshes[index].Current); //Invoke the Event
+            }
         }
 
-        public virtual void ChangeMesh(int index, bool next) => Meshes[index].ChangeMesh(next);
+        public virtual void ChangeMesh(int index, bool next)
+        {
+            Meshes[index].ChangeMesh(next);
+            OnMeshChanged.Invoke(index, Meshes[index].Current); //Invoke the Event
+        }
 
         /// <summary>Toggle all meshes on the list</summary>
         public virtual void ChangeMesh(bool next = true)
         {
-            foreach (var mesh in Meshes)
+            for (int i = 0; i < Meshes.Count; i++)
+            {
+                var mesh = Meshes[i];
                 mesh.ChangeMesh(next);
+
+                OnMeshChanged.Invoke(i, Meshes[i].Current); //Invoke the Event
+            }
         }
 
         /// <summary>  Get the Active mesh by their name  </summary>
@@ -289,8 +322,10 @@ namespace MalbersAnimations.Utilities
         [ContextMenu("Create Event Listeners")]
         void CreateListeners()
         {
-            MEventListener listener = this.FindComponent<MEventListener>();
-            if (listener == null) listener = transform.root.gameObject.AddComponent<MEventListener>();
+            MEventListener listener =
+                (this.FindComponent<MEventListener>()
+                ?? transform.root.GetComponentInChildren<MEventListener>())
+                ?? transform.root.gameObject.AddComponent<MEventListener>();
             listener.Events ??= new List<MEventItemListener>();
 
             MEvent BlendS = MTools.GetInstance<MEvent>("Change Mesh");
@@ -360,10 +395,12 @@ namespace MalbersAnimations.Utilities
         /// <summary>  Current Active Mesh Item  </summary>
         public MeshItem CurrentItem { get; set; }
 
-        public ActiveMeshes Onwer { get; set; }
+        public ActiveMeshes Owner { get; set; }
 
         [SerializeField, HideInInspector] //Editor Only 
         private int CurrentMeshItemIndex;
+
+        public TransformEvent OnSetMeshChange = new();
 
         public bool SyncMesh()
         {
@@ -373,8 +410,8 @@ namespace MalbersAnimations.Utilities
             if (MeshItems == null || MeshItems.Count != meshes.Length)
             {
                 MeshItems = new();
-                foreach (var transf in meshes)
-                    MeshItems.Add(new() { Mesh = transf });
+                foreach (var t in meshes)
+                    MeshItems.Add(new() { Mesh = t });
 
                 needsUpdate = true;
             }
@@ -408,7 +445,7 @@ namespace MalbersAnimations.Utilities
                 {
                     if (item.Mesh.gameObject.IsPrefab())
                     {
-                        Debug.LogWarning($"<B>[Active Mesh]</B> Mesh <B>{item.ItemName}</B> is a Prefab. It will not be deactivated", Onwer);
+                        Debug.LogWarning($"<B>[Active Mesh]</B> Mesh <B>{item.ItemName}</B> is a Prefab. It will not be deactivated", Owner);
                         continue;
                     }
                     else if (item.Mesh.gameObject.activeSelf)
@@ -417,7 +454,7 @@ namespace MalbersAnimations.Utilities
 
                         if (Application.isPlaying)
                         {
-                            item.MeshOff?.React(Onwer); //Do this only when the game is playing
+                            item.MeshOff.React(item.Mesh); //Do this only when the game is playing
                             var HideSet = GetHideSet(item);
                             Unhide_Set(HideSet);
                         }
@@ -431,23 +468,27 @@ namespace MalbersAnimations.Utilities
                 {
                     if (NewItem.Mesh.gameObject.IsPrefab())
                     {
-                        Debug.LogWarning($"<B>[Active Mesh]</B> Mesh <B>{NewItem.ItemName}</B> is a Prefab. It will not be activated", Onwer);
+                        Debug.LogWarning($"<B>[Active Mesh]</B> Mesh <B>{NewItem.ItemName}</B> is a Prefab. It will not be activated", Owner);
                         continue;
                     }
-
 
                     NewItem.Mesh.gameObject.SetActive(true);
                     NewItem.UpdateMaterials();
 
                     if (Application.isPlaying)
                     {
-                        NewItem.MeshOn?.React(Onwer);
                         var HideSet = GetHideSet(NewItem);
                         Hide_Set(HideSet);
                     }
                 }
-                CurrentItem = NewItem; //Store the current Item
 
+                if (Application.isPlaying)
+                {
+                    NewItem.MeshOn.React(NewItem.Mesh);
+                    OnSetMeshChange.Invoke(NewItem.Mesh); //Invoke that a new mesh was changed
+                }
+
+                CurrentItem = NewItem; //Store the current Item
                 //  Debug.Log($"<B>[Active Mesh]</B> Set <B>{Name}</B> Current {Current} :  MeshItems.Count {MeshItems.Count}", Onwer);
             }
         }
@@ -456,7 +497,7 @@ namespace MalbersAnimations.Utilities
         {
             if (!string.IsNullOrEmpty(NewItem.HideSet)) //Hide All the Meshes on the HideSet
             {
-                return Onwer.Meshes.Find(item => item.Name == NewItem.HideSet);   //Find the HideSet
+                return Owner.Meshes.Find(item => item.Name == NewItem.HideSet);   //Find the HideSet
             }
             return null;
         }
@@ -545,7 +586,7 @@ namespace MalbersAnimations.Utilities
 
             // Debug.Log($"<B>[Active Mesh]</B> Set <B>{Name}</B> Current {Current} :  MeshItems.Count {MeshItems.Count}", owner);
 
-            Onwer = owner; //Set the Owner of the Active Mesh
+            Owner = owner; //Set the Owner of the Active Mesh
 
             if (MeshItems != null && MeshItems.Count > 0)
             {
@@ -576,11 +617,8 @@ namespace MalbersAnimations.Utilities
         [Tooltip("LODs Included in the Mesh Item")]
         public Renderer[] Renderers;
 
-        [SerializeReference, SubclassSelector]
-        public Reaction MeshOn;
-
-        [SerializeReference, SubclassSelector]
-        public Reaction MeshOff;
+        public Reaction2 MeshOn;
+        public Reaction2 MeshOff;
 
 
         [SerializeField, HideInInspector] private int EditorTab;
@@ -588,7 +626,7 @@ namespace MalbersAnimations.Utilities
         /// <summary> Cache the renderer from the Mesh Transform  </summary>
         [HideInInspector] public Renderer MainRenderer;
 
-        //Uptade all materials on the LODs
+        //Update all materials on the LODs
         internal void UpdateMaterials()
         {
             if (materials != null && materials.Length > 0)

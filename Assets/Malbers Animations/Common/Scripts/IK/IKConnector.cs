@@ -7,6 +7,7 @@ namespace MalbersAnimations.IK
 
     public class IKConnector : MonoBehaviour
     {
+        [Tooltip("IK Set to enable or Disable on the IK Manager.\nUse coma',' to have check for multiple sets ")]
         public StringReference ikSet = new();
 
         [Tooltip("When a source is found, the IK Set Targets will be assigned too")]
@@ -37,7 +38,7 @@ namespace MalbersAnimations.IK
         {
             source = owner.FindInterface<IIKSource>();
             source?.Set_Enable(ikSet, true);
-            source?.Set_Weight(ikSet, true);
+            //  source?.Set_Weight(ikSet, true);
             if (SetTargetOnEnable) Targets_Set();
         }
 
@@ -46,7 +47,7 @@ namespace MalbersAnimations.IK
         public virtual void Set_Disable(GameObject owner)
         {
             source = owner.FindInterface<IIKSource>();
-            source?.Set_Weight(ikSet, false);
+            source?.Set_Enable(ikSet, false);
         }
 
         public virtual void Set_Enable() => source?.Set_Enable(ikSet);

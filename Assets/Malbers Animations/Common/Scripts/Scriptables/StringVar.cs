@@ -17,32 +17,56 @@ namespace MalbersAnimations.Scriptables
         private string value = "";
 
         /// <summary>Invoked when the value changes </summary>
-        public Action<string> OnValueChanged = delegate { };
+        public Action<string> OnValueChanged;
 
         /// <summary>Value of the String Scriptable variable</summary>
         public virtual string Value
         {
             get => value;
             set
-            { 
+            {
                 this.value = value;
-                OnValueChanged(value);         //If we are using OnChange event Invoked
+                OnValueChanged?.Invoke(value);         //If we are using OnChange event Invoked
 
 #if UNITY_EDITOR
-                if (debug) Debug.Log($"<B>{name} -> [<color=green> {value} </color>] </B>", this);
+                if (debug) MDebug.Log($"<B>{name} -> [<color=green> {value} </color>] </B>", this);
 #endif 
             }
         }
 
         public virtual void SetValue(StringVar var) => Value = var.Value;
+        public virtual void SetValue(string var) => Value = var;
         public virtual void SetValue(UnityEngine.Object var) => Value = var.name;
 
         public static implicit operator string(StringVar reference) => reference.Value;
+
+        #region String Operations
+        public virtual void _Add(string var) => Value += var;
+        public virtual void _Add(StringVar var) => Value += var.Value;
+        public virtual void _Add(char var) => Value += var;
+        public virtual void _Clear() => Value = string.Empty;
+
+        public virtual void _RemoveFirst()
+        {
+            if (!string.IsNullOrEmpty(Value))
+            {
+                Value = Value[1..];
+            }
+        }
+
+        public virtual void _RemoveLast()
+        {
+            if (!string.IsNullOrEmpty(Value))
+            {
+                Value = Value[..^1];
+            }
+        }
+        #endregion
     }
 
     [System.Serializable]
     public class StringReference : ReferenceVar
-    { 
+    {
         public string ConstantValue;
         [RequiredField] public StringVar Variable;
 
@@ -50,6 +74,12 @@ namespace MalbersAnimations.Scriptables
         {
             UseConstant = true;
             ConstantValue = string.Empty;
+        }
+
+        public StringReference(StringVar newValue)
+        {
+            UseConstant = false;
+            Variable = newValue;
         }
 
         public StringReference(bool variable = false)
@@ -71,7 +101,7 @@ namespace MalbersAnimations.Scriptables
 
         public string Value
         {
-            get => UseConstant ? ConstantValue : Variable.Value;
+            get => UseConstant ? ConstantValue : (Variable != null ? Variable.Value : ConstantValue);
             set
             {
                 if (UseConstant)
@@ -117,7 +147,10 @@ namespace MalbersAnimations.Scriptables
                     value.stringValue = EditorGUILayout.TextArea(value.stringValue, GUILayout.MinWidth(50));
                     MalbersEditor.DrawDebugIcon(debug);
                 }
-                EditorGUILayout.PropertyField(Description);
+
+                EditorGUILayout.LabelField("Description");
+
+                EditorGUILayout.PropertyField(Description, GUIContent.none);
             }
             serializedObject.ApplyModifiedProperties();
         }

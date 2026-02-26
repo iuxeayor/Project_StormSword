@@ -539,11 +539,7 @@ ModelImporter:
     removeConstantScaleCurves: 0
     motionNodeName: 
     rigImportErrors: 
-    rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
-      copied configuration does not match position in animation file:\n\t'R_L Foot'
-      : position error = 27.611326 mm\n\t'R_L Toe0' : position error = 31.769428
-      mm\n\t'R_R Foot' : position error = 27.611238 mm\n\t'R_R Toe0' : position error
-      = 31.799992 mm\n"
+    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -565,7 +561,7 @@ ModelImporter:
       firstFrame: 18
       lastFrame: 76
       wrapMode: 0
-      orientationOffsetY: -30
+      orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
@@ -594,7 +590,7 @@ ModelImporter:
       firstFrame: 18
       lastFrame: 76
       wrapMode: 0
-      orientationOffsetY: -30
+      orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
@@ -1388,3 +1384,10 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Common/Human Anims/Locomotion/S_Start_Turn180.fbx
+  uploadId: 848732

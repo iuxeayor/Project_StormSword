@@ -5,6 +5,7 @@ using MalbersAnimations.Controller;
 using System.Collections.Generic;
 using System.Linq;
 
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -22,11 +23,17 @@ namespace MalbersAnimations.HAP
         #region Mount Point References
         public Transform MountPoint;     // Reference for the RidersLink Bone  
         public Transform MountBase;     // Reference for the RidersLink Bone  
+
+
         public Transform FootLeftIK;     // Reference for the LeftFoot correct position on the mount
         public Transform FootRightIK;    // Reference for the RightFoot correct position on the mount
         public Transform KneeLeftIK;     // Reference for the LeftKnee correct position on the mount
         public Transform KneeRightIK;    // Reference for the RightKnee correct position on the mount
 
+        [Tooltip("Name of the IK Set to activate Ik Feet Correction while riding a Mount")]
+        public StringReference RiderFeetIKSet = new("Rider Feet");
+
+        private Transform[] IKTargets;
 
         public Transform LeftRein;     // Reference for the LeftRein 
         public Transform RightRein;    // Reference for the RightRein  
@@ -83,7 +90,7 @@ namespace MalbersAnimations.HAP
         public AnimatorUpdateMode DefaultAnimUpdateMode { get; set; }
         #endregion
 
-        /// <summary>Velocity changes for diferent Animation Speeds... used on other animals</summary>
+        /// <summary>Velocity changes for different Animation Speeds... used on other animals</summary>
         public List<SpeedTimeMultiplier> SpeedMultipliers;
 
         #region Straight Mount
@@ -100,19 +107,20 @@ namespace MalbersAnimations.HAP
 
         #region Events
         public GameObjectEvent OnMounted = new();
+        public GameObjectEvent OnEndMounting = new();
         public GameObjectEvent OnDismounted = new();
+        public GameObjectEvent OnEndDismounting = new();
         public BoolEvent OnCanBeMounted = new();
         public GameObjectEvent OnCalled = new();
         #endregion
 
         #region Properties
-        /// <summary>Straighen the Spine bone while mounted depends on the Mount</summary>
+        /// <summary>Straighten the Spine bone while mounted depends on the Mount</summary>
         public bool StraightSpine { get => straightSpine; set => straightSpine.Value = value; }
 
-
-        /// <summary>Straighen the Spine bone while mounted depends on the Mount</summary>
+        /// <summary>Straighten the Spine bone while mounted depends on the Mount</summary>
         public Transform StraightSpineOffsetTransform;
-        private bool defaultStraightSpine;
+        protected bool defaultStraightSpine;
 
         /// <summary>Reference for the Animal Animator</summary>
         public Animator Anim => Animal.Anim;
@@ -123,7 +131,6 @@ namespace MalbersAnimations.HAP
 
         /// <summary>Input for the Mount</summary>
         public List<MountTriggers> MountTriggers { get; private set; }
-
 
         protected bool mounted;
         /// <summary> Is the animal Mounted</summary>
@@ -137,12 +144,19 @@ namespace MalbersAnimations.HAP
                     mounted = value;
 
                     if (mounted)
+                    {
                         OnMounted.Invoke(Rider.gameObject);    //Invoke the Event 
+
+                    }
                     else
+                    {
                         OnDismounted.Invoke(Rider.gameObject);
+                    }
                 }
             }
         }
+
+
 
 
         /// <summary> Dismount only when the Animal is Still on place </summary>
@@ -153,20 +167,17 @@ namespace MalbersAnimations.HAP
         /// <summary>Animal Mountable Script 'Enabled/Disabled'</summary>
         public virtual bool CanBeMounted { get => active; set => active.Value = value; }
 
-        /// <summary> The Mount has all the IK Links</summary>
-        public bool HasIKFeet => FootLeftIK != null && FootRightIK != null && KneeLeftIK != null && KneeRightIK != null;
-
-
         /// <summary>If "Mount Only" is enabled, this will capture the State the animal is at, in order to Mount</summary>
         public bool CanBeMountedByState { get; set; }
         /// <summary>If "Mount Only" is enabled, this will capture the State the animal is at, in order to Mount</summary>
         public bool CanBeDismountedByState { get; set; }
 
-        /// <summary>Active Ride the Montura. is setted by the Rider Script </summary>
-        public MRider Rider { get; set; }
+        /// <summary>Active Ride the Montura. is set by the Rider Script </summary>
+        public virtual MRider Rider { get; set; }
+        public virtual IIKSource RiderIK { get; set; }
 
         /// <summary>Rider that is near the Mount</summary>
-        public MRider NearbyRider { get; set; }
+        public virtual MRider NearbyRider { get; set; }
 
         /// <summary> Ignore Mount Animations </summary>
         public bool InstantMount { get => instantMount.Value; set => instantMount.Value = value; }
@@ -181,20 +192,22 @@ namespace MalbersAnimations.HAP
 
         /// <summary>Right Rein Handle Default Local Position  </summary>
         public Vector3 DefaultRightReinPos { get; internal set; }
+
+        public static List<Mount> AllMounts;
         #endregion
 
         public bool debug;
 
-        public void Awake()
+        public virtual void Awake()
         {
             if (Animal == null)
                 Animal = this.FindComponent<MAnimal>();
 
             AI = Animal.GetComponentInChildren<IAIControl>(true);
 
-            MountTriggers = GetComponentsInChildren<MountTriggers>(true).ToList(); //Catche all the MountTriggers of the Mount
+            MountTriggers = GetComponentsInChildren<MountTriggers>(true).ToList(); //Cache all the MountTriggers of the Mount
 
-            CanBeDismountedByState = CanBeMountedByState = true; //Set as true can be mounted and canbe dismounted by state
+            CanBeDismountedByState = CanBeMountedByState = true; //Set as true can be mounted and can be dismounted by state
             defaultStraightSpine = StraightSpine;
             if (Anim) DefaultAnimUpdateMode = Anim.updateMode;
 
@@ -211,24 +224,21 @@ namespace MalbersAnimations.HAP
             }
         }
 
-        public static List<Mount> AllMounts;
 
-        void OnEnable()
+
+        protected virtual void OnEnable()
         {
-            if (AllMounts == null) AllMounts = new List<Mount>();
+            AllMounts ??= new List<Mount>();
 
             AllMounts.Add(this);
 
             Animal.OnStateActivate.AddListener(AnimalStateChange);
             Animal.OnSpeedChange.AddListener(SetAnimatorSpeed);
 
-            foreach (var item in MountTriggers)
-            {
-
-            }
+            IKTargets = new Transform[] { FootLeftIK, FootRightIK, KneeLeftIK, KneeRightIK };
         }
 
-        void OnDisable()
+        protected virtual void OnDisable()
         {
             Animal.OnStateActivate.RemoveListener(AnimalStateChange);
             Animal.OnSpeedChange.RemoveListener(SetAnimatorSpeed);
@@ -241,12 +251,13 @@ namespace MalbersAnimations.HAP
         /// <summary>Enable the Input for the Mount</summary>
         public virtual void EnableInput(bool value)
         {
-            MountInput?.Enable(value);
+            if (MountInput != null)
+            {
+                MountInput.PlayerInput(Rider.RiderInput);
+                MountInput.Enable(value);
 
-            //Check if the new Input System is enabled
-            //#if ENABLE_INPUT_SYSTEM
-            //            var riderInput = Rider.GetComponent < MInputLink >
-            //#endif
+                if (Rider.RiderInput != null) MountInput.MoveAxis = Rider.RiderInput.MoveAxis; //Set the Move Axis from the Rider to the Mount from the last value
+            }
 
             Animal.StopMoving();
         }
@@ -266,11 +277,16 @@ namespace MalbersAnimations.HAP
         public virtual void StartMounting(MRider rider)
         {
             Rider = rider;          //Send to the Montura that it has a rider
+            RiderIK = Rider.FindInterface<IIKSource>(); //Get the Rider IK Source
+            RiderIK?.Target_Set(RiderFeetIKSet.Value, IKTargets); //Set the IK Targets on the Rider
+
             Mounted = true;         //Set Mounting to true
 
             Animal.ResetCameraInput();
-
             Set_MountTriggers(Set_MTriggersMount.Value);   //Disable all Mount Trigger to avoid ON Enter ON Exit Trigger Events**
+
+
+
         }
 
 
@@ -278,10 +294,10 @@ namespace MalbersAnimations.HAP
         {
             EnableInput(Set_InputMount.Value);                //Enable Animal Controls
             AI?.SetActive(Set_AIMount.Value);                 //Set the AI Value
-
-            SetAnimatorSpeed(Animal.currentSpeedModifier); //Update the Speed Modifier /Rider and Animal
-
+            SetAnimatorSpeed(Animal.currentSpeedModifier);    //Update the Speed Modifier /Rider and Animal
             Animal.ResetCameraInput();
+
+            OnEndMounting.Invoke(Rider.gameObject); //Invoke the Start Mounting Event
         }
 
         public virtual void Start_Dismounting()
@@ -289,7 +305,7 @@ namespace MalbersAnimations.HAP
             Mounted = false;
             EnableInput(set_InputDismount.Value); //Enable/Disable Animal Controls
 
-            Animal.Mode_Interrupt();
+            Animal.Mode_Interrupt(); //Interrupt the Animal Mode
 
             ResetLeftRein();
             ResetRightRein();
@@ -297,9 +313,16 @@ namespace MalbersAnimations.HAP
 
         public virtual void EndDismounting()
         {
+            OnEndDismounting.Invoke(Rider.gameObject); //Invoke the End Dismounting Event
+
+
             Set_MountTriggers(Set_MTriggersDismount.Value);                            //Enable all Mount Triggers
             AI?.SetActive(Set_AIDismount.Value); //Reactivate the AI.
+            //Clear the IK Targets on the Rider
             Rider = null;
+
+            RiderIK?.Target_Clear(RiderFeetIKSet.Value);
+            RiderIK = null;
         }
 
 
@@ -339,7 +362,7 @@ namespace MalbersAnimations.HAP
 
             if (DismountOnly)
             {
-                CanBeDismountedByState = DismountOnlyStates.Contains(ActiveState);   //Set DimountOnly by State
+                CanBeDismountedByState = DismountOnlyStates.Contains(ActiveState);   //Set DismountOnly by State
             }
 
             if (Rider)
@@ -365,7 +388,7 @@ namespace MalbersAnimations.HAP
 
                 float TargetAnimSpeed = speed != null ? speed.AnimSpeed * SpeedModifier.animator * Animal.AnimatorSpeed : 1f;
 
-                Rider.TargetSpeedMultiplier = TargetAnimSpeed;
+                Rider.SetAnimatorSpeed(TargetAnimSpeed);
             }
         }
 
@@ -392,6 +415,11 @@ namespace MalbersAnimations.HAP
                 UnityEditor.Events.UnityEventTools.AddObjectPersistentListener<Transform>(OnCanBeMounted, RiderMountUIE.Invoke, transform);
                 UnityEditor.Events.UnityEventTools.AddPersistentListener(OnCanBeMounted, RiderMountUIE.Invoke);
             }
+        }
+
+        private void OnValidate()
+        {
+            if (Animal == null) Animal = GetComponentInParent<MAnimal>();
         }
 
         /// <summary> Debug Options </summary>
@@ -434,8 +462,12 @@ namespace MalbersAnimations.HAP
 
         SerializedProperty
             UseSpeedModifiers, MountOnly, DismountOnly, active, mountIdle, instantMount, instantDismount, straightSpine, ID, StraightSpineOffsetTransform,
-           pointOffset, Animal, smoothSM, mountPoint, rightIK, rightKnee, leftIK, leftKnee, SpeedMultipliers,
-            OnMounted, Editor_Tabs1, Editor_Tabs2, OnDismounted, OnCanBeMounted, OnCalled, MountOnlyStates, DismountOnlyStates, MountBase,
+           pointOffset, Animal, smoothSM, mountPoint, rightIK, rightKnee, leftIK, leftKnee, SpeedMultipliers, RiderFeetIKSet,
+
+            OnMounted, OnEndDismounting, OnEndMounting,
+
+
+            Editor_Tabs1, Editor_Tabs2, OnDismounted, OnCanBeMounted, OnCalled, MountOnlyStates, DismountOnlyStates, MountBase,
 
             ForceDismountStates, ForceDismount, debug,
 
@@ -446,7 +478,7 @@ namespace MalbersAnimations.HAP
             ;
 
 
-        private void OnEnable()
+         protected virtual void OnEnable()
         {
             M = (Mount)target;
 
@@ -457,10 +489,8 @@ namespace MalbersAnimations.HAP
             debug = serializedObject.FindProperty("debug");
             ID = serializedObject.FindProperty("ID");
 
-
             LeftRein = serializedObject.FindProperty("LeftRein");
             RightRein = serializedObject.FindProperty("RightRein");
-
 
             MountOnly = serializedObject.FindProperty("MountOnly");
             DismountOnly = serializedObject.FindProperty("DismountOnly");
@@ -469,7 +499,6 @@ namespace MalbersAnimations.HAP
             instantMount = serializedObject.FindProperty("instantMount");
             instantDismount = serializedObject.FindProperty("instantDismount");
             straightSpine = serializedObject.FindProperty("straightSpine");
-
 
             smoothSM = serializedObject.FindProperty("smoothSM");
 
@@ -491,6 +520,13 @@ namespace MalbersAnimations.HAP
 
             OnDismounted = serializedObject.FindProperty("OnDismounted");
             OnCanBeMounted = serializedObject.FindProperty("OnCanBeMounted");
+
+
+            OnEndMounting = serializedObject.FindProperty("OnEndMounting");
+            OnEndDismounting = serializedObject.FindProperty("OnEndDismounting");
+
+
+
             OnCalled = serializedObject.FindProperty("OnCalled");
             MountOnlyStates = serializedObject.FindProperty("MountOnlyStates");
             DismountOnlyStates = serializedObject.FindProperty("DismountOnlyStates");
@@ -505,6 +541,7 @@ namespace MalbersAnimations.HAP
             Set_MTriggersDismount = serializedObject.FindProperty("Set_MTriggersDismount");
             Set_AIDismount = serializedObject.FindProperty("Set_AIDismount");
             Set_InputDismount = serializedObject.FindProperty("set_InputDismount");
+            RiderFeetIKSet = serializedObject.FindProperty("RiderFeetIKSet");
         }
 
         public override void OnInspectorGUI()
@@ -561,43 +598,45 @@ namespace MalbersAnimations.HAP
 
             if (Application.isPlaying)
             {
-                EditorGUI.BeginDisabledGroup(true);
-                EditorGUILayout.ObjectField("Current Rider", M.Rider, typeof(MRider), false);
-                EditorGUILayout.ObjectField("Nearby Rider", M.NearbyRider, typeof(MRider), false);
-                EditorGUILayout.Space();
-                EditorGUILayout.ToggleLeft("Mounted/Can Dismount", M.Mounted);
-                EditorGUILayout.ToggleLeft("Can Be Mounted by State", M.CanBeDismountedByState);
-                EditorGUILayout.ToggleLeft("Can Be Mounted", M.CanBeMounted);
-                EditorGUILayout.ToggleLeft("Straight Spine", M.StraightSpine);
-                Repaint();
-                EditorGUI.EndDisabledGroup();
+                using (new EditorGUI.DisabledGroupScope(true))
+                {
+                    EditorGUILayout.ObjectField("Current Rider", M.Rider, typeof(MRider), false);
+                    EditorGUILayout.ObjectField("Nearby Rider", M.NearbyRider, typeof(MRider), false);
+                    EditorGUILayout.Space();
+                    EditorGUILayout.ToggleLeft("Mounted/Can Dismount", M.Mounted);
+                    EditorGUILayout.ToggleLeft("Can Be Mounted by State", M.CanBeDismountedByState);
+                    EditorGUILayout.ToggleLeft("Can Be Mounted", M.CanBeMounted);
+                    EditorGUILayout.ToggleLeft("Straight Spine", M.StraightSpine);
+                    Repaint();
+                }
             }
         }
 
-
         private void ShowEvents()
         {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                EditorGUILayout.BeginHorizontal();
+                using (new GUILayout.HorizontalScope())
                 {
                     EditorGUILayout.LabelField("Events", EditorStyles.boldLabel);
                     helpEvents = GUILayout.Toggle(helpEvents, "?", EditorStyles.miniButton, GUILayout.Width(18));
                 }
-                EditorGUILayout.EndHorizontal();
+
                 if (helpEvents) EditorGUILayout.HelpBox("On Mounted: Invoked when the rider start to mount the animal\nOn Dismounted: Invoked when the rider start to dismount the animal\nInvoked when the Mountable has an available Rider Nearby", MessageType.None);
 
-                EditorGUILayout.PropertyField(OnMounted);
-                EditorGUILayout.PropertyField(OnDismounted);
+                EditorGUILayout.PropertyField(OnMounted, new GUIContent("On Start Mounting"));
+                EditorGUILayout.PropertyField(OnEndMounting);
+                EditorGUILayout.PropertyField(OnDismounted, new GUIContent("On Start Dismounting"));
+                EditorGUILayout.PropertyField(OnEndDismounting);
                 EditorGUILayout.PropertyField(OnCanBeMounted);
                 EditorGUILayout.PropertyField(OnCalled);
             }
-            EditorGUILayout.EndVertical();
+
         }
 
         private void ShowStates()
         {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 EditorGUILayout.LabelField("Mount/Dismount States", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(MountOnly, new GUIContent("Mount Only", "The Rider can only Mount when the Animal is on any of these states"));
@@ -613,12 +652,12 @@ namespace MalbersAnimations.HAP
 
                 if (ForceDismount.boolValue) MalbersEditor.Arrays(ForceDismountStates);
             }
-            EditorGUILayout.EndVertical();
+
         }
 
         private void ShowCustom()
         {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 EditorGUILayout.PropertyField(straightSpine, new GUIContent("Straight Spine", "Straighten the Mount Point to fix the Rider Animation"));
 
@@ -629,17 +668,17 @@ namespace MalbersAnimations.HAP
                     EditorGUILayout.PropertyField(smoothSM, new GUIContent("Smoothness", "Smooth changes between the rotation and the straight Mount"));
                 }
             }
-            EditorGUILayout.EndVertical();
 
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                EditorGUILayout.BeginHorizontal();
+                using (new GUILayout.HorizontalScope())
                 {
                     EditorGUILayout.PropertyField(UseSpeedModifiers, new GUIContent("Animator Speeds", "Use this for other animals but the horse"));
                     helpUseSpeeds = GUILayout.Toggle(helpUseSpeeds, "?", EditorStyles.miniButton, GUILayout.Width(18));
                 }
-                EditorGUILayout.EndHorizontal();
+
 
                 if (M.UseSpeedModifiers)
                 {
@@ -647,44 +686,47 @@ namespace MalbersAnimations.HAP
                     MalbersEditor.Arrays(SpeedMultipliers, new GUIContent("Animator Speed Multipliers", "Velocity changes for diferent Animation Speeds... used on other animals"));
                 }
             }
-            EditorGUILayout.EndVertical();
+
 
         }
 
         private void ShowLinks()
         {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 EditorGUILayout.HelpBox("'Mount Point' is obligatory, the rest are optional", MessageType.None);
 
                 EditorGUILayout.PropertyField(MountBase, new GUIContent("Mount Base", "Reference for the Mount Base, Parent of the Mount Point, used for Straight movement for the mount"));
                 EditorGUILayout.PropertyField(mountPoint, new GUIContent("Mount Point", "Reference for the Mount Point"));
                 EditorGUILayout.Space();
-                EditorGUILayout.PropertyField(rightIK, new GUIContent("Right Foot", "Reference for the Right Foot correct position on the mount"));
-                EditorGUILayout.PropertyField(rightKnee, new GUIContent("Right Knee", "Reference for the Right Knee correct position on the mount"));
-                EditorGUILayout.Space();
-                EditorGUILayout.PropertyField(leftIK, new GUIContent("Left Foot", "Reference for the Left Foot correct position on the mount"));
-                EditorGUILayout.PropertyField(leftKnee, new GUIContent("Left Knee", "Reference for the Left Knee correct position on the mount"));
-            }
-            EditorGUILayout.EndVertical();
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.PropertyField(RiderFeetIKSet, new GUIContent("IK Set", "Name of the IK Set to activate Ik Feet Correction while riding a Mount"));
+
+                EditorGUILayout.PropertyField(leftIK, new GUIContent("Left Foot", "Reference for the Left Foot correct position on the mount"));
+                EditorGUILayout.PropertyField(rightIK, new GUIContent("Right Foot", "Reference for the Right Foot correct position on the mount"));
+                EditorGUILayout.Space();
+                EditorGUILayout.PropertyField(leftKnee, new GUIContent("Left Knee", "Reference for the Left Knee correct position on the mount"));
+                EditorGUILayout.PropertyField(rightKnee, new GUIContent("Right Knee", "Reference for the Right Knee correct position on the mount"));
+            }
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 EditorGUILayout.LabelField("Reins [Optional]", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(LeftRein, new GUIContent("Left Rein Point", "Reference for the Left Rein, to parent it to the Rider Left Hand while mounting"));
                 EditorGUILayout.PropertyField(RightRein, new GUIContent("Right Rein Point", "Reference for the Right Rein, to parent it to the Rider Right Hand while mounting"));
             }
-            EditorGUILayout.EndVertical();
         }
 
         private void ShowGeneral()
         {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PropertyField(active, new GUIContent("Active", "If the animal can be mounted. Deactivate if the mount is death or destroyed or is not ready to be mountable"));
-                MalbersEditor.DrawDebugIcon(debug);
-                EditorGUILayout.EndHorizontal();
+                using (new GUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PropertyField(active, new GUIContent("Active", "If the animal can be mounted. Deactivate if the mount is death or destroyed or is not ready to be mountable"));
+                    MalbersEditor.DrawDebugIcon(debug);
+                }
+
 
                 EditorGUILayout.PropertyField(Animal, new GUIContent("Animal", "Animal Reference for the Mounting System"));
                 EditorGUILayout.PropertyField(ID, new GUIContent("ID", "Default should be 0.... change this and the Stance parameter on the Rider will change to that value... allowing other types of mounts like Wagon"));
@@ -692,30 +734,36 @@ namespace MalbersAnimations.HAP
                 EditorGUILayout.PropertyField(instantDismount, new GUIContent("Instant Dismount", "Ignores the Dismount Animations"));
                 EditorGUILayout.PropertyField(mountIdle, new GUIContent("Mount Idle", "Animation to Play directly when instant mount is enabled"));
             }
-            EditorGUILayout.EndVertical();
 
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                EditorGUILayout.LabelField("Set values on Mounted", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(Set_InputMount, new GUIContent("Mount Input"));
-                EditorGUILayout.PropertyField(Set_AIMount, new GUIContent("Mount AI"));
-                EditorGUILayout.PropertyField(Set_MTriggersMount, new GUIContent("Mount Triggers"));
-            }
-            EditorGUILayout.EndVertical();
+                Set_InputMount.isExpanded = MalbersEditor.Foldout_Bold(Set_InputMount.isExpanded, "Set Values on Mounted");
 
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            {
-                EditorGUILayout.LabelField("Set values on Dismounted", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(Set_InputDismount, new GUIContent("Mount Input"));
-                EditorGUILayout.PropertyField(Set_AIDismount, new GUIContent("Mount AI"));
-                EditorGUILayout.PropertyField(Set_MTriggersDismount, new GUIContent("Mount Triggers"));
+                if (Set_InputMount.isExpanded)
+                {
+                    EditorGUILayout.PropertyField(Set_InputMount, new GUIContent("Mount Input"));
+                    EditorGUILayout.PropertyField(Set_AIMount, new GUIContent("Mount AI"));
+                    EditorGUILayout.PropertyField(Set_MTriggersMount, new GUIContent("Mount Triggers"));
+                }
             }
-            EditorGUILayout.EndVertical();
+
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+
+                Set_InputDismount.isExpanded = MalbersEditor.Foldout_Bold(Set_InputDismount.isExpanded, "Set Values on Dismounted");
+
+                if (Set_InputDismount.isExpanded)
+                {
+                    EditorGUILayout.PropertyField(Set_InputDismount, new GUIContent("Mount Input"));
+                    EditorGUILayout.PropertyField(Set_AIDismount, new GUIContent("Mount AI"));
+                    EditorGUILayout.PropertyField(Set_MTriggersDismount, new GUIContent("Mount Triggers"));
+                }
+            }
         }
     }
-
-
 
     [CustomPropertyDrawer(typeof(SpeedTimeMultiplier))]
     public class SpeedTimeMultiplierDrawer : PropertyDrawer
@@ -758,7 +806,6 @@ namespace MalbersAnimations.HAP
             EditorGUI.EndProperty();
         }
     }
-#endif
-
+#endif 
     #endregion
 }

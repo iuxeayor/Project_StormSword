@@ -58,7 +58,32 @@ ModelImporter:
       heightFromFeet: 1
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
+      curves:
+      - name: LookAt
+        curve:
+          serializedVersion: 2
+          curve:
+          - serializedVersion: 3
+            time: 0
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 34
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 1
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 34
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          preInfinity: 2
+          postInfinity: 2
+          rotationOrder: 4
       events: []
       transformMask: []
       maskType: 3
@@ -536,16 +561,6 @@ ModelImporter:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       scale: {x: 1, y: 1, z: 1}
-    - name: Root
-      parentName: Steve_v2(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: -1.6463614e-10, z: -1.6463614e-10, w: 0.7071068}
-      scale: {x: 1, y: 1, z: 1}
-    - name: Steve_Body
-      parentName: Steve_v2(Clone)
-      position: {x: -0.000028243065, y: 0, z: 0.002120819}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071068}
-      scale: {x: 1, y: 1, z: 1}
     - name: R_CG
       parentName: Steve_v2(Clone)
       position: {x: -0, y: 0.94800514, z: 0.037758965}
@@ -555,6 +570,46 @@ ModelImporter:
       parentName: R_CG
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.5, y: 0.5, z: 0.4999993, w: 0.5000007}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_L Thigh
+      parentName: R_Pelvis
+      position: {x: 0.00000015258789, y: 0.00000019073485, z: 0.10891703}
+      rotation: {x: 0.04045889, y: 0.9989529, z: 0.012761989, w: 0.017126184}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_L Calf
+      parentName: R_L Thigh
+      position: {x: -0.45398992, y: -0.0000000023841857, z: -0.000000019073486}
+      rotation: {x: -2.339901e-10, y: 0.0000000018624995, z: 0.0006225109, w: 0.9999998}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_L Foot
+      parentName: R_L Calf
+      position: {x: -0.40567005, y: -0.0000000023841857, z: 0.000000009536743}
+      rotation: {x: -0.07194978, y: 0.020539582, z: -0.039481763, w: 0.99641484}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_L Toe0
+      parentName: R_L Foot
+      position: {x: -0.088107556, y: 0.12147929, z: -0.0014967441}
+      rotation: {x: 0.000000015453727, y: -0.00000001545486, z: -0.7071068, w: 0.7071068}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_R Thigh
+      parentName: R_Pelvis
+      position: {x: -0.00000015258789, y: -0.00000010967254, z: -0.10891703}
+      rotation: {x: 0.031684443, y: 0.99935675, z: -0.012927037, w: -0.010730059}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_R Calf
+      parentName: R_R Thigh
+      position: {x: -0.4539899, y: 0, z: 0}
+      rotation: {x: -2.4739297e-10, y: 9.275604e-10, z: 0.015666919, w: 0.9998773}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_R Foot
+      parentName: R_R Calf
+      position: {x: -0.40567002, y: 0.0000000023841857, z: 0}
+      rotation: {x: 0.07161534, y: -0.014500415, z: -0.046274774, w: 0.9962528}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_R Toe0
+      parentName: R_R Foot
+      position: {x: -0.088107556, y: 0.12147929, z: 0.0014967346}
+      rotation: {x: -0.000000010186535, y: 0.000000020722053, z: -0.7071068, w: 0.7071068}
       scale: {x: 1, y: 1, z: 1}
     - name: R_Spine
       parentName: R_Pelvis
@@ -637,21 +692,6 @@ ModelImporter:
       rotation: {x: -0.0000000036028596, y: -0.0000000016389401, z: -0.062994495,
         w: 0.9980139}
       scale: {x: 1, y: 1, z: 1}
-    - name: R_L Finger4
-      parentName: R_L Hand
-      position: {x: -0.116351314, y: -0.017920302, z: 0.034068633}
-      rotation: {x: 0.002106577, y: -0.023350077, z: 0.023761725, w: 0.9994427}
-      scale: {x: 1, y: 1, z: 1}
-    - name: R_L Finger41
-      parentName: R_L Finger4
-      position: {x: -0.040758323, y: 0, z: 0.000000009536743}
-      rotation: {x: 0.00000023678874, y: -0.00000081211317, z: -0.030653043, w: 0.99953014}
-      scale: {x: 1, y: 1, z: 1}
-    - name: R_L Finger42
-      parentName: R_L Finger41
-      position: {x: -0.028148804, y: 0.000000076293944, z: 0.000000009536743}
-      rotation: {x: 0.0000000018867696, y: 0.0000000035027774, z: -0.13490386, w: 0.99085873}
-      scale: {x: 1, y: 1, z: 1}
     - name: R_L Finger3
       parentName: R_L Hand
       position: {x: -0.1235382, y: -0.020039596, z: 0.009702873}
@@ -666,6 +706,21 @@ ModelImporter:
       parentName: R_L Finger31
       position: {x: -0.030387726, y: 0.000000076293944, z: 0}
       rotation: {x: 0.0000000018104468, y: 0.0000000016876088, z: -0.10149469, w: 0.9948361}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_L Finger4
+      parentName: R_L Hand
+      position: {x: -0.116351314, y: -0.017920302, z: 0.034068633}
+      rotation: {x: 0.002106577, y: -0.023350077, z: 0.023761725, w: 0.9994427}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_L Finger41
+      parentName: R_L Finger4
+      position: {x: -0.040758323, y: 0, z: 0.000000009536743}
+      rotation: {x: 0.00000023678874, y: -0.00000081211317, z: -0.030653043, w: 0.99953014}
+      scale: {x: 1, y: 1, z: 1}
+    - name: R_L Finger42
+      parentName: R_L Finger41
+      position: {x: -0.028148804, y: 0.000000076293944, z: 0.000000009536743}
+      rotation: {x: 0.0000000018867696, y: 0.0000000035027774, z: -0.13490386, w: 0.99085873}
       scale: {x: 1, y: 1, z: 1}
     - name: R_Neck
       parentName: R_Spine2
@@ -767,21 +822,6 @@ ModelImporter:
       position: {x: -0.037881393, y: -0.000000038146972, z: -0.000000009536743}
       rotation: {x: -5.797682e-10, y: 0.0000000019029474, z: -0.0629945, w: 0.9980139}
       scale: {x: 1, y: 1, z: 1}
-    - name: R_R Finger4
-      parentName: R_R Hand
-      position: {x: -0.11635135, y: -0.017920226, z: -0.034068633}
-      rotation: {x: -0.0021066363, y: 0.023349475, z: 0.023760488, w: 0.9994428}
-      scale: {x: 1, y: 1, z: 1}
-    - name: R_R Finger41
-      parentName: R_R Finger4
-      position: {x: -0.04075836, y: -0.000000076293944, z: 0}
-      rotation: {x: 0.00000037788396, y: -0.00000038929264, z: -0.030645605, w: 0.9995304}
-      scale: {x: 1, y: 1, z: 1}
-    - name: R_R Finger42
-      parentName: R_R Finger41
-      position: {x: -0.028148727, y: 0, z: -0.000000009536743}
-      rotation: {x: -0.000000001005112, y: -0.000000007382472, z: -0.13490386, w: 0.99085873}
-      scale: {x: 1, y: 1, z: 1}
     - name: R_R Finger3
       parentName: R_R Hand
       position: {x: -0.12353809, y: -0.020039672, z: -0.009702873}
@@ -797,45 +837,30 @@ ModelImporter:
       position: {x: -0.03038765, y: -0.000000076293944, z: -0.000000019073486}
       rotation: {x: 0.000000007137899, y: 0.0000000011440943, z: -0.101494685, w: 0.9948361}
       scale: {x: 1, y: 1, z: 1}
-    - name: R_L Thigh
-      parentName: R_Pelvis
-      position: {x: 0.00000015258789, y: 0.00000019073485, z: 0.10891703}
-      rotation: {x: 0.04045889, y: 0.9989529, z: 0.012761989, w: 0.017126184}
+    - name: R_R Finger4
+      parentName: R_R Hand
+      position: {x: -0.11635135, y: -0.017920226, z: -0.034068633}
+      rotation: {x: -0.0021066363, y: 0.023349475, z: 0.023760488, w: 0.9994428}
       scale: {x: 1, y: 1, z: 1}
-    - name: R_L Calf
-      parentName: R_L Thigh
-      position: {x: -0.45398992, y: -0.0000000023841857, z: -0.000000019073486}
-      rotation: {x: -2.339901e-10, y: 0.0000000018624995, z: 0.0006225109, w: 0.9999998}
+    - name: R_R Finger41
+      parentName: R_R Finger4
+      position: {x: -0.04075836, y: -0.000000076293944, z: 0}
+      rotation: {x: 0.00000037788396, y: -0.00000038929264, z: -0.030645605, w: 0.9995304}
       scale: {x: 1, y: 1, z: 1}
-    - name: R_L Foot
-      parentName: R_L Calf
-      position: {x: -0.40567005, y: -0.0000000023841857, z: 0.000000009536743}
-      rotation: {x: -0.07194978, y: 0.020539582, z: -0.039481763, w: 0.99641484}
+    - name: R_R Finger42
+      parentName: R_R Finger41
+      position: {x: -0.028148727, y: 0, z: -0.000000009536743}
+      rotation: {x: -0.000000001005112, y: -0.000000007382472, z: -0.13490386, w: 0.99085873}
       scale: {x: 1, y: 1, z: 1}
-    - name: R_L Toe0
-      parentName: R_L Foot
-      position: {x: -0.088107556, y: 0.12147929, z: -0.0014967441}
-      rotation: {x: 0.000000015453727, y: -0.00000001545486, z: -0.7071068, w: 0.7071068}
+    - name: Root
+      parentName: Steve_v2(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: -1.6463614e-10, z: -1.6463614e-10, w: 0.7071068}
       scale: {x: 1, y: 1, z: 1}
-    - name: R_R Thigh
-      parentName: R_Pelvis
-      position: {x: -0.00000015258789, y: -0.00000010967254, z: -0.10891703}
-      rotation: {x: 0.031684443, y: 0.99935675, z: -0.012927037, w: -0.010730059}
-      scale: {x: 1, y: 1, z: 1}
-    - name: R_R Calf
-      parentName: R_R Thigh
-      position: {x: -0.4539899, y: 0, z: 0}
-      rotation: {x: -2.4739297e-10, y: 9.275604e-10, z: 0.015666919, w: 0.9998773}
-      scale: {x: 1, y: 1, z: 1}
-    - name: R_R Foot
-      parentName: R_R Calf
-      position: {x: -0.40567002, y: 0.0000000023841857, z: 0}
-      rotation: {x: 0.07161534, y: -0.014500415, z: -0.046274774, w: 0.9962528}
-      scale: {x: 1, y: 1, z: 1}
-    - name: R_R Toe0
-      parentName: R_R Foot
-      position: {x: -0.088107556, y: 0.12147929, z: 0.0014967346}
-      rotation: {x: -0.000000010186535, y: 0.000000020722053, z: -0.7071068, w: 0.7071068}
+    - name: Steve_Body
+      parentName: Steve_v2(Clone)
+      position: {x: -0.000028243065, y: 0, z: 0.002120819}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071068}
       scale: {x: 1, y: 1, z: 1}
     armTwist: 0.49
     foreArmTwist: 0.506
@@ -862,3 +887,10 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Common/Human Anims/Idle/Idle v2.fbx
+  uploadId: 848732

@@ -5,9 +5,10 @@ using UnityEngine;
 namespace MalbersAnimations.Controller
 {
     /// <summary>UnderWater Logic</summary>
+    [AddTypeMenu("Water/Swim UnderWater")]
     public class SwimUnderwater : State
     {
-        public override string StateName => "UnderWater";
+        //public override string StateName => "UnderWater";
         public override string StateIDName => "UnderWater";
 
         [Header("UnderWater Parameters")]
@@ -18,11 +19,6 @@ namespace MalbersAnimations.Controller
         [Tooltip("It will push the animal down into the water for a given time")]
         public float EnterWaterDrag = 10;
 
-        //[Tooltip("If the Animal Enters it will wait this time to try exiting the water")]
-        //public float TryExitTime = 0.5f;
-        //protected float EnterWaterTime;
-
-
         [Tooltip("When the Underwater state exits, it will activate the Fall State")]
         public bool AllowFallOnExit = true;
 
@@ -30,10 +26,10 @@ namespace MalbersAnimations.Controller
         protected Swim SwimState;
 
 
+
         public override void InitializeState()
         {
-            SwimState = null;
-            SwimState = (Swim)animal.State_Get(StateEnum.Swim); //Cache the Swim State
+            SwimState = animal.State_Get<Swim>(); //Cache the Swim State
 
             if (SwimState == null)
             {
@@ -95,12 +91,18 @@ namespace MalbersAnimations.Controller
                     animal.State_Force(StateEnum.Fall);
                     AllowExit();
                 }
+                else if (animal.UpDownSmooth < 0f)
+                {
+                    Debugging("[Allow Exit to Locomotion]");
+                    AllowExit(StateEnum.Locomotion);
+                }
                 //If we  touched the waterLevel
                 else
                 {
                     Debugging("[Allow Exit to Swim]");
                     SwimState.Activate();
                     SwimState.BounceDown = Vector3.zero;
+                    animal.ResetUPVector(); //Make sure the animal does not go up from the water level
                 }
             }
         }

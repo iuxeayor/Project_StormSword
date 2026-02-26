@@ -23,10 +23,10 @@ namespace MalbersAnimations.Scriptables
 
         public virtual void ResetVars()
         {
-            foreach (var v in vars) v.ResetVar(); 
+            foreach (var v in vars) v.ResetVar();
         }
     }
-    
+
     [System.Serializable]
     public struct ScriptableVarReseter
     {
@@ -48,8 +48,8 @@ namespace MalbersAnimations.Scriptables
             else if (Var is FloatVar) (Var as FloatVar).Value = DefaultFloat.Value;
             else if (Var is StringVar) (Var as StringVar).Value = DefaultString.Value;
             else if (Var is Vector3Var) (Var as Vector3Var).Value = DefaultVector3.Value;
-            else if (Var is Vector2Var)  (Var as Vector2Var).Value = DefaultVector2.Value;
-            else if (Var is ColorVar)     (Var as ColorVar).Value = DefaultColor.Value;
+            else if (Var is Vector2Var) (Var as Vector2Var).Value = DefaultVector2.Value;
+            else if (Var is ColorVar) (Var as ColorVar).Value = DefaultColor.Value;
             else if (Var is TransformVar) (Var as TransformVar).Value = DefaultTransform.Value;
             else if (Var is GameObjectVar) (Var as GameObjectVar).Value = DefaultGO.Value;
         }
@@ -70,7 +70,7 @@ namespace MalbersAnimations.Scriptables
         /// <summary> Cached style to use to draw the popup button. </summary>
         private GUIStyle popupStyle;
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             script = MonoScript.FromMonoBehaviour(target as MonoBehaviour);
             m = (ResetScriptableVars)target;
@@ -88,7 +88,7 @@ namespace MalbersAnimations.Scriptables
             };
 
 
-       
+
         }
 
         private void OnRemoveCallback(ReorderableList list)
@@ -109,23 +109,23 @@ namespace MalbersAnimations.Scriptables
             serializedObject.Update();
             MalbersEditor.DrawDescription("Reset Scriptable Variables");
 
-          //  EditorGUILayout.BeginVertical(MalbersEditor.StyleGray);
+            //  EditorGUILayout.BeginVertical(MalbersEditor.StyleGray);
             {
-               // MalbersEditor.DrawScript(script);
+                // MalbersEditor.DrawScript(script);
 
                 EditorGUILayout.BeginHorizontal();
                 {
-                    ResetOnEnable.boolValue =  GUILayout.Toggle(ResetOnEnable.boolValue, 
+                    ResetOnEnable.boolValue = GUILayout.Toggle(ResetOnEnable.boolValue,
                         new GUIContent("Reset on Enable", "Reset the values when this Script is Enabled"), EditorStyles.miniButton);
 
-                    ResetOnDisable.boolValue = GUILayout.Toggle(ResetOnDisable.boolValue, 
+                    ResetOnDisable.boolValue = GUILayout.Toggle(ResetOnDisable.boolValue,
                         new GUIContent("Reset on Disable", "Reset the values when this Script is Disabled, and when the Play button is Off (in the Editor)"), EditorStyles.miniButton);
 
                 }
                 EditorGUILayout.EndHorizontal();
-                    Reo_ScriptVars.DoLayoutList();
+                Reo_ScriptVars.DoLayoutList();
             }
-           // EditorGUILayout.EndVertical();
+            // EditorGUILayout.EndVertical();
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -172,7 +172,7 @@ namespace MalbersAnimations.Scriptables
             buttonRect.height = height;
 
             if (Var is IntVar)
-            { 
+            {
                 var ele = Element.FindPropertyRelative("DefaultInt");
 
                 var useConstant = ele.FindPropertyRelative("UseConstant");

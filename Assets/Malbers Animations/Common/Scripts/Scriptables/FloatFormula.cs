@@ -46,7 +46,7 @@ namespace MalbersAnimations.Scriptables
         }
 
 
-
+        [ContextMenu("Update Formula")]
         private void OnValidate()
         {
             var displayOld = $"{value}";

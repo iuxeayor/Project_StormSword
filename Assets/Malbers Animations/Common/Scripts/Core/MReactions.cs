@@ -1,10 +1,8 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
 
 namespace MalbersAnimations.Reactions
 {
@@ -22,12 +20,10 @@ namespace MalbersAnimations.Reactions
         [Tooltip("React when the Component is Disabled")]
         public bool ReactOnDisable = false;
 
+        [Header("[Obsolete] Please use Reactions2")]
+        [SerializeReference] public Reaction reaction;
 
-
-        [SerializeReference, SubclassSelector]
-        public Reaction reaction;
-
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             if (FindTarget)
                 Target = GetComponent(reaction.ReactionType) ?? GetComponentInParent(reaction.ReactionType);
@@ -89,10 +85,15 @@ namespace MalbersAnimations.Reactions
         }
 
         public void React(GameObject newAnimal) => React(newAnimal.transform);
+
+
+        public void OnDrawGizmosSelected()
+        {
+            reaction?.DrawGizmos(this);
+        }
     }
 
 #if UNITY_EDITOR
-
     [CustomEditor(typeof(MReactions))]
     public class MReactionEditor : Editor
     {
@@ -104,7 +105,7 @@ namespace MalbersAnimations.Reactions
         MReactions M;
 
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             M = (MReactions)target;
             FindTarget = serializedObject.FindProperty("FindTarget");

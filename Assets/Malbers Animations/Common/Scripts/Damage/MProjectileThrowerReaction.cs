@@ -9,7 +9,37 @@ namespace MalbersAnimations.Weapons
 
     public class MProjectileThrowerReaction : Reaction
     {
-        public enum ProjectileThrowerActions { SetProjectile, SetTarget, SetDamageMultiplier, SetScaleMultiplier, SetForceMultiplier, SetForce, SetAngle, SetAfterDistance }
+
+        public override string DynamicName
+        {
+            get
+            {
+                var display = $"Projectile Thrower [{action}]"; //Name of the Reaction
+                switch (action)
+                {
+                    case ProjectileThrowerActions.SetProjectile:
+                        display += $" [{(projectile != null ? projectile.name : "None")}]";
+                        break;
+                    case ProjectileThrowerActions.SetTarget:
+                        display += $" [{(target != null ? target.name : "None")}]";
+                        break;
+                    case ProjectileThrowerActions.SetDamageMultiplier:
+                    case ProjectileThrowerActions.SetScaleMultiplier:
+                    case ProjectileThrowerActions.SetForceMultiplier:
+                    case ProjectileThrowerActions.SetForce:
+                    case ProjectileThrowerActions.SetAngle:
+                    case ProjectileThrowerActions.SetAfterDistance:
+                        display += $" [{value}]";
+                        break;
+                    default:
+                        break;
+                }
+                return display;
+            }
+        }
+
+
+        public enum ProjectileThrowerActions { SetProjectile, SetTarget, SetDamageMultiplier, SetScaleMultiplier, SetForceMultiplier, SetForce, SetAngle, SetAfterDistance, Fire }
 
         public ProjectileThrowerActions action = ProjectileThrowerActions.SetProjectile;
 
@@ -17,7 +47,7 @@ namespace MalbersAnimations.Weapons
         public GameObject projectile;
         [Hide("action", (int)ProjectileThrowerActions.SetTarget)]
         public Transform target;
-        [Hide("action", true, (int)ProjectileThrowerActions.SetProjectile, (int)ProjectileThrowerActions.SetTarget)]
+        [Hide("action", true, (int)ProjectileThrowerActions.SetProjectile, (int)ProjectileThrowerActions.SetTarget, (int)ProjectileThrowerActions.Fire)]
         public float value;
 
         public override Type ReactionType => typeof(MProjectileThrower);
@@ -51,6 +81,9 @@ namespace MalbersAnimations.Weapons
                         break;
                     case ProjectileThrowerActions.SetAfterDistance:
                         thrower.AfterDistance = value;
+                        break;
+                    case ProjectileThrowerActions.Fire:
+                        thrower.Fire();
                         break;
                     default:
                         break;

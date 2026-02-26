@@ -18,7 +18,7 @@ MonoBehaviour:
     Variable: {fileID: 0}
   time:
     UseConstant: 1
-    ConstantValue: 1
+    ConstantValue: 0.5
     Variable: {fileID: 0}
   curve:
     serializedVersion: 2
@@ -32,6 +32,15 @@ MonoBehaviour:
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.060860436
+    - serializedVersion: 3
+      time: 0.7468902
+      value: 0.8314357
+      inSlope: -1.2719579
+      outSlope: -1.2719579
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
       value: 0
@@ -59,5 +68,8 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
-  clearEmissionMap: 0
-  revertColorAfterLerp: 0
+  revertColorAfterLerp: 1
+  ResetToOriginalBefore: 1
+  FloatOriginal: 0
+  ColorOriginal: {r: 0, g: 0, b: 0, a: 1}
+  ColorHDROriginal: {r: 0, g: 0, b: 0, a: 1}

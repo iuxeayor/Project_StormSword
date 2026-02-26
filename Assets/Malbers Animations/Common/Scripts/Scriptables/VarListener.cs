@@ -3,6 +3,9 @@ using MalbersAnimations.Events;
 using MalbersAnimations.Scriptables;
 using UnityEngine.Events;
 
+
+
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -40,7 +43,7 @@ namespace MalbersAnimations
         public IntReference Value = new();
         public IntEvent Response = new();
 
-        [Tooltip("Update the Main Value after the comparison")]
+        [Tooltip("Update the value of the comparer with the incoming Master Value after the comparison")]
         public bool UpdateAfterCompare = false;
 
         /// <summary>Use the comparer to execute a response using the Int Event and the Value</summary>
@@ -94,7 +97,7 @@ namespace MalbersAnimations
         public FloatReference Value = new();
         public FloatEvent Response = new();
 
-        [Tooltip("Update the Comparer Value after the comparison")]
+        [Tooltip("Update the value of the comparer with the incoming Master Value after the comparison")]
         public bool UpdateAfterCompare = false;
 
         /// <summary>Use the comparer to execute a response using the Int Event and the Value</summary>
@@ -170,39 +173,36 @@ namespace MalbersAnimations
         public ComparerString comparer = ComparerString.Equal;
         public StringReference Value = new();
         public StringEvent Response = new();
+        public UnityEvent OnTrue = new();
+        public UnityEvent OnFalse = new();
 
 
-        [Tooltip("Update the Main Value after the comparison")]
+        [Tooltip("Update the value of the comparer with the incoming Master Value after the comparison")]
         public bool UpdateAfterCompare = false;
 
         /// <summary>Use the comparer to execute a response using the Int Event and the Value</summary>
         /// <param name="val">Value that comes from the string event</param>
-        public void ExecuteAdvanceStringEvent(string val, bool debug)
+        public bool ExecuteAdvanceStringEvent(string val)
         {
-            if (active)
+            return comparer switch
             {
-                bool finalValue = false;
+                ComparerString.Equal => StringComparisonResult(val, val == Value.Value),
+                ComparerString.NotEqual => StringComparisonResult(val, val != Value.Value),
+                ComparerString.Empty => StringComparisonResult(val, string.IsNullOrEmpty(val)),
+                ComparerString.Contains => StringComparisonResult(val, val.Contains(Value.Value)),
+                ComparerString.DoesNotContains => StringComparisonResult(val, !val.Contains(Value.Value)),
+                _ => false,
+            };
+        }
 
-                switch (comparer)
-                {
-                    case ComparerString.Equal:
-                        if (val == Value.Value) { Response.Invoke(val); finalValue = true; }
-                        break;
-                    case ComparerString.NotEqual:
-                        if (val != Value.Value) Response.Invoke(val);
-                        break;
-                    case ComparerString.Empty:
-                        if (string.IsNullOrEmpty(val)) Response.Invoke(val);
-                        break;
-                    default:
-                        break;
-                }
 
-                if (UpdateAfterCompare) Value.Value = val;
+        private bool StringComparisonResult(string value, bool result)
+        {
+            Response.Invoke(value);
+            if (result) OnTrue.Invoke(); else OnFalse.Invoke();
 
-                if (debug)
-                    Debug.Log($"String Comparer: <B>{name}</B> <color=green> {val} </color> <B>{comparer}</B> <color=green> {Value.Value}  </color> <<{finalValue}>>");
-            }
+            if (UpdateAfterCompare) Value.Value = value;
+            return result;
         }
 
         public void SetValue(string value) => Value.Value = value;
@@ -400,12 +400,12 @@ namespace MalbersAnimations
                 }
 
 
-                DrawEvents();
+                DrawElements();
             }
             serializedObject.ApplyModifiedProperties();
         }
 
-        protected virtual void DrawEvents() { }
+        protected virtual void DrawElements() { }
     }
 #endif
 }

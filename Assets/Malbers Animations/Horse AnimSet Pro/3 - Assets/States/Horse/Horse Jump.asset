@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -33,9 +41,10 @@ MonoBehaviour:
   General:
     modify: 2303
     RootMotion: 1
+    RootMotionRotation: 0
     Sprint: 1
     Gravity: 0
-    Grounded: 0
+    Grounded: 1
     OrientToGround: 0
     CustomRotation: 0
     FreeMovement: 0
@@ -51,6 +60,7 @@ MonoBehaviour:
     modifier:
       modify: 2303
       RootMotion: 1
+      RootMotionRotation: 0
       Sprint: 1
       Gravity: 0
       Grounded: 1
@@ -68,6 +78,7 @@ MonoBehaviour:
     modifier:
       modify: 2303
       RootMotion: 1
+      RootMotionRotation: 0
       Sprint: 1
       Gravity: 0
       Grounded: 1
@@ -100,6 +111,17 @@ MonoBehaviour:
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 1
@@ -130,9 +152,17 @@ MonoBehaviour:
   MovementStrafe: 1
   IdleStrafe: 1
   m_debug: 1
-  Editor_Tabs1: 4
+  Editor_Tabs1: 1
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets: []
   ID: {fileID: 11400000, guid: 9ae07cd2f8f4c054687fecf634f8e5b3, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   JumpPressed:
     UseConstant: 1
     ConstantValue: 0
@@ -173,10 +203,10 @@ MonoBehaviour:
     ForwardPressed: 0
     LastState: {fileID: 0}
   - name: Jump Forward
-    VerticalSpeed: 0.1
-    JumpLandDistance: 2.21
-    fallingTime: 0.6
-    ExitTime: 0.95
+    VerticalSpeed: 0.2
+    JumpLandDistance: 2.3
+    fallingTime: 0.53
+    ExitTime: 0.71
     CliffTime:
       minValue: 0.5
       maxValue: 0.7
@@ -186,10 +216,10 @@ MonoBehaviour:
     ForwardPressed: 0
     LastState: {fileID: 0}
   - name: Jump Canter
-    VerticalSpeed: 2.9
-    JumpLandDistance: 2.5
-    fallingTime: 0.57
-    ExitTime: 0.85
+    VerticalSpeed: 2.5
+    JumpLandDistance: 2.55
+    fallingTime: 0.53
+    ExitTime: 0.7
     CliffTime:
       minValue: 0.5
       maxValue: 0.7
@@ -199,10 +229,10 @@ MonoBehaviour:
     ForwardPressed: 0
     LastState: {fileID: 0}
   - name: Jump Gallop
-    VerticalSpeed: 3.9
-    JumpLandDistance: 2.41
-    fallingTime: 0.51
-    ExitTime: 0.9
+    VerticalSpeed: 3.5
+    JumpLandDistance: 2.51
+    fallingTime: 0.52
+    ExitTime: 0.8
     CliffTime:
       minValue: 0.5
       maxValue: 0.7
@@ -212,10 +242,10 @@ MonoBehaviour:
     ForwardPressed: 0
     LastState: {fileID: 0}
   - name: Jump Sprint
-    VerticalSpeed: 4.9
-    JumpLandDistance: 2.515
-    fallingTime: 0.53
-    ExitTime: 0.9
+    VerticalSpeed: 4.5
+    JumpLandDistance: 2.46
+    fallingTime: 0.4
+    ExitTime: 0.75
     CliffTime:
       minValue: 0.4
       maxValue: 0.5
@@ -224,3 +254,6 @@ MonoBehaviour:
     ForwardMultiplier: 1
     ForwardPressed: 0
     LastState: {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

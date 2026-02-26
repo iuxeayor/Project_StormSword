@@ -59,8 +59,11 @@ namespace MalbersAnimations.Scriptables
                 int indent = EditorGUI.indentLevel;
                 EditorGUI.indentLevel = 0;
 
+                //CustomPatch: Ensures multi-object selection properly propagates changes without losing data (useConstant was resetting when multi-selecting objects).
+                EditorGUI.BeginChangeCheck();
                 int result = EditorGUI.Popup(buttonRect, useConstant.boolValue ? 0 : 1, popupOptions, popupStyle);
-                useConstant.boolValue = (result == 0);
+                if (EditorGUI.EndChangeCheck())
+                    useConstant.boolValue = (result == 0);
 
                 bool varIsEmpty = variable.objectReferenceValue == null;
 
@@ -84,9 +87,7 @@ namespace MalbersAnimations.Scriptables
                 }
 
 
-#if UNITY_2020_1_OR_NEWER
                 EditorGUIUtility.labelWidth = 0.1f;
-#endif
                 EditorGUI.PropertyField(propRect, useConstant.boolValue ? constantValue : variable, GUIContent.none, false);
                 EditorGUIUtility.labelWidth = 0;
 
@@ -97,9 +98,7 @@ namespace MalbersAnimations.Scriptables
                         if (GUI.Button(AddButtonRect, plus, UnityEditor.EditorStyles.helpBox))
                         {
                             MTools.CreateScriptableAsset(variable, MalbersEditor.GetSelectedPathOrFallback());
-#if UNITY_2020_1_OR_NEWER
                             GUIUtility.ExitGUI(); //Unity Bug!
-#endif
                         }
                     }
                     else
@@ -118,8 +117,10 @@ namespace MalbersAnimations.Scriptables
             {
                 if (!ValidObject(variable.objectReferenceValue)) return; //Do not Paint vectors
 
-                SerializedObject objs = new SerializedObject(variable.objectReferenceValue);
+                SerializedObject objs = new(variable.objectReferenceValue);
+
                 var Var = objs.FindProperty("value");
+
                 EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(variableRect, Var, GUIContent.none);
                 if (EditorGUI.EndChangeCheck())
@@ -131,23 +132,19 @@ namespace MalbersAnimations.Scriptables
         }
 
 
-        private static bool ValidObject(Object val) => (val is IntVar) || (val is FloatVar && val is not FloatRangeVar) || (val is BoolVar) || (val is StringVar);
+        private static bool ValidObject(Object val) => (val is IntVar) || (val is FloatVar && val is not FloatRangeVar) || (val is BoolVar) /*|| (val is StringVar)*/;
 
-        //public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        //{
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            // Pick which sub-property we are drawing
+            var useConstant = property.FindPropertyRelative("UseConstant");
+            var targetProp = useConstant.boolValue
+                ? property.FindPropertyRelative("ConstantValue")
+                : property.FindPropertyRelative("Variable");
 
-        //    float height = base.GetPropertyHeight(property, label);
-
-        //    SerializedProperty useConstant = property.FindPropertyRelative("UseConstant");
-        //    if (!useConstant.boolValue)
-        //    {
-        //        SerializedProperty variable = property.FindPropertyRelative("Variable");
-        //        if (variable.objectReferenceValue != null)
-        //        height = height * 2 + 8;
-        //    }
-
-        //    return height;
-        //}
+            // Ask Unity for the height of that sub-property
+            return EditorGUI.GetPropertyHeight(targetProp, label, true);
+        }
     }
 }
 #endif

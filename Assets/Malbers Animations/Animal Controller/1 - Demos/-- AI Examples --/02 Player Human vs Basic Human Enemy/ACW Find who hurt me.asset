@@ -48,7 +48,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   task: 3
   distance:
@@ -152,9 +155,16 @@ MonoBehaviour:
   transform: {fileID: 11400000, guid: 0c45a2c5e368c004eb9efaa6152aa0ea, type: 2}
   gameObject: {fileID: 0}
   gameObjectSet: {fileID: 0}
-  tags: []
   zoneType: 0
   AllZones: 1
   ZoneID: -1
   ZoneModeAbility: -1
+  tags: []
+  ReactionOnSelf:
+    reactions: []
+  ReactionOnTarget:
+    reactions: []
   debugColor: {r: 0.8792453, g: 0.6535159, b: 0.4893912, a: 0.3}
+  references:
+    version: 2
+    RefIds: []

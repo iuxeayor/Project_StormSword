@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 10
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -38,13 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4849924, g: 0.5915705, b: 0.65520734, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
-  m_GIWorkflowMode: 0
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 1
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -67,9 +66,6 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
-    m_FinalGather: 0
-    m_FinalGatherFiltering: 1
-    m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 1
     m_BakeBackend: 0
@@ -97,7 +93,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 112000004, guid: ddff19b1cd7b04349abe6e80558d7e1e,
+  m_LightingDataAsset: {fileID: 112000000, guid: 80949385952bf9a43b0ace8aced18ca4,
     type: 2}
   m_LightingSettings: {fileID: 1863882304}
 --- !u!196 &4
@@ -206,6 +202,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -272,6 +271,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -361,6 +361,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -427,6 +430,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -546,7 +550,7 @@ MonoBehaviour:
     Variable: {fileID: 0}
   m_InteractorID:
     UseConstant: 1
-    ConstantValue: 0
+    ConstantValue: 1
     Variable: {fileID: 0}
   m_Auto:
     UseConstant: 1
@@ -568,23 +572,30 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  events:
-    OnInteractWithGO:
-      m_PersistentCalls:
-        m_Calls: []
-    OnInteractWith:
-      m_PersistentCalls:
-        m_Calls: []
+  debug: 0
+  reactions: []
+  OnInteractWithGO:
+    m_PersistentCalls:
+      m_Calls: []
+  OnInteractWithID:
+    m_PersistentCalls:
+      m_Calls: []
   OnFocused:
     m_PersistentCalls:
       m_Calls: []
   OnUnfocused:
     m_PersistentCalls:
       m_Calls: []
+  OnCoolDown:
+    m_PersistentCalls:
+      m_Calls: []
   Description: Set this as an Interactable so the Player Wolf can do an Attack when
     is clicked on it
   ShowDescription: 1
   Editor_Tabs1: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &194882617
 GameObject:
   m_ObjectHideFlags: 0
@@ -719,6 +730,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -856,6 +870,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -983,12 +1000,21 @@ MonoBehaviour:
     floatValue: 0
     stringValue: 
     intVarValue: {fileID: 0}
-    transformValue: {fileID: 1223357226}
-    GoValue: {fileID: 0}
     ComponentValue: {fileID: 0}
+    TransformValue:
+      UseConstant: 1
+      ConstantValue: {fileID: 1223357226}
+      Variable: {fileID: 0}
+    GOValue:
+      UseConstant: 1
+      ConstantValue: {fileID: 0}
+      Variable: {fileID: 0}
+    Old_transformValue: {fileID: 1223357226}
+    Old_GoValue: {fileID: 0}
     time: 0
     sent: 0
     Active: 1
+    UpdateVarReference: 1
   - message: Stop
     typeM: 4
     boolValue: 0
@@ -996,12 +1022,21 @@ MonoBehaviour:
     floatValue: 0
     stringValue: 
     intVarValue: {fileID: 0}
-    transformValue: {fileID: 1223357226}
-    GoValue: {fileID: 0}
     ComponentValue: {fileID: 0}
+    TransformValue:
+      UseConstant: 1
+      ConstantValue: {fileID: 1223357226}
+      Variable: {fileID: 0}
+    GOValue:
+      UseConstant: 1
+      ConstantValue: {fileID: 0}
+      Variable: {fileID: 0}
+    Old_transformValue: {fileID: 1223357226}
+    Old_GoValue: {fileID: 0}
     time: 0
     sent: 0
     Active: 1
+    UpdateVarReference: 1
   UseSendMessage: 0
   SendToChildren: 1
   debug: 1
@@ -1060,6 +1095,22 @@ MonoBehaviour:
   OnEmpty:
     m_PersistentCalls:
       m_Calls: []
+  ID:
+    UseConstant: 1
+    ConstantValue: -1
+    Variable: {fileID: 0}
+  TriggerEnterReaction:
+    reactions: []
+  TriggerExitReaction:
+    reactions: []
+  TriggerStayReaction:
+    reactions: []
+  GameObjectEnterReaction:
+    reactions: []
+  GameObjectExitReaction:
+    reactions: []
+  GameObjectStayReaction:
+    reactions: []
   m_debug: 0
   useOnTriggerStay:
     UseConstant: 1
@@ -1069,8 +1120,18 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  trigger: {fileID: 0}
+  ignoreStatic:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  Conditions:
+    conditions: []
+    active: 0
+  ownCollider: {fileID: 0}
   Editor_Tabs1: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &261874669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1086,9 +1147,17 @@ MonoBehaviour:
   UseColliders: 1
   gizmoType: 0
   debugSize: 0.03
+  height: 2
   DebugColor: {r: 0, g: 0, b: 1, a: 0.353}
   DrawAxis: 0
   AxisSize: 0.65
+  _colliders:
+  - {fileID: 261874670}
+  HasColliders: 1
+  DrawLineTo: 1
+  ConnectTo: {fileID: 1223357226}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!65 &261874670
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1197,6 +1266,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -1263,6 +1335,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 0
@@ -1281,6 +1354,10 @@ PrefabInstance:
     - target: {fileID: 1687954435391512, guid: 4314a73211c85fd4492c1bd44c74fc62, type: 3}
       propertyPath: m_Name
       value: Respawner
+      objectReference: {fileID: 0}
+    - target: {fileID: 1687954435391512, guid: 4314a73211c85fd4492c1bd44c74fc62, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4455119416797234, guid: 4314a73211c85fd4492c1bd44c74fc62, type: 3}
       propertyPath: m_RootOrder
@@ -1419,6 +1496,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -1485,6 +1565,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -1492,6 +1573,37 @@ MonoBehaviour:
   m_IgnoreFromBuild: 0
   m_ApplyToChildren: 1
   m_AffectedAgents: ffffffff
+--- !u!1 &452451769
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 452451770}
+  m_Layer: 0
+  m_Name: Start Align Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &452451770
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 452451769}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 866615099}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &490773348
 GameObject:
   m_ObjectHideFlags: 0
@@ -1539,9 +1651,16 @@ MonoBehaviour:
   UseColliders: 0
   gizmoType: 1
   debugSize: 0.27
+  height: 2
   DebugColor: {r: 0.9867141, g: 0.03676468, b: 1, a: 1}
   DrawAxis: 1
   AxisSize: 1.18
+  _colliders: []
+  HasColliders: 0
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!1 &504411612
 GameObject:
   m_ObjectHideFlags: 0
@@ -1589,9 +1708,16 @@ MonoBehaviour:
   UseColliders: 0
   gizmoType: 1
   debugSize: 0.18
+  height: 2
   DebugColor: {r: 0.74264705, g: 0.5543491, b: 0.060067054, a: 1}
   DrawAxis: 0
   AxisSize: 0.65
+  _colliders: []
+  HasColliders: 0
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!1 &553658887
 GameObject:
   m_ObjectHideFlags: 0
@@ -1693,6 +1819,12 @@ OffMeshLink:
   m_BiDirectional: 0
   m_Activated: 1
   m_AutoUpdatePositions: 0
+--- !u!4 &640293771 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+    type: 3}
+  m_PrefabInstance: {fileID: 725873223}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &641616115
 GameObject:
   m_ObjectHideFlags: 0
@@ -1870,6 +2002,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -1936,6 +2071,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -2043,6 +2179,76 @@ PrefabInstance:
       propertyPath: stoppingDistance
       value: 1.5
       objectReference: {fileID: 0}
+    - target: {fileID: 538114909240407621, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: radius
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 538114909240407621, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: stoppingDistance
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[1].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[2].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[3].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[4].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[5].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[6].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[7].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[8].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[9].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[10].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[11].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 688928636819729589, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_MapButtons.Array.data[0].buttons.Array.data[12].active.ConstantValue
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 777501663697548374, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: debug
@@ -2058,9 +2264,34 @@ PrefabInstance:
       propertyPath: Editor_Tabs1
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1184344264281877460, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1437026997428540908, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: radius
+      value: 0.6
+      objectReference: {fileID: 0}
     - target: {fileID: 1808351838260071692, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: OnPointClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3130916460042895085, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: 'managedReferences[-2]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3130916460042895085, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: managedReferences[5016934631901495396].Active
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4083360240567393876, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4482416303181249315, guid: d520239042c144f438232f9375004dc2,
@@ -2076,7 +2307,7 @@ PrefabInstance:
     - target: {fileID: 7402902085319866278, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: Editor_Tabs1
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7402902085319866278, guid: d520239042c144f438232f9375004dc2,
         type: 3}
@@ -2092,7 +2323,7 @@ PrefabInstance:
         type: 3}
       propertyPath: OnHitInteractable.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1847813590}
+      objectReference: {fileID: 0}
     - target: {fileID: 7402902085319866278, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: OnHitInteractable.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
@@ -2198,6 +2429,11 @@ PrefabInstance:
         type: 3}
       propertyPath: stats.Array.data[1].RegenRate.ConstantValue
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7403204806355872018, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: stats.Array.data[1].ImmuneTime.ConstantValue
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 7403204806355872018, guid: d520239042c144f438232f9375004dc2,
         type: 3}
@@ -2387,7 +2623,7 @@ PrefabInstance:
     - target: {fileID: 7403766772878258876, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: Editor_Tabs1
-      value: 3
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7403766772878258876, guid: d520239042c144f438232f9375004dc2,
         type: 3}
@@ -2398,6 +2634,11 @@ PrefabInstance:
         type: 3}
       propertyPath: SelectedMode
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7403766772878258876, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: SelectedState
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 7403766772878258876, guid: d520239042c144f438232f9375004dc2,
         type: 3}
@@ -2452,17 +2693,17 @@ PrefabInstance:
     - target: {fileID: 7432359228648269916, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.2
+      value: -5.3094006
       objectReference: {fileID: 0}
     - target: {fileID: 7432359228648269916, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.0000038146973
       objectReference: {fileID: 0}
     - target: {fileID: 7432359228648269916, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -7.44
+      value: -8.846345
       objectReference: {fileID: 0}
     - target: {fileID: 7432359228648269916, guid: d520239042c144f438232f9375004dc2,
         type: 3}
@@ -2472,17 +2713,17 @@ PrefabInstance:
     - target: {fileID: 7432359228648269916, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7432359228648269916, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7432359228648269916, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7432359228648269916, guid: d520239042c144f438232f9375004dc2,
         type: 3}
@@ -2499,6 +2740,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7433958804650771155, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: Editor_Tabs1
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7433958804650771155, guid: d520239042c144f438232f9375004dc2,
+        type: 3}
+      propertyPath: Editor_Tabs2
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 7435339613071955038, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: m_Name
@@ -2507,7 +2758,7 @@ PrefabInstance:
     - target: {fileID: 9169016568318894166, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8256862547436485366, guid: d520239042c144f438232f9375004dc2, type: 3}
@@ -2517,7 +2768,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7432359228648269916, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1847813589}
+      addedObject: {fileID: 640293771}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7435339613071955038, guid: d520239042c144f438232f9375004dc2,
         type: 3}
@@ -2526,7 +2777,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7435339613071955038, guid: d520239042c144f438232f9375004dc2,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1047585918}
+      addedObject: {fileID: 1047585929}
   m_SourcePrefab: {fileID: 100100000, guid: d520239042c144f438232f9375004dc2, type: 3}
 --- !u!1 &707086737
 GameObject:
@@ -2610,6 +2861,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -2676,6 +2930,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -2741,11 +2996,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointType: 0
-  stoppingDistance: 1.3
+  m_height: 0.5
+  radius: 1.3
   slowingDistance: 0
   center: {x: 0, y: 0, z: 0}
-  m_height: 0.5
   m_arriveLookAt: 1
+  m_TargetLimit: 0
+  m_targeterStopDistance: 0.2
+  m_WaitTargeterDistance: 4
+  gizmoColor: {r: 1, g: 0, b: 0, a: 0.4}
   OnTargetArrived:
     m_PersistentCalls:
       m_Calls: []
@@ -2902,35 +3161,83 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  events:
-    OnInteractWithGO:
-      m_PersistentCalls:
-        m_Calls: []
-    OnInteractWith:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 11400000, guid: 69a68b019b544094ca6f3e7dd8c92e8f, type: 2}
-          m_TargetAssemblyTypeName: 
-          m_MethodName: Add
-          m_Mode: 3
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 1
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+  debug: 0
+  reactions:
+  - Description: 
+    Is: 0
+    Index:
+      UseConstant: 1
+      ConstantValue: 1
+      Variable: {fileID: 0}
+    reaction:
+      reactions:
+      - rid: 5016934631901495397
+  OnInteractWithGO:
+    m_PersistentCalls:
+      m_Calls: []
+  OnInteractWithID:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 11400000, guid: 69a68b019b544094ca6f3e7dd8c92e8f, type: 2}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: Add
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 11400000, guid: a944e371459e9954caf261ad32156339, type: 2}
+        m_TargetAssemblyTypeName: MalbersAnimations.Utilities.MaterialPropertyLerpSO,
+          MalbersAnimations
+        m_MethodName: LerpMaterial
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 243049406}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Renderer, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   OnFocused:
     m_PersistentCalls:
       m_Calls: []
   OnUnfocused:
     m_PersistentCalls:
       m_Calls: []
+  OnCoolDown:
+    m_PersistentCalls:
+      m_Calls: []
   Description: Interactable Element that invoke events when an Interactor interact
     with it
   ShowDescription: 1
   Editor_Tabs1: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 5016934631901495397
+      type: {class: ModeReaction, ns: MalbersAnimations.Reactions, asm: MalbersAnimations}
+      data:
+        desc: 
+        Active: 1
+        useLocal: 0
+        localTarget: {fileID: 0}
+        delay: 0
+        type: 0
+        ID: {fileID: 11400000, guid: 1286867ad3c4cdd4baacac3373aff92c, type: 2}
+        abilityStatus: 0
+        Ability:
+          UseConstant: 1
+          ConstantValue: -99
+          Variable: {fileID: 0}
+        HasCoolDown: 1
+        coolDown: 0
+        AbilityTime: 3
+        ModePower: 0
 --- !u!114 &708057169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3022,6 +3329,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+    UpdateAfterCompare: 0
   OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -3098,6 +3406,74 @@ Transform:
   - {fileID: 351287970}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &725873223
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1047585915}
+    m_Modifications:
+    - target: {fileID: 435660834099328405, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_Name
+      value: CM Main Target
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907813687048982312, guid: 251e0a928a7fe0d479f336db6eb40835,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 251e0a928a7fe0d479f336db6eb40835, type: 3}
 --- !u!1 &726663157
 GameObject:
   m_ObjectHideFlags: 0
@@ -3145,9 +3521,65 @@ MonoBehaviour:
   UseColliders: 0
   gizmoType: 1
   debugSize: 0.18
+  height: 2
   DebugColor: {r: 0.74264705, g: 0.5543491, b: 0.060067054, a: 1}
   DrawAxis: 1
   AxisSize: 0.65
+  _colliders: []
+  HasColliders: 0
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
+--- !u!1 &734824457
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 734824458}
+  - component: {fileID: 734824459}
+  m_Layer: 0
+  m_Name: Global Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &734824458
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734824457}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 1315090894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &734824459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734824457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 5c9ce45c6be249d408076e6484c917bc, type: 2}
 --- !u!1 &758069036
 GameObject:
   m_ObjectHideFlags: 0
@@ -3230,6 +3662,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -3296,6 +3731,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -3448,6 +3884,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -3657,6 +4096,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -3723,6 +4165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -3739,8 +4182,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 866615099}
-  - component: {fileID: 866615101}
   - component: {fileID: 866615100}
+  - component: {fileID: 866615102}
+  - component: {fileID: 866615101}
   m_Layer: 0
   m_Name: OffMeshLink Jump Bi
   m_TagString: Untagged
@@ -3757,11 +4201,12 @@ Transform:
   m_GameObject: {fileID: 866615098}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 28.24, y: 3.55, z: -6.23}
+  m_LocalPosition: {x: 28.45, y: 3.55, z: -6.44}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1846121318}
+  - {fileID: 452451770}
+  - {fileID: 1464265282}
   m_Father: {fileID: 553658888}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &866615100
@@ -3779,26 +4224,95 @@ MonoBehaviour:
   UseColliders: 0
   gizmoType: 1
   debugSize: 0.28
+  height: 2
   DebugColor: {r: 0.74264705, g: 0.5543491, b: 0.060067054, a: 1}
   DrawAxis: 1
   AxisSize: 1.05
---- !u!191 &866615101
-OffMeshLink:
+  _colliders: []
+  HasColliders: 0
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
+--- !u!114 &866615101
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 866615098}
   m_Enabled: 1
-  serializedVersion: 3
-  m_AreaIndex: 2
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eeb5dc026fdf4b488bc7ae0138ab719, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedVersion: 1
   m_AgentTypeID: 0
-  m_Start: {fileID: 866615099}
-  m_End: {fileID: 1846121318}
-  m_CostOverride: -1
-  m_BiDirectional: 1
+  m_StartPoint: {x: 0, y: 0, z: -2.5}
+  m_EndPoint: {x: 0, y: 0, z: 2.5}
+  m_StartTransform: {fileID: 452451770}
+  m_EndTransform: {fileID: 1464265282}
   m_Activated: 1
-  m_AutoUpdatePositions: 0
+  m_Width: 3.6
+  m_CostModifier: 1
+  m_IsOverridingCost: 0
+  m_Bidirectional: 1
+  m_AutoUpdatePosition: 0
+  m_Area: 0
+--- !u!114 &866615102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 866615098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c199f54bc84a7418ea191a4ade7996, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BiDirectional: 1
+  StartReaction:
+    reactions:
+    - rid: 6887168862589288543
+  EndReaction:
+    reactions: []
+  DebugColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  StoppingDistance: 1
+  SlowingDistance: 1
+  SlowingLimit: 0.3
+  TimeInOffMesh: 0
+  AlignToLinkFromStart: 0
+  AlignToLinkFromEnd: 0
+  AlignTime: 0.5
+  start: {fileID: 452451770}
+  end: {fileID: 1464265282}
+  width: 3.6
+  AlignRotation: 0
+  UseDirection: 1
+  SwapYZ: 0
+  LinkDirection: 1
+  InputAxisFromStart: {x: 0, y: 0, z: 1}
+  InputAxisFromEnd: {x: 0, y: 0, z: 1}
+  debug: 0
+  navMeshLink: {fileID: 866615101}
+  gizmoSize: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 6887168862589288543
+      type: {class: StateReaction, ns: MalbersAnimations.Reactions, asm: MalbersAnimations}
+      data:
+        desc: 
+        Active: 1
+        useLocal: 0
+        localTarget: {fileID: 0}
+        delay: 0
+        type: 0
+        ID: {fileID: 11400000, guid: 9ae07cd2f8f4c054687fecf634f8e5b3, type: 2}
+        EnterStatus: 0
+        ExitStatus: 0
+        replace: {fileID: 0}
 --- !u!1 &926018134
 GameObject:
   m_ObjectHideFlags: 0
@@ -4006,6 +4520,9 @@ MonoBehaviour:
   OnTargetArrived:
     m_PersistentCalls:
       m_Calls: []
+  TargetArrivedReaction:
+    reactions: []
+  debugPersistentGizmos: 0
   m_AreaType: 0
   radius: 6.08
   BoxArea: {x: 10, y: 1, z: 10}
@@ -4014,6 +4531,9 @@ MonoBehaviour:
   ChildWanderAreas:
   - {fileID: 971969477}
   ShowRadius: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!4 &971969478
 Transform:
   m_ObjectHideFlags: 0
@@ -4103,7 +4623,7 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue:
       serializedVersion: 2
-      m_Bits: 4294967295
+      m_Bits: 1082130432
     Variable: {fileID: 0}
   TriggerInteraction: 1
   m_ID:
@@ -4111,38 +4631,71 @@ MonoBehaviour:
     ConstantValue: 1
     Variable: {fileID: 0}
   InteractionArea: {fileID: 0}
-  events:
-    OnInteractWithGO:
-      m_PersistentCalls:
-        m_Calls: []
-    OnInteractWith:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1847813590}
-          m_TargetAssemblyTypeName: 
-          m_MethodName: Compare
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
   OnFocused:
     m_PersistentCalls:
       m_Calls: []
   OnUnfocused:
     m_PersistentCalls:
       m_Calls: []
-  reactions: []
-  debug: 0
-  Editor_Tabs1: 1
+  OnInteractWithGO:
+    m_PersistentCalls:
+      m_Calls: []
+  OnInteractWith:
+    m_PersistentCalls:
+      m_Calls: []
+  reactions:
+  - Description: Interact with Red Cylinder
+    Is: 0
+    Index:
+      UseConstant: 1
+      ConstantValue: 2
+      Variable: {fileID: 0}
+    reaction:
+      reactions:
+      - rid: 5016934631901495398
+  - Description: Interact with enemies
+    Is: 0
+    Index:
+      UseConstant: 1
+      ConstantValue: 1
+      Variable: {fileID: 0}
+    reaction:
+      reactions:
+      - rid: 5016934631901495400
+  debug: 1
+  Editor_Tabs1: 0
   references:
     version: 2
-    RefIds: []
---- !u!114 &1047585918
+    RefIds:
+    - rid: 5016934631901495398
+      type: {class: ModeReaction, ns: MalbersAnimations.Reactions, asm: MalbersAnimations}
+      data:
+        desc: 
+        Active: 1
+        useLocal: 1
+        localTarget: {fileID: 1047585916}
+        delay: 0
+        type: 0
+        ID: {fileID: 11400000, guid: 1286867ad3c4cdd4baacac3373aff92c, type: 2}
+        abilityStatus: 0
+        Ability:
+          UseConstant: 1
+          ConstantValue: -99
+          Variable: {fileID: 0}
+        HasCoolDown: 1
+        coolDown: 0
+        AbilityTime: 3
+        ModePower: 0
+    - rid: 5016934631901495400
+      type: {class: ComboReaction, ns: MalbersAnimations.Reactions, asm: MalbersAnimations}
+      data:
+        desc: 
+        Active: 1
+        useLocal: 1
+        localTarget: {fileID: 1628757109}
+        delay: 0
+        Branch: 0
+--- !u!114 &1047585929
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4151,45 +4704,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 1047585914}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8097927ca26ab4343a884532eb8eb442, type: 3}
+  m_Script: {fileID: 11500000, guid: ad6c4fa0b69c67045a79c8155b51cc94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   inputs:
   - name: Sprint
-    active:
-      UseConstant: 1
-      ConstantValue: 1
-      Variable: {fileID: 0}
-    ignoreOnPause:
-      UseConstant: 1
-      ConstantValue: 0
-      Variable: {fileID: 0}
-    type: 1
-    input: Sprint
-    key: 304
     debug: 0
-    GetPressed: 0
-    ResetOnDisable: 1
+    input:
+      m_Name: Space
+      m_Type: 1
+      m_ExpectedControlType: 
+      m_Id: 85d81e22-64b0-4f96-a08b-78f71e1f59f0
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings:
+      - m_Name: 
+        m_Id: 9d256bb4-f3a0-475b-9b4f-fb0e7a5f7c31
+        m_Path: <Keyboard>/shift
+        m_Interactions: 
+        m_Processors: 
+        m_Groups: 
+        m_Action: Space
+        m_Flags: 0
+      m_Flags: 0
     OnInputDown:
       m_PersistentCalls:
         m_Calls: []
     OnInputUp:
       m_PersistentCalls:
         m_Calls: []
-    OnLongPress:
-      m_PersistentCalls:
-        m_Calls: []
-    OnLongPressReleased:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDoubleTap:
-      m_PersistentCalls:
-        m_Calls: []
-    OnInputChanged:
+    OnInputPressed:
       m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 1047585916}
-          m_TargetAssemblyTypeName: 
+          m_TargetAssemblyTypeName: MalbersAnimations.Controller.MAnimal, MalbersAnimations
           m_MethodName: set_Sprint
           m_Mode: 0
           m_Arguments:
@@ -4200,52 +4748,6 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-    OnInputEnable:
-      m_PersistentCalls:
-        m_Calls: []
-    OnInputDisable:
-      m_PersistentCalls:
-        m_Calls: []
-    DoubleTapTime: 0.3
-    LongPressTime: 0.5
-    SmoothDecrease: 0
-    OnInputPressed:
-      m_PersistentCalls:
-        m_Calls: []
-    OnInputFloat:
-      m_PersistentCalls:
-        m_Calls: []
-  AllInputs: []
-  actionMaps: []
-  ActiveMapIndex: 0
-  DefaultMap:
-    name:
-      UseConstant: 1
-      ConstantValue: New Map
-      Variable: {fileID: 0}
-    inputs: []
-    selectedIndex: 0
-  ActiveMap:
-    name:
-      UseConstant: 1
-      ConstantValue: New Map
-      Variable: {fileID: 0}
-    inputs: []
-    selectedIndex: 0
-  ResetAllInputsOnDisable: 1
-  showInputEvents: 0
-  ResetOnFocusLost: 0
-  OnInputEnabled:
-    m_PersistentCalls:
-      m_Calls: []
-  OnInputDisabled:
-    m_PersistentCalls:
-      m_Calls: []
-  IgnoreOnPause:
-    UseConstant: 1
-    ConstantValue: 1
-    Variable: {fileID: 0}
-  PlayerID: Player0
 --- !u!1 &1085603313
 GameObject:
   m_ObjectHideFlags: 0
@@ -4256,8 +4758,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1085603317}
   - component: {fileID: 1085603316}
-  - component: {fileID: 1085603315}
   - component: {fileID: 1085603314}
+  - component: {fileID: 1085603318}
   m_Layer: 0
   m_Name: EventSystem (NEEDED IT FOR THE POINT CLICK)
   m_TagString: Untagged
@@ -4286,26 +4788,6 @@ MonoBehaviour:
     event Trigger'
   reference: {fileID: 0}
   ShowDescription: 0
---- !u!114 &1085603315
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1085603313}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
 --- !u!114 &1085603316
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4336,6 +4818,48 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1852170624}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1085603318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1085603313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
+  m_MoveRepeatDelay: 0.5
+  m_MoveRepeatRate: 0.1
+  m_XRTrackingOrigin: {fileID: 0}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_CancelAction: {fileID: 7727032971491509709, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_LeftClickAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_MiddleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_RightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018,
+    type: 3}
+  m_DeselectOnBackgroundClick: 1
+  m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 6
 --- !u!1 &1099063984
 GameObject:
   m_ObjectHideFlags: 0
@@ -4393,6 +4917,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1112721132}
   - component: {fileID: 1112721133}
+  - component: {fileID: 1112721134}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -4423,9 +4948,8 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1112721131}
   m_Enabled: 1
-  serializedVersion: 10
+  serializedVersion: 11
   m_Type: 1
-  m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
   m_Range: 10
@@ -4475,8 +4999,35 @@ Light:
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
+  m_ForceVisible: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+  m_LightUnit: 1
+  m_LuxAtDistance: 1
+  m_EnableSpotReflector: 1
+--- !u!114 &1112721134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1112721131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_RenderingLayers: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_ShadowRenderingLayers: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
 --- !u!1 &1128193913
 GameObject:
   m_ObjectHideFlags: 0
@@ -4559,6 +5110,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -4625,6 +5179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -4714,6 +5269,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -4780,6 +5338,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 0
@@ -4914,6 +5473,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7078212305564347742, guid: fc0ba8caed599c844aea169a458f10e0,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7078212305564347742, guid: fc0ba8caed599c844aea169a458f10e0,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5011,7 +5580,7 @@ Transform:
   m_GameObject: {fileID: 1223357225}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.25, y: 0, z: -18.57}
+  m_LocalPosition: {x: 35.680363, y: 3.5062313, z: 1.0302992}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5032,9 +5601,16 @@ MonoBehaviour:
   UseColliders: 0
   gizmoType: 0
   debugSize: 0.84
+  height: 2
   DebugColor: {r: 0, g: 0, b: 1, a: 0.353}
   DrawAxis: 0
   AxisSize: 0.65
+  _colliders: []
+  HasColliders: 0
+  DrawLineTo: 0
+  ConnectTo: {fileID: 827191935}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!1 &1258395558
 GameObject:
   m_ObjectHideFlags: 0
@@ -5117,6 +5693,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -5183,6 +5762,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -5223,6 +5803,7 @@ Transform:
   - {fileID: 553658888}
   - {fileID: 934810081}
   - {fileID: 971969478}
+  - {fileID: 734824458}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1335752630
@@ -5320,6 +5901,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Events:
   - Event: {fileID: 11400000, guid: 581bc6845876f60499931e1d95169c40, type: 2}
+    active: 1
     useInt: 0
     useFloat: 0
     useVoid: 0
@@ -5406,6 +5988,9 @@ MonoBehaviour:
     ResponseGO:
       m_PersistentCalls:
         m_Calls: []
+    ResponseGOasT:
+      m_PersistentCalls:
+        m_Calls: []
     ResponseTransform:
       m_PersistentCalls:
         m_Calls:
@@ -5434,10 +6019,15 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     IntEventList: []
+    FloatEventList: []
     AdvancedInteger: 0
+    AdvancedFloat: 0
     AdvancedBool: 0
     InvertBool: 0
-    multiplier: 1
+    multiplier:
+      UseConstant: 1
+      ConstantValue: 1
+      Variable: {fileID: 0}
   ShowEvents: 1
   SelectedEvent: 0
 --- !u!114 &1335752635
@@ -5461,6 +6051,7 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  cycle: 1
   HideOffScreen: {fileID: 0}
   ResetOnDisable: 1
   HideOnNull: 0
@@ -5472,6 +6063,9 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: {x: 1, y: 1, z: 1}
     Variable: {fileID: 0}
+  OnTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &1396216398
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5656,6 +6250,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -5722,6 +6319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -5779,6 +6377,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -5863,12 +6464,37 @@ OffMeshLink:
   m_BiDirectional: 0
   m_Activated: 1
   m_AutoUpdatePositions: 0
---- !u!4 &1458636350 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7432517556429644034, guid: d520239042c144f438232f9375004dc2,
-    type: 3}
-  m_PrefabInstance: {fileID: 705515459}
+--- !u!1 &1464265281
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1464265282}
+  m_Layer: 0
+  m_Name: End Align Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1464265282
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1464265281}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0.0000029504295}
+  m_LocalPosition: {x: 0, y: 0, z: 3.534454}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 866615099}
+  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!1 &1555536565
 GameObject:
   m_ObjectHideFlags: 0
@@ -5960,6 +6586,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_AgentTypeID: 0
   m_CollectObjects: 3
   m_Size: {x: 10, y: 10, z: 10}
@@ -5975,7 +6602,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
+  m_VoxelSize: 0.033333335
   m_MinRegionArea: 1
   m_NavMeshData: {fileID: 23800000, guid: 07d54807eb490e04584a3fe534284e90, type: 2}
   m_BuildHeightMesh: 0
@@ -6076,6 +6703,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -6142,6 +6772,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -6149,6 +6780,18 @@ MonoBehaviour:
   m_IgnoreFromBuild: 0
   m_ApplyToChildren: 1
   m_AffectedAgents: ffffffff
+--- !u!114 &1628757109 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 624513367321697576, guid: d520239042c144f438232f9375004dc2,
+    type: 3}
+  m_PrefabInstance: {fileID: 705515459}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 408f0460a69d76f4b89139b3979c69f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1629033269
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6439,9 +7082,16 @@ MonoBehaviour:
   UseColliders: 0
   gizmoType: 1
   debugSize: 0.29
+  height: 2
   DebugColor: {r: 0.9867141, g: 0.03676468, b: 1, a: 1}
   DrawAxis: 0
   AxisSize: 0.3
+  _colliders: []
+  HasColliders: 0
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!1 &1666519454
 GameObject:
   m_ObjectHideFlags: 0
@@ -6489,9 +7139,16 @@ MonoBehaviour:
   UseColliders: 0
   gizmoType: 1
   debugSize: 0.18
+  height: 2
   DebugColor: {r: 0.74264705, g: 0.5543491, b: 0.060067054, a: 1}
   DrawAxis: 1
   AxisSize: 0.83
+  _colliders: []
+  HasColliders: 0
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!1 &1722915371
 GameObject:
   m_ObjectHideFlags: 0
@@ -6544,6 +7201,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -6610,6 +7270,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 0
@@ -6780,6 +7441,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -6846,6 +7510,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 0
@@ -7044,6 +7709,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -7111,6 +7779,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 1
@@ -7118,169 +7787,6 @@ MonoBehaviour:
   m_IgnoreFromBuild: 0
   m_ApplyToChildren: 1
   m_AffectedAgents: ffffffff
---- !u!1 &1846121317
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1846121318}
-  - component: {fileID: 1846121319}
-  m_Layer: 0
-  m_Name: OffMeshLink End
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1846121318
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1846121317}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 2.84}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 866615099}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &1846121319
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1846121317}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b4de088e089c164bb239be84964ea4c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  UseColliders: 0
-  gizmoType: 1
-  debugSize: 0.28
-  DebugColor: {r: 0.74264705, g: 0.5543491, b: 0.060067054, a: 1}
-  DrawAxis: 1
-  AxisSize: 1.05
---- !u!1 &1847813588
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1847813589}
-  - component: {fileID: 1847813590}
-  m_Layer: 20
-  m_Name: '- Interactions - '
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1847813589
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1847813588}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1047585915}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1847813590
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1847813588}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3438e97d3cf74cf4b8684df9fad6757b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowEvents: 1
-  ID:
-    UseConstant: 1
-    ConstantValue: 0
-    Variable: {fileID: 0}
-  Auto: 0
-  InvokeOnEnable: 1
-  Description: The Interactor receive the Interactable ID of the Active Interation
-    and Interacts acordinly using Events
-  ShowDescription: 1
-  debug: 1
-  value:
-    UseConstant: 1
-    ConstantValue: 0
-    Variable: {fileID: 0}
-  Raise:
-    m_PersistentCalls:
-      m_Calls: []
-  compare:
-  - active: 1
-    name: Interact with Red Cilinder
-    description: 
-    comparer: 0
-    Value:
-      UseConstant: 1
-      ConstantValue: 2
-      Variable: {fileID: 0}
-    Response:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 11400000, guid: 5505583288220d345a4cfaa59d1fdb71, type: 2}
-          m_TargetAssemblyTypeName: MalbersAnimations.Reactions.MReactionsVar, MalbersAnimations
-          m_MethodName: React
-          m_Mode: 2
-          m_Arguments:
-            m_ObjectArgument: {fileID: 1047585916}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Component, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-  - active: 1
-    name: Interactable is Enemy
-    description: 
-    comparer: 0
-    Value:
-      UseConstant: 1
-      ConstantValue: 1
-      Variable: {fileID: 0}
-    Response:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1047585916}
-          m_TargetAssemblyTypeName: MalbersAnimations.Controller.MAnimal, MalbersAnimations
-          m_MethodName: Mode_Activate
-          m_Mode: 2
-          m_Arguments:
-            m_ObjectArgument: {fileID: 11400000, guid: 1286867ad3c4cdd4baacac3373aff92c,
-              type: 2}
-            m_ObjectArgumentAssemblyTypeName: MalbersAnimations.ModeID, MalbersAnimations
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-  OnValueChanged:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1852170623
 GameObject:
   m_ObjectHideFlags: 0
@@ -7322,8 +7828,7 @@ LightingSettings:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Settings.lighting
-  serializedVersion: 6
-  m_GIWorkflowMode: 0
+  serializedVersion: 9
   m_EnableBakedLightmaps: 0
   m_EnableRealtimeLightmaps: 0
   m_RealtimeEnvironmentLighting: 1
@@ -7333,6 +7838,8 @@ LightingSettings:
   m_UsingShadowmask: 0
   m_BakeBackend: 1
   m_LightmapMaxSize: 1024
+  m_LightmapSizeFixed: 0
+  m_UseMipmapLimits: 1
   m_BakeResolution: 7
   m_Padding: 2
   m_LightmapCompression: 3
@@ -7346,13 +7853,11 @@ LightingSettings:
   m_FilterMode: 1
   m_LightmapParameters: {fileID: 15204, guid: 0000000000000000f000000000000000, type: 0}
   m_ExportTrainingData: 0
+  m_EnableWorkerProcessBaking: 1
   m_TrainingDataDestination: TrainingData
   m_RealtimeResolution: 2
   m_ForceWhiteAlbedo: 0
   m_ForceUpdates: 0
-  m_FinalGather: 0
-  m_FinalGatherRayCount: 256
-  m_FinalGatherFiltering: 1
   m_PVRCulling: 1
   m_PVRSampling: 1
   m_PVRDirectSampleCount: 32
@@ -7376,8 +7881,6 @@ LightingSettings:
   m_PVRFilteringAtrousPositionSigmaDirect: 0.5
   m_PVRFilteringAtrousPositionSigmaIndirect: 2
   m_PVRFilteringAtrousPositionSigmaAO: 1
-  m_PVRTiledBaking: 0
-  m_NumRaysToShootPerTexel: -1
   m_RespectSceneVisibilityWhenBakingGI: 0
 --- !u!1 &2029053193
 GameObject:
@@ -7426,9 +7929,16 @@ MonoBehaviour:
   UseColliders: 0
   gizmoType: 1
   debugSize: 0.18
+  height: 2
   DebugColor: {r: 0.74264705, g: 0.5543491, b: 0.060067054, a: 1}
   DrawAxis: 0
   AxisSize: 0.65
+  _colliders: []
+  HasColliders: 0
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!1 &2036148278
 GameObject:
   m_ObjectHideFlags: 0
@@ -7481,6 +7991,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -7547,6 +8060,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
   m_OverrideArea: 0
   m_Area: 0
   m_OverrideGenerateLinks: 0
@@ -7586,12 +8100,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   character: {fileID: 0}
-  reaction:
-    rid: 5723820122946666497
+  damageReaction:
+    reactions:
+    - rid: 208606637039288419
   criticalReaction:
-    rid: -2
+    reactions:
+    - rid: 208606637039288420
   damagerReaction:
-    rid: -2
+    reactions: []
   surface: {fileID: 0}
   ignoreDamagerReaction:
     UseConstant: 1
@@ -7605,6 +8121,10 @@ MonoBehaviour:
   AlignToDamage:
     UseConstant: 1
     ConstantValue: 0
+    Variable: {fileID: 0}
+  OnlyOnMovementZero:
+    UseConstant: 1
+    ConstantValue: 1
     Variable: {fileID: 0}
   AlignTime:
     UseConstant: 1
@@ -7652,28 +8172,114 @@ MonoBehaviour:
     OnElementDamage:
       m_PersistentCalls:
         m_Calls: []
+    OnStatEmpty:
+      m_PersistentCalls:
+        m_Calls: []
+    OnProfileDefaultEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    OnProfileDefaultExit:
+      m_PersistentCalls:
+        m_Calls: []
   elements: []
+  Default:
+    name: 
+    surface: {fileID: 0}
+    damageReaction:
+      reactions: []
+    criticalReaction:
+      reactions: []
+    damagerReaction:
+      reactions: []
+    multiplier:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    AlignToDamage:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    ignoreDamagerReaction:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    elements: []
+    OnProfileEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    OnProfileExit:
+      m_PersistentCalls:
+        m_Calls: []
+  CurrentProfile:
+    name: 
+    surface: {fileID: 0}
+    damageReaction:
+      reactions: []
+    criticalReaction:
+      reactions: []
+    damagerReaction:
+      reactions: []
+    multiplier:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    AlignToDamage:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    ignoreDamagerReaction:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    elements: []
+    OnProfileEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    OnProfileExit:
+      m_PersistentCalls:
+        m_Calls: []
   profiles: []
   Editor_Tabs1: 0
-  First_Change: 1
+  FirstTime: 1
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 5723820122946666497
+    - rid: 208606637039288419
       type: {class: ModeReaction, ns: MalbersAnimations.Reactions, asm: MalbersAnimations}
       data:
+        desc: 
         Active: 1
-        useLocalTarget: 0
-        LocalTarget: {fileID: 0}
+        useLocal: 0
+        localTarget: {fileID: 0}
         delay: 0
         type: 0
         ID: {fileID: 11400000, guid: b04409080ae7e3c4fa645d8c67b40424, type: 2}
-        Ability: -99
+        abilityStatus: 0
+        Ability:
+          UseConstant: 1
+          ConstantValue: -99
+          Variable: {fileID: 0}
         HasCoolDown: 1
         coolDown: 0
+        AbilityTime: 3
+        ModePower: 0
+    - rid: 208606637039288420
+      type: {class: ModeReaction, ns: MalbersAnimations.Reactions, asm: MalbersAnimations}
+      data:
+        desc: 
+        Active: 1
+        useLocal: 0
+        localTarget: {fileID: 0}
+        delay: 0
+        type: 0
+        ID: {fileID: 11400000, guid: b04409080ae7e3c4fa645d8c67b40424, type: 2}
         abilityStatus: 0
+        Ability:
+          UseConstant: 1
+          ConstantValue: -99
+          Variable: {fileID: 0}
+        HasCoolDown: 1
+        coolDown: 0
         AbilityTime: 3
         ModePower: 0
 --- !u!114 &2148381889379906539
@@ -7689,6 +8295,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Active: 1
+  WaitNextStep: 0.2
   GroundLayer:
     UseConstant: 1
     ConstantValue:
@@ -7707,6 +8314,7 @@ MonoBehaviour:
     ConstantValue: {fileID: 0}
     Variable: {fileID: 0}
   trackOffset: 0.0085
+  TracksOnlyOnState: []
 --- !u!114 &2154709536206031943
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7913,8 +8521,7 @@ MonoBehaviour:
   OnAIStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  TasksVars: []
-  DecisionsVars: []
+  MaxAlloc: 20
   DecisionsTime: []
   Editor_Tabs1: 0
 --- !u!4 &3083462532809742850
@@ -7947,9 +8554,17 @@ MonoBehaviour:
   UseColliders: 1
   gizmoType: 0
   debugSize: 0.03
+  height: 2
   DebugColor: {r: 1, g: 0, b: 0.5256634, a: 0.37254903}
   DrawAxis: 0
   AxisSize: 0.65
+  _colliders:
+  - {fileID: 3083462532809742853}
+  HasColliders: 1
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!1 &3083462532809742852
 GameObject:
   m_ObjectHideFlags: 0
@@ -8055,6 +8670,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8097,6 +8715,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8139,6 +8760,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8181,6 +8805,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8223,6 +8850,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8265,6 +8895,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8307,6 +8940,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8349,6 +8985,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8391,6 +9030,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8433,6 +9075,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8475,6 +9120,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8517,6 +9165,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8559,6 +9210,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8601,6 +9255,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8643,6 +9300,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8685,6 +9345,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8727,6 +9390,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8769,6 +9435,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8811,6 +9480,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8853,6 +9525,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8895,6 +9570,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8937,6 +9615,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -8979,6 +9660,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -9021,6 +9705,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -9063,6 +9750,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -9105,6 +9795,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -9147,6 +9840,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -9189,6 +9885,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -9231,6 +9930,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -9273,6 +9975,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -9315,6 +10020,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -10800,6 +11508,8 @@ GameObject:
   - component: {fileID: 3665632191036191659}
   - component: {fileID: 154704826}
   - component: {fileID: 3664780903311420941}
+  - component: {fileID: 3714051147019879381}
+  - component: {fileID: 3714051147019879382}
   m_Layer: 23
   m_Name: Wolf Lite AI Enemy
   m_TagString: Animal
@@ -10822,14 +11532,14 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 1.75
-  m_Direction: 2
-  m_Center: {x: 0, y: 0.5, z: 0.24}
+  m_Radius: 0.6806202
+  m_Height: 1.537062
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.8839324, z: 0.24000001}
 --- !u!1 &3665118621557942912
 GameObject:
   m_ObjectHideFlags: 0
@@ -10945,6 +11655,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -11198,9 +11909,17 @@ MonoBehaviour:
   UseColliders: 1
   gizmoType: 0
   debugSize: 0.03
+  height: 2
   DebugColor: {r: 0, g: 0.91724133, b: 1, a: 1}
   DrawAxis: 0
   AxisSize: 0.3
+  _colliders:
+  - {fileID: 3692663317283528154}
+  HasColliders: 1
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!114 &3694904850229587846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11216,9 +11935,17 @@ MonoBehaviour:
   UseColliders: 1
   gizmoType: 0
   debugSize: 0.03
+  height: 2
   DebugColor: {r: 0, g: 0.91724133, b: 1, a: 1}
   DrawAxis: 0
   AxisSize: 0.3
+  _colliders:
+  - {fileID: 3692101103808611446}
+  HasColliders: 1
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!114 &3695205988269516860
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11233,7 +11960,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_StepsManager: {fileID: 2148381889379906539}
   parent: {fileID: 0}
-  WaitNextStep: 0.2
   StepAudio: {fileID: 0}
   m_Trigger: {fileID: 3692663317283528154}
   DebugColor: {r: 0, g: 1, b: 1, a: 1}
@@ -11260,6 +11986,7 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 4294967295
     Variable: {fileID: 0}
+  Tags: []
   AttackDirection: 0
   triggerInteraction: 2
   owner: {fileID: 0}
@@ -11267,7 +11994,7 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: {fileID: 0}
     Variable: {fileID: 0}
-  hitEffects: []
+  hitEffects: {fileID: 0}
   hitSound:
     UseConstant: 1
     ConstantValue: {fileID: 0}
@@ -11278,17 +12005,13 @@ MonoBehaviour:
     ConstantValue: 1
     Variable: {fileID: 0}
   CustomReaction:
-    rid: -2
+    reactions: []
   element: {fileID: 0}
   interactorID:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
   interact:
-    UseConstant: 1
-    ConstantValue: 1
-    Variable: {fileID: 0}
-  react:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
@@ -11311,6 +12034,12 @@ MonoBehaviour:
       UseConstant: 1
       ConstantValue: 1
       Variable: {fileID: 0}
+    Base: {fileID: 0}
+    useBase: 0
+  m_MissChance:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_cChance:
     UseConstant: 1
     ConstantValue: 0
@@ -11328,6 +12057,7 @@ MonoBehaviour:
     ConstantValue: 20
     Variable: {fileID: 0}
   forceMode: 0
+  preventDuplicateDamage: 0
   OnHit:
     m_PersistentCalls:
       m_Calls: []
@@ -11338,6 +12068,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnProfileChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAttackMissed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCritical:
     m_PersistentCalls:
       m_Calls: []
   animator: {fileID: 0}
@@ -11384,7 +12120,13 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 1
         Variable: {fileID: 0}
+      Base: {fileID: 0}
+      useBase: 0
     m_cChance:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    m_MissChance:
       UseConstant: 1
       ConstantValue: 0
       Variable: {fileID: 0}
@@ -11406,7 +12148,7 @@ MonoBehaviour:
       ConstantValue: {fileID: 0}
       Variable: {fileID: 0}
     CustomReaction:
-      rid: -2
+      reactions: []
     element: {fileID: 0}
   debug: 0
   m_audio: {fileID: 0}
@@ -11426,6 +12168,8 @@ MonoBehaviour:
       UseConstant: 1
       ConstantValue: 1
       Variable: {fileID: 0}
+    Base: {fileID: 0}
+    useBase: 0
   OnAttackBegin:
     m_PersistentCalls:
       m_Calls: []
@@ -11436,9 +12180,7 @@ MonoBehaviour:
   Editor_Tabs1: 0
   references:
     version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    RefIds: []
 --- !u!114 &3695363072089885498
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11454,9 +12196,17 @@ MonoBehaviour:
   UseColliders: 1
   gizmoType: 0
   debugSize: 0.03
+  height: 2
   DebugColor: {r: 0, g: 0.91724133, b: 1, a: 1}
   DrawAxis: 0
   AxisSize: 0.3
+  _colliders:
+  - {fileID: 3691935396242039634}
+  HasColliders: 1
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!114 &3695462652786866168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11471,7 +12221,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_StepsManager: {fileID: 2148381889379906539}
   parent: {fileID: 0}
-  WaitNextStep: 0.2
   StepAudio: {fileID: 0}
   m_Trigger: {fileID: 3692590987620950310}
   DebugColor: {r: 0, g: 1, b: 1, a: 1}
@@ -11487,6 +12236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b6db78c48b0b6342937f21d4681fba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Selected_StatIndex: 0
   stats:
   - active: 1
     ID: {fileID: 11400000, guid: d6b3e636d59a6c547a2cad40b69f4432, type: 2}
@@ -11505,6 +12255,10 @@ MonoBehaviour:
     DisableOnEmpty:
       UseConstant: 1
       ConstantValue: 1
+      Variable: {fileID: 0}
+    Round:
+      UseConstant: 1
+      ConstantValue: -1
       Variable: {fileID: 0}
     multiplier:
       UseConstant: 1
@@ -11534,11 +12288,19 @@ MonoBehaviour:
       UseConstant: 1
       ConstantValue: 0
       Variable: {fileID: 0}
-    InmuneTime:
+    ImmuneTime:
       UseConstant: 1
       ConstantValue: 1
       Variable: {fileID: 0}
+    immune:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
     resetTo: 1
+    ResetOnEnable:
+      UseConstant: 1
+      ConstantValue: 1
+      Variable: {fileID: 0}
     isPercent: 1
     debug: 0
     OnStatFull:
@@ -11621,6 +12383,10 @@ MonoBehaviour:
       UseConstant: 1
       ConstantValue: 0
       Variable: {fileID: 0}
+    Round:
+      UseConstant: 1
+      ConstantValue: -1
+      Variable: {fileID: 0}
     multiplier:
       UseConstant: 1
       ConstantValue: 1
@@ -11649,11 +12415,19 @@ MonoBehaviour:
       UseConstant: 1
       ConstantValue: 0
       Variable: {fileID: 0}
-    InmuneTime:
+    ImmuneTime:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    immune:
       UseConstant: 1
       ConstantValue: 0
       Variable: {fileID: 0}
     resetTo: 1
+    ResetOnEnable:
+      UseConstant: 1
+      ConstantValue: 1
+      Variable: {fileID: 0}
     isPercent: 1
     debug: 0
     OnStatFull:
@@ -11706,7 +12480,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_StepsManager: {fileID: 2148381889379906539}
   parent: {fileID: 0}
-  WaitNextStep: 0.2
   StepAudio: {fileID: 0}
   m_Trigger: {fileID: 3692101103808611446}
   DebugColor: {r: 0, g: 1, b: 1, a: 1}
@@ -11724,7 +12497,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_StepsManager: {fileID: 2148381889379906539}
   parent: {fileID: 0}
-  WaitNextStep: 0.2
   StepAudio: {fileID: 0}
   m_Trigger: {fileID: 3691935396242039634}
   DebugColor: {r: 0, g: 1, b: 1, a: 1}
@@ -11743,9 +12515,17 @@ MonoBehaviour:
   UseColliders: 1
   gizmoType: 0
   debugSize: 0.03
+  height: 2
   DebugColor: {r: 0, g: 0.91724133, b: 1, a: 1}
   DrawAxis: 0
   AxisSize: 0.3
+  _colliders:
+  - {fileID: 3692590987620950310}
+  HasColliders: 1
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
+  FirstSearch: 1
 --- !u!114 &3696115591853623534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11763,8 +12543,8 @@ MonoBehaviour:
   SelectedState: 0
   SelectedStance: 0
   ShowStateInInspector: 0
-  Editor_Tabs1: 2
-  Editor_Tabs2: 4
+  Editor_Tabs1: 4
+  Editor_Tabs2: 1
   SelectedMode: 1
   Mode_Tabs1: 0
   Ability_Tabs: 0
@@ -11772,23 +12552,44 @@ MonoBehaviour:
   showPivots: 0
   showModeList: 1
   showStateList: 1
+  ShowOnGUIData: 0
   debugStates: 0
   debugStances: 0
   debugModes: 0
   debugGizmos: 0
   Runtime_Tabs1: 0
   Runtime_Tabs2: 0
+  SpeedTabs: 0
+  SelectedSpeed: 0
   t: {fileID: 3661778875071156750}
+  AnimalMaterial: {fileID: 0}
   InGroundChanger: 0
-  states_C: []
+  UseMainCameraDirection:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  states_C:
+  - active: 1
+    state: {fileID: 11400000, guid: 059fcb0b5c50a2947ad6e5356e369291, type: 2}
+    priority: 9
+  - active: 1
+    state: {fileID: 11400000, guid: bdb4bb76e2b782f42b909978af887428, type: 2}
+    priority: 2
+  - active: 1
+    state: {fileID: 11400000, guid: c31051ac4cd486e4f9ac40015fdef3a6, type: 2}
+    priority: 1
   states:
   - {fileID: 11400000, guid: 059fcb0b5c50a2947ad6e5356e369291, type: 2}
   - {fileID: 11400000, guid: bdb4bb76e2b782f42b909978af887428, type: 2}
   - {fileID: 11400000, guid: c31051ac4cd486e4f9ac40015fdef3a6, type: 2}
   Stances: []
   modes:
-  - active: 1
+  - SelectedAbilityIndexEditor: 0
+    ActiveAbilityConditions: []
+    active: 1
+    TemporalActivation: 1
     ignoreLowerModes: 1
+    forceIgnorePriority: 1
     hasCoolDown: 0
     Input: Attack1
     ID: {fileID: 11400000, guid: 1286867ad3c4cdd4baacac3373aff92c, type: 2}
@@ -11816,6 +12617,10 @@ MonoBehaviour:
         ConstantValue: {fileID: 0}
         Variable: {fileID: 0}
       ClipDelay:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      CoolDown:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
@@ -11864,12 +12669,27 @@ MonoBehaviour:
         ConstantValue: 1
         Variable: {fileID: 0}
       Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       IgnoreGrounded: 0
       IgnoreGravity: 0
       NoYMovement: 0
       Persistent: 0
+      IncludeInRandom: 1
       ReactEnter:
         rid: -2
       ReactExit:
@@ -11904,6 +12724,10 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
+      CoolDown:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       audioSource: {fileID: 0}
       m_stopAudio: 1
       modifier: {fileID: 0}
@@ -11949,12 +12773,27 @@ MonoBehaviour:
         ConstantValue: 1
         Variable: {fileID: 0}
       Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       IgnoreGrounded: 0
       IgnoreGravity: 0
       NoYMovement: 0
       Persistent: 0
+      IncludeInRandom: 1
       ReactEnter:
         rid: -2
       ReactExit:
@@ -11988,14 +12827,38 @@ MonoBehaviour:
     OnExitMode:
       m_PersistentCalls:
         m_Calls: []
+    OnModeEnabled:
+      m_PersistentCalls:
+        m_Calls: []
+    OnModeDisabled:
+      m_PersistentCalls:
+        m_Calls: []
     OnEnterReaction:
-      rid: -2
+      reactions: []
     OnExitReaction:
-      rid: -2
+      reactions: []
+    OnEnabledReaction:
+      reactions: []
+    OnDisabledReaction:
+      reactions: []
+    EnterConditions:
+      conditions: []
+      active: 0
+    InterruptConditions:
+      conditions: []
+      active: 0
+    ExitConditions:
+      conditions: []
+      active: 0
     m_Source: {fileID: 0}
+    RandomAbilitiesIndex: 
     ActivationTime: 0
-  - active: 1
+  - SelectedAbilityIndexEditor: 0
+    ActiveAbilityConditions: []
+    active: 1
+    TemporalActivation: 1
     ignoreLowerModes: 0
+    forceIgnorePriority: 1
     hasCoolDown: 0
     Input: 
     ID: {fileID: 11400000, guid: b04409080ae7e3c4fa645d8c67b40424, type: 2}
@@ -12023,6 +12886,10 @@ MonoBehaviour:
         ConstantValue: {fileID: 0}
         Variable: {fileID: 0}
       ClipDelay:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      CoolDown:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
@@ -12069,12 +12936,27 @@ MonoBehaviour:
         ConstantValue: 1
         Variable: {fileID: 0}
       Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       IgnoreGrounded: 0
       IgnoreGravity: 0
       NoYMovement: 0
       Persistent: 0
+      IncludeInRandom: 1
       ReactEnter:
         rid: -2
       ReactExit:
@@ -12109,123 +12991,7 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
-      audioSource: {fileID: 0}
-      m_stopAudio: 1
-      modifier: {fileID: 0}
-      Limits:
-        affect: 0
-        affectStates: []
-        affect_Stance: 0
-        Stances: []
-        TransitionFrom: 
-      Status: 0
-      abilityTime:
-        UseConstant: 1
-        ConstantValue: 3
-        Variable: {fileID: 0}
-      ChargeCurve:
-        serializedVersion: 2
-        m_Curve:
-        - serializedVersion: 3
-          time: 0
-          value: 0
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      ChargeValue:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
-      IgnoreGrounded: 0
-      IgnoreGravity: 0
-      NoYMovement: 0
-      Persistent: 0
-      ReactEnter:
-        rid: -2
-      ReactExit:
-        rid: -2
-      OnEnter:
-        m_PersistentCalls:
-          m_Calls: []
-      OnExit:
-        m_PersistentCalls:
-          m_Calls: []
-      OnCharged:
-        m_PersistentCalls:
-          m_Calls: []
-    m_AbilityIndex:
-      UseConstant: 1
-      ConstantValue: 0
-      Variable: {fileID: 0}
-    DefaultIndex:
-      UseConstant: 1
-      ConstantValue: 0
-      Variable: {fileID: 0}
-    OnAbilityIndex:
-      m_PersistentCalls:
-        m_Calls: []
-    ResetToDefault: 0
-    allowRotation: 1
-    allowMovement: 1
-    OnEnterMode:
-      m_PersistentCalls:
-        m_Calls: []
-    OnExitMode:
-      m_PersistentCalls:
-        m_Calls: []
-    OnEnterReaction:
-      rid: -2
-    OnExitReaction:
-      rid: -2
-    m_Source: {fileID: 0}
-    ActivationTime: 0
-  - active: 1
-    ignoreLowerModes: 0
-    hasCoolDown: 0
-    Input: 
-    ID: {fileID: 11400000, guid: c0d938e24e7fe1f4a8f00633ce81a5b1, type: 2}
-    modifier: {fileID: 0}
-    CoolDown:
-      UseConstant: 1
-      ConstantValue: 0
-      Variable: {fileID: 0}
-    Abilities:
-    - active:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      Name: Pick Up
-      Index:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      Input:
-        UseConstant: 1
-        ConstantValue: 
-        Variable: {fileID: 0}
-      audioClip:
-        UseConstant: 1
-        ConstantValue: {fileID: 0}
-        Variable: {fileID: 0}
-      ClipDelay:
+      CoolDown:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
@@ -12272,12 +13038,190 @@ MonoBehaviour:
         ConstantValue: 1
         Variable: {fileID: 0}
       Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       IgnoreGrounded: 0
       IgnoreGravity: 0
       NoYMovement: 0
       Persistent: 0
+      IncludeInRandom: 1
+      ReactEnter:
+        rid: -2
+      ReactExit:
+        rid: -2
+      OnEnter:
+        m_PersistentCalls:
+          m_Calls: []
+      OnExit:
+        m_PersistentCalls:
+          m_Calls: []
+      OnCharged:
+        m_PersistentCalls:
+          m_Calls: []
+    m_AbilityIndex:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    DefaultIndex:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    OnAbilityIndex:
+      m_PersistentCalls:
+        m_Calls: []
+    ResetToDefault: 0
+    allowRotation: 1
+    allowMovement: 1
+    OnEnterMode:
+      m_PersistentCalls:
+        m_Calls: []
+    OnExitMode:
+      m_PersistentCalls:
+        m_Calls: []
+    OnModeEnabled:
+      m_PersistentCalls:
+        m_Calls: []
+    OnModeDisabled:
+      m_PersistentCalls:
+        m_Calls: []
+    OnEnterReaction:
+      reactions: []
+    OnExitReaction:
+      reactions: []
+    OnEnabledReaction:
+      reactions: []
+    OnDisabledReaction:
+      reactions: []
+    EnterConditions:
+      conditions: []
+      active: 0
+    InterruptConditions:
+      conditions: []
+      active: 0
+    ExitConditions:
+      conditions: []
+      active: 0
+    m_Source: {fileID: 0}
+    RandomAbilitiesIndex: 
+    ActivationTime: 0
+  - SelectedAbilityIndexEditor: 0
+    ActiveAbilityConditions: []
+    active: 1
+    TemporalActivation: 1
+    ignoreLowerModes: 0
+    forceIgnorePriority: 1
+    hasCoolDown: 0
+    Input: 
+    ID: {fileID: 11400000, guid: c0d938e24e7fe1f4a8f00633ce81a5b1, type: 2}
+    modifier: {fileID: 0}
+    CoolDown:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    Abilities:
+    - active:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      Name: Pick Up
+      Index:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      Input:
+        UseConstant: 1
+        ConstantValue: 
+        Variable: {fileID: 0}
+      audioClip:
+        UseConstant: 1
+        ConstantValue: {fileID: 0}
+        Variable: {fileID: 0}
+      ClipDelay:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      CoolDown:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      audioSource: {fileID: 0}
+      m_stopAudio: 1
+      modifier: {fileID: 0}
+      Limits:
+        affect: 0
+        affectStates: []
+        affect_Stance: 0
+        Stances: []
+        TransitionFrom: 
+      Status: 0
+      abilityTime:
+        UseConstant: 1
+        ConstantValue: 3
+        Variable: {fileID: 0}
+      ChargeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      ChargeValue:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      Release: 0
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      IgnoreGrounded: 0
+      IgnoreGravity: 0
+      NoYMovement: 0
+      Persistent: 0
+      IncludeInRandom: 1
       ReactEnter:
         rid: -2
       ReactExit:
@@ -12312,6 +13256,10 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
+      CoolDown:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       audioSource: {fileID: 0}
       m_stopAudio: 1
       modifier: {fileID: 0}
@@ -12355,12 +13303,27 @@ MonoBehaviour:
         ConstantValue: 1
         Variable: {fileID: 0}
       Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       IgnoreGrounded: 0
       IgnoreGravity: 0
       NoYMovement: 0
       Persistent: 0
+      IncludeInRandom: 1
       ReactEnter:
         rid: -2
       ReactExit:
@@ -12394,14 +13357,38 @@ MonoBehaviour:
     OnExitMode:
       m_PersistentCalls:
         m_Calls: []
+    OnModeEnabled:
+      m_PersistentCalls:
+        m_Calls: []
+    OnModeDisabled:
+      m_PersistentCalls:
+        m_Calls: []
     OnEnterReaction:
-      rid: -2
+      reactions: []
     OnExitReaction:
-      rid: -2
+      reactions: []
+    OnEnabledReaction:
+      reactions: []
+    OnDisabledReaction:
+      reactions: []
+    EnterConditions:
+      conditions: []
+      active: 0
+    InterruptConditions:
+      conditions: []
+      active: 0
+    ExitConditions:
+      conditions: []
+      active: 0
     m_Source: {fileID: 0}
+    RandomAbilitiesIndex: 
     ActivationTime: 0
-  - active: 1
+  - SelectedAbilityIndexEditor: 0
+    ActiveAbilityConditions: []
+    active: 1
+    TemporalActivation: 1
     ignoreLowerModes: 0
+    forceIgnorePriority: 1
     hasCoolDown: 0
     Input: Action
     ID: {fileID: 11400000, guid: 4dc5ca673dc60d346a62529c8a9bd8ff, type: 2}
@@ -12429,6 +13416,10 @@ MonoBehaviour:
         ConstantValue: {fileID: 0}
         Variable: {fileID: 0}
       ClipDelay:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      CoolDown:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
@@ -12477,12 +13468,27 @@ MonoBehaviour:
         ConstantValue: 1
         Variable: {fileID: 0}
       Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       IgnoreGrounded: 0
       IgnoreGravity: 0
       NoYMovement: 0
       Persistent: 0
+      IncludeInRandom: 1
       ReactEnter:
         rid: -2
       ReactExit:
@@ -12517,6 +13523,10 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
+      CoolDown:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       audioSource: {fileID: 0}
       m_stopAudio: 1
       modifier: {fileID: 0}
@@ -12562,12 +13572,27 @@ MonoBehaviour:
         ConstantValue: 1
         Variable: {fileID: 0}
       Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       IgnoreGrounded: 0
       IgnoreGravity: 0
       NoYMovement: 0
       Persistent: 0
+      IncludeInRandom: 1
       ReactEnter:
         rid: -2
       ReactExit:
@@ -12602,6 +13627,10 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
+      CoolDown:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       audioSource: {fileID: 0}
       m_stopAudio: 1
       modifier: {fileID: 0}
@@ -12647,12 +13676,27 @@ MonoBehaviour:
         ConstantValue: 1
         Variable: {fileID: 0}
       Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       IgnoreGrounded: 0
       IgnoreGravity: 0
       NoYMovement: 0
       Persistent: 0
+      IncludeInRandom: 1
       ReactEnter:
         rid: -2
       ReactExit:
@@ -12687,6 +13731,10 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
+      CoolDown:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       audioSource: {fileID: 0}
       m_stopAudio: 1
       modifier: {fileID: 0}
@@ -12732,12 +13780,27 @@ MonoBehaviour:
         ConstantValue: 1
         Variable: {fileID: 0}
       Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       IgnoreGrounded: 0
       IgnoreGravity: 0
       NoYMovement: 0
       Persistent: 0
+      IncludeInRandom: 1
       ReactEnter:
         rid: -2
       ReactExit:
@@ -12772,88 +13835,7 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
-      audioSource: {fileID: 0}
-      m_stopAudio: 1
-      modifier: {fileID: 0}
-      Limits:
-        affect: 1
-        affectStates:
-        - {fileID: 11400000, guid: 7370df9c769c2764381ad7c76eb3d949, type: 2}
-        - {fileID: 11400000, guid: 3787b6d94d5454740bf36d57436185b0, type: 2}
-        affect_Stance: 0
-        Stances: []
-        TransitionFrom: 
-      Status: 0
-      abilityTime:
-        UseConstant: 1
-        ConstantValue: 3
-        Variable: {fileID: 0}
-      ChargeCurve:
-        serializedVersion: 2
-        m_Curve:
-        - serializedVersion: 3
-          time: 0
-          value: 0
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 0
-          outSlope: 0
-          tangentMode: 0
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      ChargeValue:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
-      IgnoreGrounded: 0
-      IgnoreGravity: 0
-      NoYMovement: 0
-      Persistent: 0
-      ReactEnter:
-        rid: -2
-      ReactExit:
-        rid: -2
-      OnEnter:
-        m_PersistentCalls:
-          m_Calls: []
-      OnExit:
-        m_PersistentCalls:
-          m_Calls: []
-      OnCharged:
-        m_PersistentCalls:
-          m_Calls: []
-    - active:
-        UseConstant: 1
-        ConstantValue: 1
-        Variable: {fileID: 0}
-      Name: Seat
-      Index:
-        UseConstant: 1
-        ConstantValue: 8
-        Variable: {fileID: 0}
-      Input:
-        UseConstant: 1
-        ConstantValue: 
-        Variable: {fileID: 0}
-      audioClip:
-        UseConstant: 1
-        ConstantValue: {fileID: 0}
-        Variable: {fileID: 0}
-      ClipDelay:
+      CoolDown:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
@@ -12902,12 +13884,131 @@ MonoBehaviour:
         ConstantValue: 1
         Variable: {fileID: 0}
       Release: 0
-      AdditivePosition: 1
-      AdditiveRotation: 1
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
       IgnoreGrounded: 0
       IgnoreGravity: 0
       NoYMovement: 0
       Persistent: 0
+      IncludeInRandom: 1
+      ReactEnter:
+        rid: -2
+      ReactExit:
+        rid: -2
+      OnEnter:
+        m_PersistentCalls:
+          m_Calls: []
+      OnExit:
+        m_PersistentCalls:
+          m_Calls: []
+      OnCharged:
+        m_PersistentCalls:
+          m_Calls: []
+    - active:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      Name: Seat
+      Index:
+        UseConstant: 1
+        ConstantValue: 8
+        Variable: {fileID: 0}
+      Input:
+        UseConstant: 1
+        ConstantValue: 
+        Variable: {fileID: 0}
+      audioClip:
+        UseConstant: 1
+        ConstantValue: {fileID: 0}
+        Variable: {fileID: 0}
+      ClipDelay:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      CoolDown:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      audioSource: {fileID: 0}
+      m_stopAudio: 1
+      modifier: {fileID: 0}
+      Limits:
+        affect: 1
+        affectStates:
+        - {fileID: 11400000, guid: 7370df9c769c2764381ad7c76eb3d949, type: 2}
+        - {fileID: 11400000, guid: 3787b6d94d5454740bf36d57436185b0, type: 2}
+        affect_Stance: 0
+        Stances: []
+        TransitionFrom: 
+      Status: 0
+      abilityTime:
+        UseConstant: 1
+        ConstantValue: 3
+        Variable: {fileID: 0}
+      ChargeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      ChargeValue:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      Release: 0
+      MultiplierPosition:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      MultiplierRotation:
+        UseConstant: 1
+        ConstantValue: 1
+        Variable: {fileID: 0}
+      AdditivePosition:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      AdditiveRotation:
+        UseConstant: 1
+        ConstantValue: 0
+        Variable: {fileID: 0}
+      IgnoreGrounded: 0
+      IgnoreGravity: 0
+      NoYMovement: 0
+      Persistent: 0
+      IncludeInRandom: 1
       ReactEnter:
         rid: -2
       ReactExit:
@@ -12953,14 +14054,37 @@ MonoBehaviour:
     OnExitMode:
       m_PersistentCalls:
         m_Calls: []
+    OnModeEnabled:
+      m_PersistentCalls:
+        m_Calls: []
+    OnModeDisabled:
+      m_PersistentCalls:
+        m_Calls: []
     OnEnterReaction:
-      rid: -2
+      reactions: []
     OnExitReaction:
-      rid: -2
+      reactions: []
+    OnEnabledReaction:
+      reactions: []
+    OnDisabledReaction:
+      reactions: []
+    EnterConditions:
+      conditions: []
+      active: 0
+    InterruptConditions:
+      conditions: []
+      active: 0
+    ExitConditions:
+      conditions: []
+      active: 0
     m_Source: {fileID: 0}
+    RandomAbilitiesIndex: 
     ActivationTime: 0
   CloneStates: 1
   OverrideStartState: {fileID: 0}
+  activeState: {fileID: 0}
+  lastState: {fileID: 0}
+  queueState: {fileID: 0}
   groundLayer:
     UseConstant: 1
     ConstantValue:
@@ -13012,6 +14136,8 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: {fileID: 0}
     Variable: {fileID: 0}
+  additivePosLog: 0
+  additiveRotLog: 0
   isPlayer:
     UseConstant: 1
     ConstantValue: 0
@@ -13075,6 +14201,7 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
+  kinematicTimeline: 1
   OnStrafe:
     m_PersistentCalls:
       m_Calls: []
@@ -13098,46 +14225,32 @@ MonoBehaviour:
   pivots:
   - name: Hip
     position: {x: 0, y: 0.7, z: 0}
-    dir: {x: 0, y: -1, z: 0}
-    multiplier: 1.2
-    interval: 1
     EditorModify: 0
     EditorDisplay: 0
     PivotColor: {r: 0, g: 0, b: 1, a: 1}
   - name: Chest
     position: {x: 0, y: 0.7, z: 0.5}
-    dir: {x: 0, y: -1, z: 0}
-    multiplier: 1.2
-    interval: 1
     EditorModify: 0
     EditorDisplay: 0
     PivotColor: {r: 0, g: 0, b: 1, a: 1}
   - name: Water
     position: {x: 0, y: 0.68, z: 0.2}
-    dir: {x: 0, y: -1, z: 0}
-    multiplier: 0.3
-    interval: 1
     EditorModify: 0
     EditorDisplay: 0
     PivotColor: {r: 0, g: 0, b: 1, a: 1}
   Pivot_Hip:
     name: Hip
     position: {x: 0, y: 0.7, z: 0}
-    dir: {x: 0, y: -1, z: 0}
-    multiplier: 1.2
-    interval: 1
     EditorModify: 0
     EditorDisplay: 0
     PivotColor: {r: 0, g: 0, b: 1, a: 1}
   Pivot_Chest:
     name: Chest
     position: {x: 0, y: 0.7, z: 0.5}
-    dir: {x: 0, y: -1, z: 0}
-    multiplier: 1.2
-    interval: 1
     EditorModify: 0
     EditorDisplay: 0
     PivotColor: {r: 0, g: 0, b: 1, a: 1}
+  m_pivotMultiplier: 1.5
   Has_Pivot_Hip: 0
   Has_Pivot_Chest: 0
   speedSets:
@@ -13148,11 +14261,11 @@ MonoBehaviour:
       Variable: {fileID: 0}
     TopIndex:
       UseConstant: 1
-      ConstantValue: 2
+      ConstantValue: 3
       Variable: {fileID: 0}
     m_SprintIndex:
       UseConstant: 1
-      ConstantValue: 10
+      ConstantValue: 3
       Variable: {fileID: 0}
     m_LockIndex:
       UseConstant: 1
@@ -13236,7 +14349,7 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
-    - name: Run
+    - name: Trot
       Vertical:
         UseConstant: 1
         ConstantValue: 2
@@ -13277,10 +14390,10 @@ MonoBehaviour:
         UseConstant: 1
         ConstantValue: 0
         Variable: {fileID: 0}
-    - name: Run Sprint
+    - name: Run
       Vertical:
         UseConstant: 1
-        ConstantValue: 2
+        ConstantValue: 3
         Variable: {fileID: 0}
       position:
         UseConstant: 1
@@ -13496,6 +14609,48 @@ MonoBehaviour:
       UseConstant: 1
       ConstantValue: 4
       Variable: {fileID: 0}
+  SprintSpeed:
+    name: Default
+    Vertical:
+      UseConstant: 1
+      ConstantValue: 1
+      Variable: {fileID: 0}
+    position:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    lerpPosition:
+      UseConstant: 1
+      ConstantValue: 4
+      Variable: {fileID: 0}
+    lerpPosAnim:
+      UseConstant: 1
+      ConstantValue: 4
+      Variable: {fileID: 0}
+    rotation:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    lerpRotAnim:
+      UseConstant: 1
+      ConstantValue: 4
+      Variable: {fileID: 0}
+    animator:
+      UseConstant: 1
+      ConstantValue: 1
+      Variable: {fileID: 0}
+    lerpAnimator:
+      UseConstant: 1
+      ConstantValue: 4
+      Variable: {fileID: 0}
+    strafeSpeed:
+      UseConstant: 1
+      ConstantValue: 0
+      Variable: {fileID: 0}
+    lerpStrafe:
+      UseConstant: 1
+      ConstantValue: 4
+      Variable: {fileID: 0}
   m_gravityDir:
     UseConstant: 1
     ConstantValue: {x: 0, y: -1, z: 0}
@@ -13517,7 +14672,7 @@ MonoBehaviour:
     ConstantValue: 0
     Variable: {fileID: 0}
   TurnLimit: 120
-  rootMotion:
+  GlobalRootMotion:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
@@ -13547,7 +14702,11 @@ MonoBehaviour:
     Variable: {fileID: 0}
   currentAnimTag: 0
   platform: {fileID: 0}
-  MainCollider: {fileID: 0}
+  defaultPlatform:
+    UseConstant: 1
+    ConstantValue: {fileID: 0}
+    Variable: {fileID: 0}
+  MainCollider: {fileID: 3664780903311420941}
   colliders: []
   OnAnimationChange:
     m_PersistentCalls:
@@ -13595,12 +14754,6 @@ MonoBehaviour:
   OnFreeMovement:
     m_PersistentCalls:
       m_Calls: []
-  OnStateActivate:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStateChange:
-    m_PersistentCalls:
-      m_Calls: []
   OnStateProfile:
     m_PersistentCalls:
       m_Calls: []
@@ -13617,6 +14770,18 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPreTeleport:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGroundChangesGravity:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStateActivate:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStateChange:
     m_PersistentCalls:
       m_Calls: []
   OnEnterExitStates: []
@@ -13654,6 +14819,7 @@ MonoBehaviour:
           m_CallState: 2
   OnEnterExitSpeeds: []
   m_Vertical: Vertical
+  m_VerticalRaw: VerticalRaw
   m_Horizontal: Horizontal
   m_UpDown: UpDown
   m_DeltaUpDown: DeltaUpDown
@@ -13687,7 +14853,7 @@ MonoBehaviour:
       type: {class: , ns: , asm: }
 --- !u!95 &3714051147019879380
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -13695,17 +14861,57 @@ Animator:
   m_GameObject: {fileID: 3664780903311420940}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 486bf825b22a4b64eac7c0a9c80f6889, type: 3}
-  m_Controller: {fileID: 9100000, guid: c10837add9cdb6946a1b6456dbab055a, type: 2}
+  m_Controller: {fileID: 9100000, guid: 31449d6fa4a10744ca4e21067e9b31ad, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 1
   m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 1
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &3714051147019879381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3664780903311420940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 149655f5fc18e11419380005a139e5e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pointType: 0
+  m_height: 0.56
+  radius: 0.7
+  slowingDistance: 0
+  center: {x: 0, y: 0, z: 0.18}
+  m_arriveLookAt: 1
+  m_TargetLimit: 0
+  m_targeterStopDistance: 0.2
+  m_WaitTargeterDistance: 4
+  gizmoColor: {r: 1, g: 0, b: 0, a: 0.4}
+  OnTargetArrived:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &3714051147019879382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3664780903311420940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20201266b5fdc6c4ca0fa6ce10d048c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tags:
+  - {fileID: 11400000, guid: 9d80b30d48e415e4daefefb2e359ad3d, type: 2}
 --- !u!1 &4131810211711325119
 GameObject:
   m_ObjectHideFlags: 0
@@ -13764,6 +14970,22 @@ MonoBehaviour:
   OnEmpty:
     m_PersistentCalls:
       m_Calls: []
+  ID:
+    UseConstant: 1
+    ConstantValue: -1
+    Variable: {fileID: 0}
+  TriggerEnterReaction:
+    reactions: []
+  TriggerExitReaction:
+    reactions: []
+  TriggerStayReaction:
+    reactions: []
+  GameObjectEnterReaction:
+    reactions: []
+  GameObjectExitReaction:
+    reactions: []
+  GameObjectStayReaction:
+    reactions: []
   m_debug: 0
   useOnTriggerStay:
     UseConstant: 1
@@ -13773,8 +14995,18 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  trigger: {fileID: 0}
+  ignoreStatic:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  Conditions:
+    conditions: []
+    active: 0
+  ownCollider: {fileID: 0}
   Editor_Tabs1: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!4 &4451895324576058351
 Transform:
   m_ObjectHideFlags: 0
@@ -13903,19 +15135,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agent: {fileID: 7767756432531524887}
   animal: {fileID: 3696115591853623534}
-  disableInput: 1
-  enableInput: 1
+  DisableInputAIOn: 1
+  EnableInputAIOff: 1
+  autoValidateDestination: 0
+  startValidationMovementRange: 2
+  maxNumValidationIterations: 4
   StopAgentOn:
   - {fileID: 11400000, guid: 8078fbdb01991b44b9c1351f444b5efe, type: 2}
   - {fileID: 11400000, guid: c44e7e8d6840aa243b6c33ec85052763, type: 2}
   waitTimeMult: 1
   UpdateAI: 0.2
-  stoppingDistance: 1.5
+  stoppingDistance: 1
   PointStoppingDistance: 0.6
+  additiveStopDistance: 0
   slowingDistance: 0
-  UseScale: 1
+  UseScale:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  InterruptModeOnTarget:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  ForceStopModeOnTarget:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  ClearTargetOnDisable:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
   targetHeight: 5
-  StopOnTargetTooHigh: 1
+  StopOnTargetTooHigh:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
   LookAtOffset: 1
   slowingLimit: 0.3
   target: {fileID: 971969478}
@@ -13938,6 +15192,7 @@ MonoBehaviour:
   OnDisabled:
     m_PersistentCalls:
       m_Calls: []
+  AirDestinationState: {fileID: 0}
   AgentTransform: {fileID: 2369028375349337131}
   Editor_Tabs1: 0
 --- !u!1 &6389935953302467740
@@ -13970,7 +15225,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 1.5
+  m_StoppingDistance: 1
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -13995,12 +15250,12 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Follow
       value: 
-      objectReference: {fileID: 1458636350}
+      objectReference: {fileID: 0}
     - target: {fileID: 7938413579077664804, guid: cc9bf390dab9cb34ab26ab2b660184d0,
         type: 3}
       propertyPath: m_LookAt
       value: 
-      objectReference: {fileID: 1458636350}
+      objectReference: {fileID: 0}
     - target: {fileID: 7938413579077664804, guid: cc9bf390dab9cb34ab26ab2b660184d0,
         type: 3}
       propertyPath: m_Lens.m_SensorSize.x

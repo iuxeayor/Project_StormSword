@@ -18,7 +18,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   task: 3
   distance:
@@ -41,6 +44,7 @@ MonoBehaviour:
   arcsCount: 12
   LookAtTarget: 1
   FleeForever: 1
+  StopOnArrive: 1
   debugColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.25}
 --- !u!114 &-7254236280633116046
 MonoBehaviour:
@@ -73,30 +77,36 @@ MonoBehaviour:
     ConstantValue: 6
     Variable: {fileID: 0}
   LookAngle: 360
-  lookFor: 1
+  lookFor: 10
   ObstacleLayer:
     UseConstant: 1
     ConstantValue:
       serializedVersion: 2
-      m_Bits: 1
+      m_Bits: 0
     Variable: {fileID: 0}
   AssignTarget: 1
   MoveToTarget: 1
-  RemoveTarget: 0
   ChooseRandomly: 0
   UnityTag: 
   GameObjectName: 
   transform: {fileID: 0}
   gameObject: {fileID: 0}
   gameObjectSet: {fileID: 0}
-  tags:
-  - {fileID: 11400000, guid: f45a3d7e9fbf2074496de5b9b0ab09b0, type: 2}
-  - {fileID: 11400000, guid: 47b9fe94735ecba44a6bf84861a3d536, type: 2}
   zoneType: 0
   AllZones: 1
   ZoneID: 0
   ZoneModeAbility: -1
+  tags:
+  - {fileID: 11400000, guid: f45a3d7e9fbf2074496de5b9b0ab09b0, type: 2}
+  - {fileID: 11400000, guid: 47b9fe94735ecba44a6bf84861a3d536, type: 2}
+  ReactionOnSelf:
+    reactions: []
+  ReactionOnTarget:
+    reactions: []
   debugColor: {r: 1, g: 0.913718, b: 0, a: 0.3}
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &-3294704985937391917
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,3 +168,5 @@ MonoBehaviour:
   GizmoStateColor: {r: 0, g: 1, b: 0.1323154, a: 1}
   CreateTaskAsset: 1
   CreateDecisionAsset: 1
+  TasksIndex: -1
+  DecisionIndex: 0

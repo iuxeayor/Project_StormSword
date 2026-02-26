@@ -13,4 +13,38 @@ MonoBehaviour:
   m_Name: Rider is Riding
   m_EditorClassIdentifier: 
   Description: "Broadcast if the Rider is riding the Horse.... \nmeaning is seatting
-    on the sadldle"
+    on the sadldle\nBool: The Rider is Riding"
+  debug: 0
+  m_int:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  m_float:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  m_string:
+    UseConstant: 1
+    ConstantValue: 
+    Variable: {fileID: 0}
+  m_bool:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  m_V2:
+    UseConstant: 1
+    ConstantValue: {x: 0, y: 0}
+    Variable: {fileID: 0}
+  m_V3:
+    UseConstant: 1
+    ConstantValue: {x: 0, y: 0, z: 0}
+    Variable: {fileID: 0}
+  m_go:
+    UseConstant: 1
+    ConstantValue: {fileID: 0}
+    Variable: {fileID: 0}
+  m_transform:
+    UseConstant: 1
+    ConstantValue: {fileID: 0}
+    Variable: {fileID: 0}
+  m_Sprite: {fileID: 0}

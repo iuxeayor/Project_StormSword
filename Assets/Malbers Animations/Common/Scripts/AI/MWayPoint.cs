@@ -1,6 +1,10 @@
 ﻿using MalbersAnimations.Events;
 using System.Collections.Generic;
 using UnityEngine;
+using MalbersAnimations.Reactions;
+
+
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -32,7 +36,7 @@ namespace MalbersAnimations
 
         public float Height => m_height;
 
-        [MinMaxRange(0, 60), Tooltip("Waytime range to go to the next destination")]
+        [MinMaxRange(0, 60), Tooltip("Wait time range to go to the next destination")]
         public RangedFloat m_WaitTime = new(1, 5);
 
         public Color DebugColor = Color.red;
@@ -56,6 +60,8 @@ namespace MalbersAnimations
         [Space]
         public GameObjectEvent OnTargetArrived = new();
 
+        public Reaction2 TargetArrivedReaction;
+
 
         protected virtual void OnEnable()
         {
@@ -68,13 +74,17 @@ namespace MalbersAnimations
             WayPoints.Remove(this);
         }
 
-        public virtual void TargetArrived(GameObject target) => OnTargetArrived.Invoke(target);
+        public virtual void TargetArrived(GameObject target)
+        {
+            OnTargetArrived.Invoke(target);
+            TargetArrivedReaction.React(target);
+        }
 
         public virtual Transform NextTarget()
         {
             var next = NextTargets.Count > 0 ? NextTargets[UnityEngine.Random.Range(0, NextTargets.Count)] : null;
 
-            if (next != null && !next.gameObject.activeInHierarchy) next = null; //Do not get the Next target if its desactive in herarchy
+            if (next != null && !next.gameObject.activeInHierarchy) next = null; //Do not get the Next target if its deactive in hierarchy
 
             return next;
         }
@@ -106,48 +116,65 @@ namespace MalbersAnimations
             return StopDistance();
         }
 
-
-
-
-
-
 #if UNITY_EDITOR
+
+
+
+
+        [ContextMenu("Connect to Zone")]
+        void ConnectToWaypoint()
+        {
+            var method = this.GetUnityAction<GameObject>("Zone", "TargetArrived");
+            if (method != null) UnityEditor.Events.UnityEventTools.AddPersistentListener(OnTargetArrived, method);
+            MTools.SetDirty(this);
+        }
+
+
+
         /// <summary>DebugOptions</summary>
+
+        GUIStyle Styl;
 
         void OnDrawGizmos()
         {
+            if (!enabled) return;
+            if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this)) return;
+
             Gizmos.color = DebugColor;
+            var sc = transform.localScale.y;
+
+
 
             if (pointType == WayPointType.Air)
             {
-                Gizmos.DrawWireSphere(base.transform.position, stoppingDistance);
+                Gizmos.DrawWireSphere(base.transform.position, stoppingDistance * sc);
                 if (stoppingDistance < slowingDistance)
                 {
                     Gizmos.color = Color.cyan;
-                    Gizmos.DrawWireSphere(base.transform.position, slowingDistance);
+                    Gizmos.DrawWireSphere(base.transform.position, slowingDistance * sc);
                 }
             }
             else
             {
-                MDebug.GizmoCircle(base.transform.position, Quaternion.FromToRotation(transform.forward, transform.up), stoppingDistance, DebugColor);
+                MDebug.GizmoCircle(base.transform.position, base.transform.rotation * Quaternion.Euler(90, 0, 0), stoppingDistance * sc, DebugColor);
 
                 if (stoppingDistance < slowingDistance)
                 {
-                    MDebug.GizmoCircle(base.transform.position, Quaternion.FromToRotation(transform.forward, transform.up), slowingDistance, Color.cyan);
+                    MDebug.GizmoCircle(base.transform.position, base.transform.rotation * Quaternion.Euler(90, 0, 0), slowingDistance * sc, Color.cyan);
                 }
             }
 
             Gizmos.color = DebugColor;
 
-            Gizmos.DrawRay(transform.position, transform.up * Height);
-            Gizmos.DrawWireSphere(transform.position, Height * 0.1f);
-            Gizmos.DrawWireSphere(transform.position + transform.up * Height, Height * 0.1f);
+            Gizmos.DrawRay(transform.position, transform.up * (Height * sc));
+            Gizmos.DrawWireSphere(transform.position, Height * 0.1f * sc);
+            Gizmos.DrawWireSphere(transform.position + transform.up * (Height * sc), Height * 0.1f * sc);
 
             var col = DebugColor;
             col.a = 0.333f;
             Gizmos.color = col;
-            Gizmos.DrawSphere(transform.position, Height * 0.1f);
-            Gizmos.DrawSphere(transform.position + transform.up * Height, Height * 0.1f);
+            Gizmos.DrawSphere(transform.position, Height * 0.1f * sc);
+            Gizmos.DrawSphere(transform.position + transform.up * Height, Height * 0.1f * sc);
 
 
             col = Color.white;
@@ -160,23 +187,38 @@ namespace MalbersAnimations
                     if (nw) MDebug.DrawLine(transform.position, nw.position, 1);
                 }
             }
+
+
+            if (Styl == null)
+            {
+                Styl = new GUIStyle();
+                Styl.normal.textColor = Color.white;
+                Styl.fontStyle = FontStyle.Bold;
+                Styl.alignment = TextAnchor.UpperCenter;
+            }
+            Handles.Label(transform.position + Vector3.up * 0.5f, name, Styl);
         }
 
         private void OnDrawGizmosSelected()
         {
+            if (!enabled) return;
+            if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this)) return;
+
+            var sc = transform.localScale.y;
+
             Gizmos.color = Color.yellow;
-            Gizmos.DrawRay(transform.position, transform.up * Height);
-            Gizmos.DrawWireSphere(transform.position, Height * 0.1f);
-            Gizmos.DrawWireSphere(transform.position + transform.up * Height, Height * 0.1f);
+            Gizmos.DrawRay(transform.position, transform.up * (Height * sc));
+            Gizmos.DrawWireSphere(transform.position, Height * 0.1f * sc);
+            Gizmos.DrawWireSphere(transform.position + transform.up * (Height * sc), Height * 0.1f * sc);
 
 
             if (pointType == WayPointType.Air)
             {
-                Gizmos.DrawWireSphere(base.transform.position, stoppingDistance);
+                Gizmos.DrawWireSphere(base.transform.position, stoppingDistance * sc);
             }
             else
             {
-                MDebug.GizmoCircle(base.transform.position, Quaternion.FromToRotation(transform.forward, transform.up), stoppingDistance, Color.yellow);
+                MDebug.GizmoCircle(base.transform.position, base.transform.rotation * Quaternion.Euler(90, 0, 0), stoppingDistance * sc, Color.yellow);
             }
 
 
@@ -203,7 +245,7 @@ namespace MalbersAnimations
         UnityEditor.SerializedProperty
             pointType, stoppingDistance, slowingDistance, WaitTime, nextWayPoints,
             //m_targetDistance, m_TargetLimit,
-            DebugColor, OnTargetArrived, m_height, m_arriveLookAt;
+            DebugColor, OnTargetArrived, TargetArrivedReaction, m_height, m_arriveLookAt;
 
         MWayPoint M;
 
@@ -231,6 +273,7 @@ namespace MalbersAnimations
             OnTargetArrived = serializedObject.FindProperty("OnTargetArrived");
             m_height = serializedObject.FindProperty("m_height");
             m_arriveLookAt = serializedObject.FindProperty("m_arriveLookAt");
+            TargetArrivedReaction = serializedObject.FindProperty("TargetArrivedReaction");
             //  m_targetDistance = serializedObject.FindProperty("m_targetDistance");
             // m_TargetLimit = serializedObject.FindProperty("m_TargetLimit");
         }
@@ -285,6 +328,7 @@ namespace MalbersAnimations
                 }
                 UnityEditor.EditorGUILayout.EndVertical();
                 UnityEditor.EditorGUILayout.PropertyField(OnTargetArrived);
+                UnityEditor.EditorGUILayout.PropertyField(TargetArrivedReaction);
             }
             // UnityEditor.EditorGUILayout.EndVertical();
             serializedObject.ApplyModifiedProperties();

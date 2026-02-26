@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace MalbersAnimations.Scriptables
@@ -50,6 +51,8 @@ namespace MalbersAnimations.Scriptables
             {
                 value.Variable.OnValueChanged += Compare;
             }
+
+            if (InvokeOnEnable) Compare();
         }
 
         void OnDisable()
@@ -60,28 +63,35 @@ namespace MalbersAnimations.Scriptables
             }
         }
 
-
-        /// <summary>Compares the Int parameter on this Component and if the condition is made then the event will be invoked</summary>
-        public virtual void Compare()
-        {
-            foreach (var item in compare)
-                item.ExecuteAdvanceStringEvent(value, debug);
-        }
-
-
         /// <summary>Compares an given int Value and if the condition is made then the event will be invoked</summary>
         public virtual void Compare(string value)
         {
             foreach (var item in compare)
-                item.ExecuteAdvanceStringEvent(value, debug);
+            {
+                if (item.active)
+                {
+                    var result = item.ExecuteAdvanceStringEvent(value);
+                    if (debug)
+                    {
+                        Debug.Log($"String Comparer: {name} <color=orange><B>'{value}'</B></color> <B>[{item.comparer}]</B> <color=orange><B>'{item.Value.Value}'</B>  </color><B>[{result}]</B>", this);
+                    }
+                }
+            }
         }
 
+        /// <summary>Compares the Int parameter on this Component and if the condition is made then the event will be invoked</summary>
+        public virtual void Compare() => Compare(value.Value);
+
         /// <summary>Compares an given intVar Value and if the condition is made then the event will be invoked</summary>
-        public virtual void Compare(StringReference value)
-        {
-            foreach (var item in compare)
-                item.ExecuteAdvanceStringEvent(value.Value, debug);
-        }
+        public virtual void Compare(StringReference value) => Compare(value);
+        public virtual void Compare(StringVar value) => Compare(value.Value);
+        public virtual void Compare(Object value) => Compare(value != null ? value.name : string.Empty);
+        public virtual void SetValue(string value) => Value = value;
+        public virtual void SetValue(Object value) => Value = value != null ? value.name : string.Empty;
+        public virtual void SetValue(StringVar value) => Value = value.Value;
+        public virtual void SetValue(StringReference value) => Value = value.Value;
+
+
 
 
         public void Index_Disable(int index) => compare[index].active = false;
@@ -92,7 +102,17 @@ namespace MalbersAnimations.Scriptables
     //INSPECTOR
 #if UNITY_EDITOR
     [UnityEditor.CustomEditor(typeof(StringComparer))]
-    public class StringComparerEditor : IntCompareEditor { }
+    public class StringComparerEditor : IntCompareEditor
+    {
+        protected override void ExtraEvents(SerializedProperty element)
+        {
+            var OnTrue = element.FindPropertyRelative("OnTrue");
+            var OnFalse = element.FindPropertyRelative("OnFalse");
+
+            EditorGUILayout.PropertyField(OnTrue);
+            EditorGUILayout.PropertyField(OnFalse);
+        }
+    }
 
 #endif
 }

@@ -18,8 +18,11 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
-  WaitForPreviousTask: 0
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
+  WaitForPreviousTask: 1
   affect: 0
   SpeedSet: Ground
   SpeedIndex:
@@ -28,6 +31,38 @@ MonoBehaviour:
     Variable: {fileID: 0}
   Sprint: 0
   ResetSprintOnExit: 0
+--- !u!114 &-3388434256333437915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63636451a47c8084494bd86071897319, type: 3}
+  m_Name: T_WaitTask
+  m_EditorClassIdentifier: 
+  active: 1
+  Description: Wait before changing to walk and storing the current weapon
+  MessageID:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
+  WaitForPreviousTask: 0
+  WaitMinTime:
+    UseConstant: 1
+    ConstantValue: 0.1
+    Variable: {fileID: 0}
+  WaitMaxTime:
+    UseConstant: 1
+    ConstantValue: 0.1
+    Variable: {fileID: 0}
+  NextState: {fileID: 0}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46,8 +81,9 @@ MonoBehaviour:
     Variable: {fileID: 0}
   tasks:
   - {fileID: 9187885472743697252}
-  - {fileID: -4262767845608076423}
+  - {fileID: -3388434256333437915}
   - {fileID: 8834467291049654815}
+  - {fileID: -4262767845608076423}
   transitions:
   - decision: {fileID: 2124183460875906822}
     trueState: {fileID: 11400000, guid: 14a01af572054954d8b89f4529cc1fc9, type: 2}
@@ -59,7 +95,7 @@ MonoBehaviour:
   CreateTaskAsset: 1
   CreateDecisionAsset: 1
   TasksIndex: -1
-  DecisionIndex: 1
+  DecisionIndex: 0
 --- !u!114 &2124183460875906822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -88,7 +124,7 @@ MonoBehaviour:
   LookMultiplier: 0.9
   LookRange:
     UseConstant: 1
-    ConstantValue: 30
+    ConstantValue: 20
     Variable: {fileID: 0}
   LookAngle: 120
   lookFor: 7
@@ -106,12 +142,19 @@ MonoBehaviour:
   transform: {fileID: 11400000, guid: 0c45a2c5e368c004eb9efaa6152aa0ea, type: 2}
   gameObject: {fileID: 0}
   gameObjectSet: {fileID: 0}
-  tags: []
   zoneType: 0
   AllZones: 1
   ZoneID: -1
   ZoneModeAbility: -1
+  tags: []
+  ReactionOnSelf:
+    reactions: []
+  ReactionOnTarget:
+    reactions: []
   debugColor: {r: 0, g: 0, b: 0.7, a: 0.05490196}
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &5074052658433831729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,8 +205,11 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
-  WaitForPreviousTask: 0
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
+  WaitForPreviousTask: 1
   near: 0
   Actions: 1
   Weapon: {fileID: 0}
@@ -188,7 +234,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  UpdateInterval: 0.2
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
   WaitForPreviousTask: 0
   LookAtOnArrival: 0
   IgnoreWaitTime: 0

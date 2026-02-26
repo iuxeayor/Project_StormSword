@@ -13,7 +13,7 @@ namespace MalbersAnimations.Controller
         public static MRespawner instance;
 
         #region Respawn
-        [Tooltip("Animal Prefab to Swpawn"), FormerlySerializedAs("playerPrefab")]
+        [Tooltip("Animal Prefab to Spawn"), FormerlySerializedAs("playerPrefab")]
         public GameObject player;
 
         //[ContextMenuItem("Set Default", "SetDefaultRespawnPoint")]
@@ -59,13 +59,13 @@ namespace MalbersAnimations.Controller
                 instance = this;
                 transform.parent = null;
                 if (m_DontDestroyOnLoad) DontDestroyOnLoad(gameObject);
-                gameObject.name = gameObject.name + " Instance";
+                //gameObject.name = gameObject.name + " Instance";
                 SceneManager.sceneLoaded += OnLevelFinishedLoading;
                 FindMainAnimal();
             }
             else
             {
-                Destroy(gameObject); //Destroy This GO since is already a Spawner in the scene
+
             }
         }
 
@@ -78,6 +78,8 @@ namespace MalbersAnimations.Controller
 
                 if (activeAnimal != null)
                     activeAnimal.OnStateChange.RemoveListener(OnCharacterDead);  //Listen to the Animal changes of states
+
+                instance = null;
             }
         }
 
@@ -147,7 +149,6 @@ namespace MalbersAnimations.Controller
                     {
                         SceneAnimal();
                     }
-
                 }
             }
 
@@ -173,17 +174,22 @@ namespace MalbersAnimations.Controller
             //}
         }
 
-
-
         private void SceneAnimal()
         {
             activeAnimal.OnStateChange.AddListener(OnCharacterDead);        //Listen to the Animal changes of states
             activeAnimal.Teleport_Internal(transform.position);             //Move the Animal to is Start Position
             activeAnimal.transform.rotation = (transform.rotation);         //Move the Animal to is Start Position
             activeAnimal.OverrideStartState = RespawnState;
-            activeAnimal.InputSource?.Enable(true);         //Enable the Input for the Player
-            if (activeAnimal.MainCollider) activeAnimal.MainCollider.enabled = (true);
+            if (!activeAnimal.InputSource.IsUnityRefNull()) //CustomPatch: corrected null check for possible Unity object interface type
+                activeAnimal.InputSource.Enable(true);         //Enable the Input for the Player
+
+            activeAnimal.MainCollider_Enable(true);
             activeAnimal.SetMainPlayer();
+            activeAnimal.Anim.Rebind();
+
+            var allCompo = activeAnimal.GetComponentsInChildren<IRestart>();
+            foreach (var item in allCompo) item.Restart();
+
             Respawned = true;
         }
 
@@ -203,10 +209,10 @@ namespace MalbersAnimations.Controller
                     if (player.IsPrefab())         //If the Player is a Prefab then then instantiate it on the created scene
                     {
                         this.Delay_Action(RespawnTime, () =>
-                         {
-                             DestroyDeathPlayer();
-                             this.Delay_Action(() => InstantiateNewPlayer()); //Instantiate next frame
-                         }
+                        {
+                            DestroyDeathPlayer();
+                            this.Delay_Action(() => InstantiateNewPlayer()); //Instantiate next frame
+                        }
                         );
                     }
                     else
@@ -219,7 +225,6 @@ namespace MalbersAnimations.Controller
                         {
                             this.Delay_Action(RespawnTime, () =>
                             {
-
                                 SceneAnimal();
 
                                 if (!activeAnimal.enabled)
@@ -261,7 +266,7 @@ namespace MalbersAnimations.Controller
 
 
         /// <summary>Destroy all the components on  Animal and leaves the mesh and bones</summary>
-        private void DestroyAllComponents(GameObject target)
+        private void DestroyAllComponents(GameObject target) //CustomPatch: TODO: future VERY big performance improvement that will show in profiler also => it would be best to cache all these components once when the animal is created and allow through an easy API for users to be able to add/remove their components to from the cache so they are taken into account by methods like this one
         {
             if (!target) return;
 
@@ -276,6 +281,35 @@ namespace MalbersAnimations.Controller
             if (rb != null) Destroy(rb);
             var anim = target.GetComponentInChildren<Animator>();
             if (anim != null) Destroy(anim);
+        }
+
+
+        public virtual void Respawn()
+        {
+            if (player != null)
+            {
+                if (player.IsPrefab())         //If the Player is a Prefab then then instantiate it on the created scene
+                {
+                    DestroyDeathPlayer();
+                    this.Delay_Action(() => InstantiateNewPlayer()); //Instantiate next frame
+                }
+                else
+                {
+                    if (RestartScene.Value)
+                    {
+                        ResetScene();
+                    }
+                    else
+                    {
+                        SceneAnimal();
+
+                        if (!activeAnimal.enabled)
+                            activeAnimal.enabled = true;
+                        else
+                            activeAnimal.ResetController();
+                    }
+                }
+            }
         }
     }
 }

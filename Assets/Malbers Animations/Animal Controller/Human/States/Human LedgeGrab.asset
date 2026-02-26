@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -27,12 +35,15 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  Priority: 9
+  Priority: 12
   resetInputOnFailed: 0
   ResetLastState: 0
+  RemoveForceOnEnter: 0
+  ForceDamping: 0
   General:
     modify: 7423
     RootMotion: 1
+    RootMotionRotation: 0
     Sprint: 0
     Gravity: 0
     Grounded: 0
@@ -41,7 +52,7 @@ MonoBehaviour:
     FreeMovement: 0
     AdditivePosition: 0
     AdditiveRotation: 0
-    Persistent: 0
+    Persistent: 1
     IgnoreLowerStates: 1
     LockMovement: 0
     LockInput: 0
@@ -65,6 +76,17 @@ MonoBehaviour:
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 6
@@ -95,9 +117,17 @@ MonoBehaviour:
   MovementStrafe: 1
   IdleStrafe: 1
   m_debug: 1
-  Editor_Tabs1: 0
+  Editor_Tabs1: 4
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets: []
   ID: {fileID: 11400000, guid: 3fbb696c31f7ed846b7ec9b2f76fd0e5, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   LedgeLayer:
     UseConstant: 1
     ConstantValue:
@@ -106,19 +136,20 @@ MonoBehaviour:
     Variable: {fileID: 0}
   automatic:
     UseConstant: 1
-    ConstantValue: 1
+    ConstantValue: 0
     Variable: {fileID: 0}
   automaticByState:
   - {fileID: 11400000, guid: 975403cc10f8cec46a3caa6ed4e3d6c5, type: 2}
   Kinematic:
     UseConstant: 1
-    ConstantValue: 0
+    ConstantValue: 1
     Variable: {fileID: 0}
   DisableMainCollider:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
   wallDistance: 0.3
+  WallFrontAngle: 30
   MinTerrainAngle: 45
   ForwardLength: 0.75
   WallChecker: 0
@@ -134,7 +165,7 @@ MonoBehaviour:
     Height: 1.15
     LedgeExitDistance: 0.4
     ExitTime: 0.7
-    AlingOffset: {x: 0, y: -1.05}
+    AlingOffset: {x: 0, y: -1.02}
     Orient: 1
     OrientSmoothness: 10
     AdditivePosition: 0
@@ -234,7 +265,7 @@ MonoBehaviour:
     Height: 1.8
     LedgeExitDistance: 0.35
     ExitTime: 0.9
-    AlingOffset: {x: 0, y: -1.42}
+    AlingOffset: {x: 0, y: -1.4}
     Orient: 1
     OrientSmoothness: 10
     AdditivePosition: 0
@@ -333,7 +364,7 @@ MonoBehaviour:
     ForwardMultiplier: 1
     Height: 3.5
     LedgeExitDistance: 0.72
-    ExitTime: 0.9
+    ExitTime: 0.65
     AlingOffset: {x: 0.5, y: -2.85}
     Orient: 1
     OrientSmoothness: 10
@@ -424,3 +455,6 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
+  references:
+    version: 2
+    RefIds: []

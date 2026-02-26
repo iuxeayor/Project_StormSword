@@ -1,4 +1,4 @@
- 
+
 #if UNITY_EDITOR
 using System.Linq;
 using UnityEditor;
@@ -15,6 +15,7 @@ namespace MalbersAnimations
         [MenuItem("Tools/Malbers Animations/Debug Gizmos [On]", false, 8000)]
         public static void DebugGizmosOn()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             string lSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
 
             if (!lSymbols.Split(';').Contains(_EditorSymbol))
@@ -22,11 +23,13 @@ namespace MalbersAnimations
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, lSymbols + ";" + _EditorSymbol);
             }
             Debug.Log($"Scripting Define Symbol Added: [{_EditorSymbol}]");
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         [MenuItem("Tools/Malbers Animations/Debug Gizmos [Off]", false, 8000)]
         public static void DebugGizmosOff()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             string lSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
 
             if (lSymbols.Split(';').Contains(_EditorSymbol))
@@ -37,6 +40,7 @@ namespace MalbersAnimations
 
             }
             Debug.Log($"Scripting Define Symbol Removed: [{_EditorSymbol}]");
+#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 }

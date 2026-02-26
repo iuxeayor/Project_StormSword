@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -33,6 +41,7 @@ MonoBehaviour:
   General:
     modify: -1
     RootMotion: 1
+    RootMotionRotation: 1
     Sprint: 0
     Gravity: 1
     Grounded: 0
@@ -68,6 +77,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3787b6d94d5454740bf36d57436185b0, type: 2}
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 1
@@ -98,7 +118,7 @@ MonoBehaviour:
   MovementStrafe: 1
   IdleStrafe: 1
   m_debug: 1
-  Editor_Tabs1: 2
+  Editor_Tabs1: 1
   SpeedSets: []
   ID: {fileID: 11400000, guid: 2f7727669c8fcdf4999e66cb669e2608, type: 2}
   Automatic:

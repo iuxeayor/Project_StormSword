@@ -20,7 +20,13 @@ namespace MalbersAnimations.Utilities
         public List<Effect> Effects;
 
         public int SelectedEffect = -1;
-        public bool debug;
+        [SerializeField] private bool debug;
+        [SerializeField] private bool editOffset;
+
+        public Color debugColor = new(1, 0.6f, 0, 0.333f);
+
+        private Effect Pin_Effect;
+
         private void Awake()
         {
             foreach (var e in Effects)
@@ -44,6 +50,23 @@ namespace MalbersAnimations.Utilities
                 foreach (var effect in effects) Play(effect);
         }
 
+
+        public virtual void Effect_Pin(string name)
+        {
+            Pin_Effect = Effects.Find(effect => effect.Name == name && effect.active == true);
+        }
+
+
+        public virtual void Effect_Pin(int ID)
+        {
+            Pin_Effect = Effects.Find(effect => effect.ID == ID && effect.active == true);
+        }
+
+
+        public virtual void Effect_Pin_Root(Transform root)
+        {
+            Pin_Effect.root = root;
+        }
 
         /// <summary>Plays an Effect using its ID value</summary>
         public virtual void PlayEffect(string name)
@@ -92,26 +115,29 @@ namespace MalbersAnimations.Utilities
 
         public virtual void StopEffect(Effect e, GameObject instance)
         {
-            //Stop the Reaction
-            e.OnStopReaction?.React(Owner);
-            e.OnStop.Invoke();
-
-            e.IsPlaying = false;
-
-            if (e.effect != null)
+            //Stop the Effect only if is playing
+            if (e.IsPlaying || e.life == 0)
             {
-                if (!e.effect.IsPrefab())
+                e.OnStopReaction?.React(Owner);
+                e.OnStop.Invoke();
+
+                e.IsPlaying = false;
+
+                if (e.effect != null)
                 {
-                    if (e.disableOnStop) 
-                        instance?.SetActive(false);
+                    if (!e.effect.IsPrefab())
+                    {
+                        if (e.disableOnStop)
+                            instance?.SetActive(false);
+                    }
+                    else
+                        Destroy(instance);
+
                 }
-                else
-                    Destroy(instance);
 
+                if (debug)
+                    Debug.Log($"<B>{Owner.name}</B> Effect Stop: <B>[{e.Name}]</B>", (instance != null ? instance : this));
             }
-
-            if (debug)
-                Debug.Log($"<B>{Owner.name}</B> Effect Stop: <B>[{e.Name}]</B>", this);
         }
 
 
@@ -127,13 +153,13 @@ namespace MalbersAnimations.Utilities
         {
             //e.Modifier?.PreStart(e);        //Execute the Method PreStart Effect if it has a modifier
 
-            if (e.effect != null && e.IsPlaying) return; //Do not play a effect that is already playing
+            if (e.effect != null && e.life > 0 && e.IsPlaying) return; //Do not play a effect that is already playing
 
             //Delay an action
             this.Delay_Action(e.delay,
                 () =>
                 {
-                    e.IsPlaying = true;
+                    e.IsPlaying = true; //Do not change is Playing to true if the time is 0
 
                     //Play Audio
                     if (!e.Clip.NullOrEmpty() && e.audioSource != null)
@@ -164,27 +190,20 @@ namespace MalbersAnimations.Utilities
                         if (e.Instance)
                         {
                             //Apply Offsets
-                            if (e.root)
+                            if (e.isChild)
                             {
-                                e.Instance.transform.position = e.root.position;
-
-                                if (e.isChild)
-                                {
-                                    e.Instance.transform.parent = e.root;
-                                    e.Instance.transform.localPosition = e.Offset.Position;
-                                    e.Instance.transform.localEulerAngles = e.Offset.Rotation;
-                                    e.Instance.transform.localScale = e.Offset.Scale; //Scale the Effect
-                                }
-                                else
-                                {
-                                    e.Instance.transform.position = e.root.TransformPoint(e.Offset.Position);
-                                }
-
-                                if (e.useRootRotation)
-                                {
-                                    e.Instance.transform.rotation = e.root.rotation * Quaternion.Euler(e.Offset.Rotation);     //Orient to the root rotation
-                                }
+                                e.Instance.transform.parent = e.root;
+                                e.Offset.RestoreTransform(e.Instance.transform); //Restore the Offset
                             }
+                            else
+                            {
+                                //Move to the root position
+                                if (e.useRootPosition) e.Instance.transform.position = e.root.position;
+
+                                //Orient to the root rotation
+                                if (e.useRootRotation) e.Instance.transform.rotation = e.root.rotation;
+                            }
+
 
                             e.Instance.SetActive(true);
 
@@ -202,11 +221,11 @@ namespace MalbersAnimations.Utilities
 
                     if (e.life > 0)
                     {
-                        this.Delay_Action(e.life, () => StopEffect(e,e.Instance));
+                        this.Delay_Action(e.life, () => StopEffect(e, e.Instance));
                     }
 
                     if (debug)
-                        Debug.Log($"<B>{Owner.name}</B> Effect Play: <B>[{e.Name}]</B>", this);
+                        Debug.Log($"<B>{Owner.name}</B> Effect Play: <B>[{e.Name}]</B>", (e.Instance != null ? e.Instance : this));
 
                     e.OnPlay.Invoke();                 //Invoke the Play Event
                     e.OnPlayReaction?.React(Owner);    //Play the Reaction
@@ -281,12 +300,24 @@ namespace MalbersAnimations.Utilities
             }
         }
 
+
+
+#if UNITY_EDITOR
         private void Reset()
         {
             Owner = transform.root;
         }
 
-#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (Owner == null) Owner = transform.root;
+
+            foreach (var e in Effects)
+            {
+                if (e.root == null) e.root = transform; //Make sure the owner is not null
+            }
+        }
+
         [ContextMenu("Create Event Listeners")]
         void CreateListeners()
         {
@@ -334,9 +365,98 @@ namespace MalbersAnimations.Utilities
 
             UnityEditor.EditorUtility.SetDirty(listener);
         }
+
+        [SerializeField] private Mesh meshGizmo;
+        [SerializeField] private Transform meshOwner;
+        public void FindSelectedEffectMesh()
+        {
+            if (Effects == null || Effects.Count == 0 || SelectedEffect > 0 || SelectedEffect >= Effects.Count) return;
+
+            meshGizmo = null;
+            meshOwner = transform;
+
+            var Effect = Effects[SelectedEffect]; //Cache the selected Effect
+
+            if (Effect.effect == null) return;
+
+            var staticMesh = Effect.effect.GetComponentInChildren<MeshFilter>();
+
+            if (staticMesh != null)
+            {
+                meshGizmo = staticMesh.sharedMesh;
+                meshOwner = staticMesh.transform;
+            }
+            else
+            {
+                var skinnedMesh = Effect.effect.GetComponentInChildren<SkinnedMeshRenderer>();
+                if (skinnedMesh != null)
+                {
+                    meshGizmo = skinnedMesh.sharedMesh;
+                    meshOwner = skinnedMesh.transform;
+                }
+            }
+            MTools.SetDirty(this);
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this)) return;
+            if (Selection.gameObjects.Length > 0 && Selection.gameObjects[0] != this.gameObject) return;
+
+            // if (Application.isPlaying) return;
+            if (meshOwner == null) meshOwner = transform;
+
+            if (Effects != null)
+            {
+                if (Effects.Count == 0 || SelectedEffect < 0 || SelectedEffect >= Effects.Count) return; //If no effects or the selected effect is out of range
+
+                var Effect = Effects[SelectedEffect]; //Cache the selected Effect
+
+                if (Effect != null && Effect.effect != null)
+                {
+                    Gizmos.color = debugColor;
+
+                    meshOwner.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+                    var scale = meshOwner.localScale;
+
+                    if (Effect.isChild)
+                    {
+                        position = Effect.root.TransformPoint(Effect.Offset.Position + meshOwner.localPosition);
+                        rotation = Effect.root.rotation * Quaternion.Euler(Effect.Offset.Rotation) * meshOwner.rotation;
+                        // rotation = meshOwner.rotation;
+                        scale.Scale(Effect.Offset.Scale);
+                    }
+                    else
+                    {
+                        if (Effect.effect != null && !Effect.effect.IsPrefab())
+                        {
+                            position = meshOwner.position;
+                            if (!Effect.useRootRotation) rotation = Effect.root.rotation * meshOwner.localRotation;
+                            scale.Scale(Effect.effect.transform.localScale);
+                        }
+                        else
+                        {
+                            rotation = Effect.root.rotation * Quaternion.Euler(Effect.Offset.Rotation) * meshOwner.localRotation;
+                        }
+                    }
+
+                    if (meshGizmo != null)
+                    {
+                        Gizmos.DrawWireMesh(meshGizmo, position, rotation, scale);
+                    }
+                    else
+                    {
+                        Matrix4x4 currentMatrix = Matrix4x4.TRS(position, rotation, scale);
+                        Gizmos.matrix = currentMatrix;
+
+                        Gizmos.DrawSphere(Vector3.zero, 0.2f);
+                        Gizmos.DrawWireSphere(Vector3.zero, 0.2f);
+                    }
+                }
+
+            }
+        }
 #endif
-
-
     }
 
     [System.Serializable]
@@ -345,11 +465,15 @@ namespace MalbersAnimations.Utilities
         public string Name = "EffectName";
         public int ID;
         public bool active = true;
-        public Transform root;
+        [RequiredField] public Transform root;
 
         public bool isChild;
         public bool disableOnStop = true;
+        public bool useRootPosition = true;
         public bool useRootRotation = true;
+        /// <summary>
+        /// Prefab or GameObject to Instantiate
+        /// </summary>
         public GameObject effect;
         public TransformOffset Offset = new(1);
         public AudioSource audioSource;
@@ -366,9 +490,9 @@ namespace MalbersAnimations.Utilities
         //public EffectModifier Modifier;
 
 
-        [SerializeReference, SubclassSelector]
+        [SerializeReference]
         public Reaction OnPlayReaction;
-        [SerializeReference, SubclassSelector]
+        [SerializeReference]
         public Reaction OnStopReaction;
 
         public UnityEvent OnPlay;
@@ -409,16 +533,32 @@ namespace MalbersAnimations.Utilities
     public class EffectManagerEditor : Editor
     {
         private ReorderableList list;
-        private SerializedProperty EffectList, Owner, SelectedEffect, debug;
+        private SerializedProperty EffectList, Owner, SelectedEffect, DebugColor, debug, editOffset;
         private EffectManager M;
+
+        private static GUIContent editicon;
+        public static GUIContent EditIcon
+        {
+            get
+            {
+                editicon ??= new GUIContent(EditorGUIUtility.IconContent("TransformTool"))
+                {
+                    tooltip = "Edit Offset in ViewPort"
+                };
+                return editicon;
+            }
+        }
+
 
         private void OnEnable()
         {
             M = ((EffectManager)target);
             Owner = serializedObject.FindProperty("Owner");
             debug = serializedObject.FindProperty("debug");
+            editOffset = serializedObject.FindProperty("editOffset");
             EffectList = serializedObject.FindProperty("Effects");
             SelectedEffect = serializedObject.FindProperty("SelectedEffect");
+            DebugColor = serializedObject.FindProperty("debugColor");
 
             list = new ReorderableList(serializedObject, EffectList, true, true, true, true)
             {
@@ -428,10 +568,13 @@ namespace MalbersAnimations.Utilities
                 onSelectCallback = (list) =>
                 {
                     SelectedEffect.intValue = list.index;
+                    serializedObject.ApplyModifiedProperties();
+                    M.FindSelectedEffectMesh();
                 }
             };
 
             list.index = SelectedEffect.intValue;
+            M.FindSelectedEffectMesh();
         }
 
         public override void OnInspectorGUI()
@@ -443,139 +586,281 @@ namespace MalbersAnimations.Utilities
             using (new GUILayout.HorizontalScope())
             {
                 EditorGUILayout.PropertyField(Owner);
+                editOffset.boolValue = GUILayout.Toggle(editOffset.boolValue, EditIcon, EditorStyles.miniButtonMid, GUILayout.Width(28), GUILayout.Height(20));
+                EditorGUILayout.PropertyField(DebugColor, GUIContent.none, GUILayout.Width(50));
                 MalbersEditor.DrawDebugIcon(debug);
             }
 
 
             list.DoLayoutList();
 
-            if (list.index != -1)
+            if (list.index != -1 && list.index < list.count)
             {
                 Effect effect = M.Effects[list.index];
 
-                EditorGUILayout.Space(-16);
-                SerializedProperty Element = EffectList.GetArrayElementAtIndex(list.index);
-                EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(Element, new GUIContent($"[{effect.Name}]"), false);
-                EditorGUI.indentLevel--;
-
-                if (Element.isExpanded)
+                if (effect != null)
                 {
-                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                    EditorGUILayout.Space(-16);
+                    SerializedProperty Element = EffectList.GetArrayElementAtIndex(list.index);
+
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.PropertyField(Element, new GUIContent($"[{effect.Name}]"), false);
+                    EditorGUI.indentLevel--;
+
+                    if (Element.isExpanded)
                     {
-                        var eff = Element.FindPropertyRelative("effect");
-                        eff.isExpanded = MalbersEditor.Foldout(eff.isExpanded, "General");
-                        if (eff.isExpanded)
+                        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                         {
-
-                            string prefabTooltip = "";
-
-                            var is_Prefab = false;
-
-                            if (eff.objectReferenceValue != null)
-                                is_Prefab = (eff.objectReferenceValue as GameObject).IsPrefab();
-
-                            if (eff.objectReferenceValue != null && is_Prefab)
+                            var eff = Element.FindPropertyRelative("effect");
+                            eff.isExpanded = MalbersEditor.Foldout(eff.isExpanded, "General");
+                            if (eff.isExpanded)
                             {
-                                prefabTooltip = "[Prefab]";
-                            }
-                            EditorGUILayout.PropertyField(Element.FindPropertyRelative("effect"), new GUIContent("Effect " + prefabTooltip, "The Prefab or gameobject which holds the Effect(Particles, transforms)"));
 
-                            if (is_Prefab)
-                                EditorGUILayout.PropertyField(Element.FindPropertyRelative("scale"), new GUIContent("Scale", "Scale the Prefab object"));
+                                string prefabTooltip = "";
 
-                           
+                                var is_Prefab = false;
+
+                                if (eff.objectReferenceValue != null)
+                                    is_Prefab = (eff.objectReferenceValue as GameObject).IsPrefab();
+
+                                if (eff.objectReferenceValue != null && is_Prefab)
+                                {
+                                    prefabTooltip = "[Prefab]";
+                                }
+                                EditorGUILayout.PropertyField(Element.FindPropertyRelative("effect"), new GUIContent("Effect " + prefabTooltip, "The Prefab or gameobject which holds the Effect(Particles, transforms)"));
+
+                                if (Application.isPlaying && is_Prefab)
+                                {
+                                    using (new EditorGUI.DisabledGroupScope(true))
+                                        EditorGUILayout.ObjectField("Effect Instance", effect.Instance, typeof(GameObject), false);
+                                }
+                                if (is_Prefab)
+                                    EditorGUILayout.PropertyField(Element.FindPropertyRelative("scale"), new GUIContent("Scale", "Scale the Prefab object"));
+
+
                                 EditorGUILayout.PropertyField(Element.FindPropertyRelative("life"), new GUIContent("Life", "Duration of the Effect. The Effect will be destroyed after the Life time has passed"));
 
-                            EditorGUILayout.PropertyField(Element.FindPropertyRelative("delay"), new GUIContent("Delay", "Time before playing the Effect"));
+                                EditorGUILayout.PropertyField(Element.FindPropertyRelative("delay"), new GUIContent("Delay", "Time before playing the Effect"));
 
 
-                            if (eff.objectReferenceValue != null && !(eff.objectReferenceValue as GameObject).IsPrefab())
-                                EditorGUILayout.PropertyField(Element.FindPropertyRelative("disableOnStop"), new GUIContent("Disable On Stop", "if the Effect is not a prefab the gameOBject will be disabled"));
+                                if (eff.objectReferenceValue != null && !(eff.objectReferenceValue as GameObject).IsPrefab())
+                                    EditorGUILayout.PropertyField(Element.FindPropertyRelative("disableOnStop"), new GUIContent("Disable On Stop", "if the Effect is not a prefab the gameOBject will be disabled"));
 
-                            if (Element.FindPropertyRelative("life").floatValue <= 0)
-                            {
-                                EditorGUILayout.HelpBox("Life = 0  the effect will not be destroyed by this Script", MessageType.Info);
-                            }
-                        }
-                    }
-
-
-                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
-                    {
-                        var audio = Element.FindPropertyRelative("audioSource");
-                        audio.isExpanded = MalbersEditor.Foldout(audio.isExpanded, "Audio");
-
-                        if (audio.isExpanded)
-                        {
-                            EditorGUILayout.PropertyField(audio,
-                                new GUIContent("Source", "Where the audio for the Effect will be player"));
-                            EditorGUILayout.PropertyField(Element.FindPropertyRelative("Clip"),
-                               new GUIContent("Clip", "What audio will be played"));
-                        }
-                    }
-
-                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
-                    {
-                        var root = Element.FindPropertyRelative("root");
-                        root.isExpanded = MalbersEditor.Foldout(root.isExpanded, "Parent");
-
-                        if (root.isExpanded)
-                        {
-                            EditorGUILayout.PropertyField(root, new GUIContent("Root", "Uses this transform to position the Effect"));
-
-                            if (root.objectReferenceValue != null)
-                            {
-                                var isChild = Element.FindPropertyRelative("isChild");
-                                var useRootRotation = Element.FindPropertyRelative("useRootRotation");
-
-                                EditorGUILayout.PropertyField(isChild, new GUIContent("is Child", "Set the Effect as a child of the Root transform"));
-
-                                if (isChild.boolValue)
+                                if (Element.FindPropertyRelative("life").floatValue <= 0)
                                 {
-                                    var Offset = Element.FindPropertyRelative("Offset");
-                                    EditorGUI.indentLevel++;
-                                    EditorGUILayout.PropertyField(Offset, true);
-                                    EditorGUI.indentLevel--;
+                                    EditorGUILayout.HelpBox("Life = 0  the effect will not be destroyed by this Script", MessageType.Info);
                                 }
-
-                                EditorGUILayout.PropertyField(useRootRotation, new GUIContent("Use Root Rotation", "Orient the Effect using the root rotation."));
                             }
                         }
-                    }
 
-                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
-                    {
-                        var OnPlayReaction = Element.FindPropertyRelative("OnPlayReaction");
-                        var OnStopReaction = Element.FindPropertyRelative("OnStopReaction");
-                        OnPlayReaction.isExpanded = MalbersEditor.Foldout(OnPlayReaction.isExpanded, "Reactions");
 
-                        if (OnPlayReaction.isExpanded)
+                        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                         {
+                            var audio = Element.FindPropertyRelative("audioSource");
+                            audio.isExpanded = MalbersEditor.Foldout(audio.isExpanded, "Audio");
 
-                            EditorGUILayout.PropertyField(OnPlayReaction);
-                            EditorGUILayout.PropertyField(OnStopReaction);
+                            if (audio.isExpanded)
+                            {
+                                EditorGUILayout.PropertyField(audio,
+                                    new GUIContent("Source", "Where the audio for the Effect will be player"));
+                                EditorGUILayout.PropertyField(Element.FindPropertyRelative("Clip"),
+                                   new GUIContent("Clip", "What audio will be played"));
+                            }
                         }
-                    }
 
-
-                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
-                    {
-                        Owner.isExpanded = MalbersEditor.Foldout(Owner.isExpanded, "Events");
-
-                        if (Owner.isExpanded)
+                        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                         {
-                            var OnStop = Element.FindPropertyRelative("OnStop");
-                            var OnPlay = Element.FindPropertyRelative("OnPlay");
+                            var root = Element.FindPropertyRelative("root");
+                            root.isExpanded = MalbersEditor.Foldout(root.isExpanded, "Location & Orientation");
 
-                            EditorGUILayout.PropertyField(OnPlay);
-                            EditorGUILayout.PropertyField(OnStop);
+                            if (root.isExpanded)
+                            {
+                                EditorGUILayout.PropertyField(root, new GUIContent("Root", "Uses this transform to position the Effect"));
+
+
+                                if (root.objectReferenceValue != null)
+                                {
+                                    var isChild = Element.FindPropertyRelative("isChild");
+                                    var useRootPosition = Element.FindPropertyRelative("useRootPosition");
+                                    var useRootRotation = Element.FindPropertyRelative("useRootRotation");
+
+                                    using (new EditorGUI.DisabledGroupScope(isChild.boolValue))
+                                    {
+                                        EditorGUILayout.PropertyField(useRootPosition, new GUIContent("Use Root Position", "Set the Effect location as the root positino."));
+                                        EditorGUILayout.PropertyField(useRootRotation, new GUIContent("Use Root Rotation", "Orient the Effect using the root rotation."));
+                                    }
+
+                                    EditorGUILayout.PropertyField(isChild, new GUIContent("Is Child", "Set the Effect as a child of the Root transform"));
+
+                                    if (isChild.boolValue)
+                                    {
+                                        var Offset = Element.FindPropertyRelative("Offset");
+                                        EditorGUI.indentLevel++;
+                                        EditorGUILayout.PropertyField(Offset, true);
+                                        EditorGUI.indentLevel--;
+                                    }
+
+                                }
+                            }
+                        }
+
+                        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                        {
+                            var OnPlayReaction = Element.FindPropertyRelative("OnPlayReaction");
+                            var OnStopReaction = Element.FindPropertyRelative("OnStopReaction");
+                            OnPlayReaction.isExpanded = MalbersEditor.Foldout(OnPlayReaction.isExpanded, "Reactions");
+
+                            if (OnPlayReaction.isExpanded)
+                            {
+
+                                EditorGUILayout.PropertyField(OnPlayReaction);
+                                EditorGUILayout.PropertyField(OnStopReaction);
+                            }
+                        }
+
+
+                        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+                        {
+                            Owner.isExpanded = MalbersEditor.Foldout(Owner.isExpanded, "Events");
+
+                            if (Owner.isExpanded)
+                            {
+                                var OnStop = Element.FindPropertyRelative("OnStop");
+                                var OnPlay = Element.FindPropertyRelative("OnPlay");
+
+                                EditorGUILayout.PropertyField(OnPlay);
+                                EditorGUILayout.PropertyField(OnStop);
+                            }
                         }
                     }
                 }
             }
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+
+        private void OnSceneGUI()
+        {
+            if (!editOffset.boolValue) return;
+
+            if (M.Effects != null)
+            {
+                var Effect = M.Effects[SelectedEffect.intValue];
+
+                if (Effect != null)
+                {
+                    if (Tools.current == Tool.Move)
+                    {
+                        if (Effect.isChild)
+                        {
+                            using (var cc = new EditorGUI.ChangeCheckScope())
+                            {
+                                Vector3 piv = Effect.root.TransformPoint(Effect.Offset.Position);
+                                Vector3 NewPivPosition = Handles.PositionHandle(piv, Quaternion.identity);
+
+                                if (cc.changed)
+                                {
+                                    Undo.RecordObject(target, "Change Pos Offest");
+                                    Effect.Offset.Position = Effect.root.InverseTransformPoint(NewPivPosition);
+                                    EditorUtility.SetDirty(target);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            using (var cc = new EditorGUI.ChangeCheckScope())
+                            {
+                                if (!Effect.effect.IsPrefab())
+                                {
+                                    Vector3 piv = Effect.effect.transform.position;
+                                    Vector3 NewPivPosition = Handles.PositionHandle(piv, Quaternion.identity);
+
+                                    if (cc.changed)
+                                    {
+                                        Undo.RecordObject(Effect.effect.transform, "Change Pos Offest");
+                                        Effect.effect.transform.position = NewPivPosition;
+                                        EditorUtility.SetDirty(Effect.effect.transform);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (Tools.current == Tool.Rotate)
+                    {
+                        if (Effect.isChild)
+                        {
+                            using (var cc = new EditorGUI.ChangeCheckScope())
+                            {
+                                Vector3 piv = Effect.root.TransformPoint(Effect.Offset.Position);
+                                Quaternion NewPivRotation = Handles.RotationHandle(Effect.root.rotation * Quaternion.Euler(Effect.Offset.Rotation), piv);
+
+                                if (cc.changed)
+                                {
+                                    Undo.RecordObject(target, "Change Rot Offest");
+                                    Effect.Offset.Rotation = (Quaternion.Inverse(Effect.root.rotation) * NewPivRotation).eulerAngles;
+                                    EditorUtility.SetDirty(target);
+                                }
+                            }
+                        }
+                        else
+                        {
+
+                            using (var cc = new EditorGUI.ChangeCheckScope())
+                            {
+                                if (!Effect.effect.IsPrefab())
+                                {
+                                    Vector3 piv = Effect.effect.transform.position;
+                                    Quaternion NewPivRotation = Handles.RotationHandle(Effect.effect.transform.rotation, piv);
+
+                                    if (cc.changed)
+                                    {
+                                        Undo.RecordObject(Effect.effect.transform, "Change Rot Offest");
+                                        Effect.effect.transform.rotation = NewPivRotation;
+                                        EditorUtility.SetDirty(Effect.effect.transform);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (Tools.current == Tool.Scale)
+                    {
+                        if (Effect.isChild)
+                        {
+                            using (var cc = new EditorGUI.ChangeCheckScope())
+                            {
+                                Vector3 piv = Effect.root.TransformPoint(Effect.Offset.Position);
+                                Vector3 NewPivScale = Handles.ScaleHandle(Effect.Offset.Scale, piv, Effect.root.rotation, HandleUtility.GetHandleSize(piv));
+
+                                if (cc.changed)
+                                {
+                                    Undo.RecordObject(target, "Change Scale Offest");
+                                    Effect.Offset.Scale = NewPivScale;
+                                    EditorUtility.SetDirty(target);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            using (var cc = new EditorGUI.ChangeCheckScope())
+                            {
+                                if (!Effect.effect.IsPrefab())
+                                {
+                                    Vector3 piv = Effect.effect.transform.position;
+                                    Vector3 NewPivScale = Handles.ScaleHandle(Effect.effect.transform.localScale, piv, Effect.effect.transform.rotation, HandleUtility.GetHandleSize(piv));
+
+                                    if (cc.changed)
+                                    {
+                                        Undo.RecordObject(Effect.effect.transform, "Change Scale Offest");
+                                        Effect.effect.transform.localScale = NewPivScale;
+                                        EditorUtility.SetDirty(Effect.effect.transform);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         void HeaderCallbackDelegate(Rect rect)

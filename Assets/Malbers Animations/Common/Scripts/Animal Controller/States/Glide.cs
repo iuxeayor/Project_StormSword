@@ -5,9 +5,10 @@ using UnityEngine;
 namespace MalbersAnimations.Controller
 {
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/main-components/manimal-controller/states/glide")]
+    [AddTypeMenu("Air/Glide")]
     public class Glide : State
     {
-        public override string StateName => "Glide";
+        //public override string StateName => "Glide";
         public override string StateIDName => "Glide";
 
         [Header("Glide Parameters")]
@@ -25,16 +26,16 @@ namespace MalbersAnimations.Controller
 
 
 
-        [/*Range(0, 90),*/ Tooltip("Bank amount used when turning while straffing")]
+        [/*Range(0, 90),*/ Tooltip("Bank amount used when turning while strafing")]
         public float BankStrafe = 0;
-        [/*Range(0, 90),*/ Tooltip("Limit to go Up and Down while straffing")]
+        [/*Range(0, 90),*/ Tooltip("Limit to go Up and Down while strafing")]
         public float PitchStrafe = 0;
 
         [Tooltip("When Entering the Glide State... The animal will keep the Velocity from the last State if this value is greater than zero")]
         public FloatReference InertiaLerp = new(1);
 
-        [Tooltip("The animal will move forward while Gliding, without the need to push the W Key, or Move forward Input")]
-        public BoolReference KeepForward = new(false);
+        //[Tooltip("The animal will move forward while Gliding, without the need to push the W Key, or Move forward Input")]
+        //public BoolReference KeepForward = new(false);
         //private bool LastAlwaysForward;
 
         [Tooltip("The animal will change the Camera Input while the Animal is using this State")]
@@ -66,6 +67,8 @@ namespace MalbersAnimations.Controller
 
             var TouchedGround = Physics.Raycast(animal.Main_Pivot_Point, animal.Gravity, out _, animal.Height + StartHeight * ScaleFactor, animal.GroundLayer);
 
+            MDebug.DrawRay(animal.Main_Pivot_Point, animal.Gravity * (animal.Height + StartHeight * ScaleFactor), TouchedGround ? Color.green : Color.red);
+
             if (TouchedGround) ResetInputOnFailed();
 
             //if we touch any ground send False. Meaning the Glide cannot play.
@@ -77,10 +80,12 @@ namespace MalbersAnimations.Controller
             return base.TryActivate() && TryOverride && CheckStartHeight();
         }
 
-        public override bool KeepForwardMovement => KeepForward.Value;
+        // public override bool KeepForwardMovement => KeepForward.Value;
 
         public override void Activate()
         {
+            if (!CheckStartHeight()) return;
+
             base.Activate();
 
             // LastUseCameraInput = animal.UseCameraInput;     //Cache the Last Use Camera Input
@@ -142,7 +147,7 @@ namespace MalbersAnimations.Controller
             {
                 if (LandDistance >= hit.distance)
                 {
-                    Debugging($"[AllowExit] Can Land on <{hit.collider.name}> ");
+                    Debugging($"<color=orange><B>[AllowExit]</B></color> Can Land on <{hit.collider.name}> ");
                     animal.FreeMovement = false; //Disable the Free Movement
                     animal.UseGravity = true;
 
@@ -197,7 +202,6 @@ namespace MalbersAnimations.Controller
         }
 
 #if UNITY_EDITOR
-
         public override void SetSpeedSets(MAnimal animal)
         {
             var setName = "Glide";

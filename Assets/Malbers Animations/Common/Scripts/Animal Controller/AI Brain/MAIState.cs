@@ -140,7 +140,7 @@ namespace MalbersAnimations.Controller.AI
                 return;
             };
 
-            if (brain.TasksStarted[i]) return; //DO NOT START AN ALREADY STARTED TASK 
+            if (brain.TasksStarted[i]) return; //DO NOT START AN ALREADY STARTED TASK  
 
             if (tasks[i].WaitForPreviousTask)
             {
@@ -524,7 +524,6 @@ namespace MalbersAnimations.Controller.AI
                                 tasks.serializedObject.ApplyModifiedProperties();
 
                             }
-
                             GUIUtility.ExitGUI();
                         }
                     }
@@ -795,6 +794,13 @@ namespace MalbersAnimations.Controller.AI
             EditorUtility.SetDirty(target);
         }
 
+
+        private Editor CurrentTaskEditor;
+        private UnityEngine.Object TaskObject;
+
+        private Editor CurrentDecisionEditor;
+        private UnityEngine.Object DecisionObject;
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -880,8 +886,6 @@ namespace MalbersAnimations.Controller.AI
 
                             if (GUILayout.Button(rename, GUILayout.Width(IconWidth), GUILayout.Height(IconHeight)))
                             {
-
-
                                 // Check if the asset itself is external or internal to the target
                                 if (taskPath != targetPath)
                                     AssetDatabase.RenameAsset(taskPath, asset.name);
@@ -907,7 +911,16 @@ namespace MalbersAnimations.Controller.AI
                                 }
                             }
                         }
-                        MTools.DrawObjectReferenceInspector(element);
+
+
+                        //Draw the Current Selected Task
+                        if (CurrentTaskEditor == null || element.objectReferenceValue != TaskObject)
+                        {
+                            TaskObject = element.objectReferenceValue;
+                            CurrentTaskEditor = Editor.CreateEditor(TaskObject);
+                        }
+
+                        CurrentTaskEditor.OnInspectorGUI();
                     }
                 }
             }
@@ -941,8 +954,6 @@ namespace MalbersAnimations.Controller.AI
 
                         string taskPath = AssetDatabase.GetAssetPath(asset);
 
-
-
                         using (new GUILayout.HorizontalScope())
                         {
                             asset.name = EditorGUILayout.TextField("Name", asset.name);
@@ -974,7 +985,15 @@ namespace MalbersAnimations.Controller.AI
                             }
                         }
 
-                        MTools.DrawObjectReferenceInspector(decision);
+
+                        //Draw the Current Selected Decision
+                        if (CurrentDecisionEditor == null || decision.objectReferenceValue != DecisionObject)
+                        {
+                            DecisionObject = decision.objectReferenceValue;
+                            CurrentDecisionEditor = Editor.CreateEditor(DecisionObject);
+                        }
+
+                        CurrentDecisionEditor.OnInspectorGUI();
                     }
                 }
             }

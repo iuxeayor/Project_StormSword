@@ -9,32 +9,89 @@ namespace MalbersAnimations
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/global-components/ui/unity-utils")]
     public class UnityUtils : MonoBehaviour
     {
+
+        /// <summary>Instantiate a GameObject chosen randomly from a GameObjectList in the position of this gameObject</summary>
+        public void InstantiateRandom(GameObjectList value)
+        {
+            GameObject randomObject = value.list[Random.Range(0, value.list.Count)];
+            Instantiate(randomObject, transform.position, transform.rotation);
+
+        }
+
+        /// <summary>Instantiate a GameObject chosen randomly from a GameObjectList in the position of this gameObject and it also  parent it </summary>
+        public void InstantiateRandomAndParent(GameObjectList value)
+        {
+            GameObject randomObject = value.list[Random.Range(0, value.list.Count)];
+            Instantiate(randomObject, transform.position, transform.rotation, transform);
+        }
+
+
         public virtual void PauseEditor()
         {
             Debug.Log("Pause Editor", this);
             Debug.Break();
         }
 
+
+        public virtual void GameObject_Toggle(GameObject go) => go.SetActive(!go.activeSelf);
+
+        public virtual void Behaviour_Toggle(Behaviour behaviour) => behaviour.enabled = !behaviour.enabled;
+
         /// <summary>Multiply the Local Scale by a value</summary>
         public virtual void Scale_By_Float(float scale) => transform.localScale = Vector3.one * scale;
 
 
-
-        /// <summary>  Ugly way to stop all audiosources on the scenes  </summary>
+        private AudioSource[] audios;
+        /// <summary>Ugly way to stop all audiosources on the scenes</summary>
         public virtual void PauseAllAudio(bool pause)
         {
-            AudioSource[] audios = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+            if (!enabled) return;
+
+            audios ??= FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
 
             if (pause)
             {
                 foreach (var audio in audios)
+                {
                     if (audio.isPlaying) audio.Pause();
+                }
             }
             else
             {
-                foreach (var audio in audios) audio.UnPause();
+                foreach (var audio in audios) if (audio != null) audio.UnPause();
             }
         }
+
+
+        public void AddRigiBody()
+        {
+            Rigidbody rb = gameObject.AddComponent<Rigidbody>();
+
+            // Lock all constraints on the Rigidbody
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+            rb.isKinematic = true;
+
+        }
+        public void DestroyRigidbody()
+        {
+            if (gameObject.TryGetComponent<Rigidbody>(out var rb))
+                Destroy(rb);
+        }
+
+
+        public void IsKinematicRigidbody(GameObject gameObjectWithRigidBody)
+        {
+            gameObjectWithRigidBody.GetComponent<Rigidbody>().isKinematic = true;
+        }
+
+        public void IsNotKinematicRigidbody(GameObject gameObjectWithRigidBody)
+        {
+            gameObjectWithRigidBody.GetComponent<Rigidbody>().isKinematic = false;
+        }
+
+
+
+
 
         public void Forward_Direction(Transform target)
         {
@@ -50,12 +107,7 @@ namespace MalbersAnimations
             transform.forward = forward.normalized;
         }
         public void Forward_Direction_NoY(TransformVar target) => Forward_Direction_NoY(target.Value);
-
-
-
         public virtual void Toggle_Enable(Behaviour component) => component.enabled = !component.enabled;
-
-
         public virtual void Time_Freeze(bool value) => Time_Scale(value ? 0 : 1);
         public virtual void Time_Scale(float value) => Time.timeScale = value;
         public virtual void Freeze_Time(bool value) => Time_Freeze(value);
@@ -85,8 +137,9 @@ namespace MalbersAnimations
         /// <summary>Disable a Monobehaviour and enable it the next frame</summary>
         public void Reset_Monobehaviour(MonoBehaviour go)
         {
-            go.SetEnable(false);
-            this.Delay_Action(() => go.SetEnable(true));
+            if (go == null) return;
+            go.enabled = false;
+            this.Delay_Action(() => go.enabled = true);
         }
 
         /// <summary>Hide this GameObject after X Time</summary>
@@ -106,7 +159,6 @@ namespace MalbersAnimations
         public void DebugLog(string value) => Debug.Log($"[{name}]-[{value}]", this);
         public void DebugLog(object value) => Debug.Log($"[{name}]-[{value}]", this);
 
-
         public void QuitGame()
         {
 #if UNITY_EDITOR
@@ -115,7 +167,6 @@ namespace MalbersAnimations
             Application.Quit();
 #endif
         }
-
 
         /// <summary>Reset the Local Rotation of this gameObject</summary>
         public void Rotation_Reset() => transform.localRotation = Quaternion.identity;
@@ -135,12 +186,10 @@ namespace MalbersAnimations
         /// <summary>Reset the Local Position of a transform</summary>
         public void Position_Reset(Transform go) => go.localPosition = Vector3.zero;
 
-
         /// <summary>Parent this Game Object to a new Transform, retains its World Position</summary>
         public void Parent(Transform value) => transform.parent = value;
         public void Parent(GameObject value) => Parent(value.transform);
         public void Parent(Component value) => Parent(value.transform);
-
 
         /// <summary>Remove the Parent of a transform</summary>
         public void Unparent(Transform value) => value.parent = null;
@@ -148,6 +197,57 @@ namespace MalbersAnimations
         public void Unparent(GameObject value) => Unparent(value.transform);
         /// <summary>Remove the Parent of a transform</summary>
         public void Unparent(Component value) => Unparent(value.transform);
+
+        public void ParentToThis(Transform value) => value.transform.parent = this.transform;
+
+        public void ParentToThis(GameObject value) => ParentToThis(value.transform);
+
+        public void ParentToThis(Component value) => ParentToThis(value.transform);
+
+        public void UnparentAllFromThis()
+        {
+            if (transform.childCount > 0)
+            {
+                for (int i = 0; i < transform.childCount; i++)
+                {
+                    transform.GetChild(i).parent = null;
+                }
+            }
+        }
+
+        public void UnparentAllFromThisIsNotKinematic()
+        {
+            if (transform.childCount > 0)
+            {
+                for (int i = 0; i < transform.childCount; i++)
+                {
+                    if (transform.GetChild(i).gameObject.GetComponent<Rigidbody>() != null)
+                    {
+                        IsNotKinematicRigidbody(transform.GetChild(i).gameObject);
+                    }
+                    transform.GetChild(i).parent = null;
+                }
+            }
+        }
+
+
+        #region RigidBody
+        public void RigidBody_KinematicTrue(Rigidbody rb) => rb.isKinematic = true;
+
+        public void RigidBody_KinematicFalse(Rigidbody rb) => rb.isKinematic = false;
+
+        public void RigidBody_KinematicTrue(Collider go)
+        {
+            if (go.attachedRigidbody != null) go.attachedRigidbody.isKinematic = true;
+        }
+
+        public void RigidBody_KinematicFalse(Collider go)
+        {
+            if (go.attachedRigidbody != null) go.attachedRigidbody.isKinematic = false;
+        }
+
+        #endregion
+
 
         /// <summary>Disable a behaviour on a gameobject using its index of all the behaviours attached to the gameobject.
         /// Useful when they're duplicated components on a same gameobject </summary>
@@ -197,8 +297,7 @@ namespace MalbersAnimations
         public void Parent_Local(Transform value)
         {
             transform.parent = value;
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
+            transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             transform.localScale = Vector3.one;
         }
 
@@ -223,9 +322,7 @@ namespace MalbersAnimations
 
         public static void ShowCursorInvert(bool value) => ShowCursor(!value);
 
-
         private void DisableGo() => gameObject.SetActive(false);
-
 
         private IEnumerator C_Reset_GameObject(GameObject go)
         {
@@ -238,7 +335,6 @@ namespace MalbersAnimations
             }
             yield return null;
         }
-
         IEnumerator C_Reset_Mono(MonoBehaviour go)
         {
             if (go.gameObject.activeInHierarchy)
@@ -276,6 +372,8 @@ namespace MalbersAnimations
                 rt.sizeDelta = new Vector2(rt.sizeDelta.x, height);
             }
         }
+        public void RectTransform_Width(int width) => RectTransform_Width((float)width);
+        public void RectTransform_Height(int height) => RectTransform_Height((float)height);
     }
 
 

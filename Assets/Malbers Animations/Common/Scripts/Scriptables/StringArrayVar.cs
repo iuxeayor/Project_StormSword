@@ -11,8 +11,13 @@ namespace MalbersAnimations.Scriptables
     [CreateAssetMenu(menuName = "Malbers Animations/Variables/String Array", order = 1000)]
     public class StringArrayVar : StringVar
     {
-        [SerializeField]  private IntReference index = new IntReference(-1);
-        [SerializeField]  private List<string> array = new List<string>();
+        [SerializeField] private IntReference index = new(-1);
+        [SerializeField] private List<string> array = new();
+
+        public int Count => array.Count;
+        public int Length => array.Count;
+
+        public string this[int index] => array[index]; //Quick access to the array
 
         /// <summary>Value of the String Scriptable variable</summary>
         public override string Value
@@ -70,13 +75,13 @@ namespace MalbersAnimations.Scriptables
             serializedObject.Update();
             MalbersEditor.DrawDescription("Scriptable String Array");
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-        //    EditorGUILayout.BeginHorizontal();
+            //    EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(Description);
-         //   MalbersEditor.DrawDebugIcon(debug);
-         //   EditorGUILayout.EndHorizontal();
+            //   MalbersEditor.DrawDebugIcon(debug);
+            //   EditorGUILayout.EndHorizontal();
             EditorGUILayout.PropertyField(index);
             EditorGUI.indentLevel++;
-            EditorGUILayout.PropertyField(array,true);
+            EditorGUILayout.PropertyField(array, true);
             EditorGUI.indentLevel--;
 
             EditorGUILayout.EndVertical();

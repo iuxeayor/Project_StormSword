@@ -1,16 +1,17 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace MalbersAnimations.IK
 {
     /// <summary>  Process the weight by checking the Look At Angle of the Animator / </summary>
-    [System.Serializable]
-    [AddTypeMenu("Weight Animation Paramameter")]
+    [System.Serializable, AddTypeMenu("Animator/Parameter (Float)")]
     public class WeightAnimParam : WeightProcessor
     {
-        public Animator animator;
+        public override string DynamicName => $"Anim Float Parameter [{Parameter}]";
 
         [Tooltip("Name of the Animator Parameter to check")]
-        [AnimatorParam("animator", AnimatorControllerParameterType.Float)]
+        [AnimatorParam(AnimatorControllerParameterType.Float)]
         public string Parameter;
         [Tooltip("Normalize the weight by this value")]
         public float normalizedBy = 1;
@@ -18,15 +19,18 @@ namespace MalbersAnimations.IK
         [HideInInspector] public int AnimParamHash;
 
 
-        [Tooltip("  ")]
-        public bool invert = false;
+        public override void OnEnable(IKSet set, Animator Anim)
+        {
+            AnimParamHash = Animator.StringToHash(Parameter);
 
-        [Tooltip("Evaluate the Animation Parameter on an Animation Curve")]
-        public bool evaluate = false;
+            HashSet<int> animatorHashParams = new(Anim.parameters.Select(p => p.nameHash)); // Cache all Animator Parameters Hashes
 
-        [Hide(nameof(evaluate))]
-        [Tooltip("Evaluate the Animation Parameter value on this curve")]
-        public AnimationCurve curve = new(new Keyframe(1, 1), new Keyframe(1, 1));
+            if (!animatorHashParams.Contains(AnimParamHash))
+            {
+                Debug.LogWarning($"<b><color=orange> '{Anim.name}' Animator does not have '{Parameter}' parameter. Disabling Weight Processor </color> </b>", Anim);
+                Active = false;
+            }
+        }
 
         public override float Process(IKSet set, float weight)
         {
@@ -38,13 +42,8 @@ namespace MalbersAnimations.IK
             if (AnimParamHash != 0)
             {
                 animWeight = set.Animator.GetFloat(AnimParamHash) / normalizedBy;
-
-                if (evaluate) animWeight = curve.Evaluate(animWeight);
-
-
-                if (invert) animWeight = 1 - animWeight;
             }
-            return weight * animWeight;
+            return Mathf.Min(weight, animWeight);
         }
     }
 }

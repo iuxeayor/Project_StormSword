@@ -3,7 +3,7 @@
 namespace MalbersAnimations.Utilities
 {
     [AddComponentMenu("Malbers/Utilities/Tools/Comment")]
-    /// <summary>Adding Coments on the Inspector</summary>.
+    /// <summary>Adding Comments on the Inspector</summary>.
     public class Comment : MonoBehaviour
     {
         [Multiline] public string text;
@@ -17,7 +17,7 @@ namespace MalbersAnimations.Utilities
     }
 
 #if UNITY_EDITOR
-    [UnityEditor.CustomEditor(typeof(Comment)),UnityEditor.CanEditMultipleObjects]
+    [UnityEditor.CustomEditor(typeof(Comment)), UnityEditor.CanEditMultipleObjects]
     public class CommentEditor : UnityEditor.Editor
     {
         private GUIStyle style;
@@ -46,7 +46,7 @@ namespace MalbersAnimations.Utilities
             style.normal.textColor = UnityEditor.EditorStyles.boldLabel.normal.textColor;
             // Color.white;
 
-            
+
             using (new GUILayout.VerticalScope(MTools.StyleGray))
                 text.stringValue = UnityEditor.EditorGUILayout.TextArea(text.stringValue, style);
 

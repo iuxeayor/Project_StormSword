@@ -1,790 +1,2348 @@
 fileFormatVersion: 2
 guid: 6e8c69f3ae23b2642a9a3d3d2945ebfc
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: ' BackNub'
-    100002: ' ChestNub'
-    100004: ' Footsteps'
-    100006: ' HeadNub'
-    100008: ' JawNub'
-    100010: ' L Finger0Nub'
-    100012: ' L Toe0Nub'
-    100014: ' Ponytail1Nub'
-    100016: ' Ponytail2Nub'
-    100018: ' R Finger0Nub'
-    100020: ' R Toe0Nub'
-    100022: Armour
-    100024: Armour PA
-    100026: Back
-    100028: CG
-    100030: Chest
-    100032: CowBoy
-    100034: Ear L
-    100036: Ear R
-    100038: Feathers
-    100040: Feathers 1
-    100042: Feathers003
-    100044: Feathers004
-    100046: Feathers2
-    100048: Head
-    100050: Horn1
-    100052: Horn2
-    100054: Horse Body
-    100056: Horse Body Low
-    100058: Horse Body PA
-    100060: Horse Eyes
-    100062: Horse Mane1
-    100064: Horse Mane1 Low
-    100066: Horse Mane2
-    100068: Horse Mane2 Low
-    100070: Horse Tail
-    100072: Horse Tail Low
-    100074: Jaw
-    100076: L Calf
-    100078: L Clavicle
-    100080: L Finger0
-    100082: L Foot
-    100084: L Forearm
-    100086: L Hand
-    100088: L HorseLink
-    100090: L Thigh
-    100092: L Toe0
-    100094: L UpperArm
-    100096: Neck
-    100098: Neck1
-    100100: Neck2
-    100102: Pelvis
-    100104: Pistol 01
-    100106: Pistol 02
-    100108: R Calf
-    100110: R Clavicle
-    100112: R Finger0
-    100114: R Foot
-    100116: R Forearm
-    100118: R Hand
-    100120: R HorseLink
-    100122: R Thigh
-    100124: R Toe0
-    100126: R UpperArm
-    100128: R_CG
-    100130: R_Footsteps
-    100132: R_Head
-    100134: R_HeadNub
-    100136: R_L Calf
-    100138: R_L Clavicle
-    100140: R_L Finger0
-    100142: R_L Finger01
-    100144: R_L Finger02
-    100146: R_L Finger0Nub
-    100148: R_L Finger1
-    100150: R_L Finger11
-    100152: R_L Finger12
-    100154: R_L Finger1Nub
-    100156: R_L Finger2
-    100158: R_L Finger21
-    100160: R_L Finger22
-    100162: R_L Finger2Nub
-    100164: R_L Finger3
-    100166: R_L Finger31
-    100168: R_L Finger32
-    100170: R_L Finger3Nub
-    100172: R_L Finger4
-    100174: R_L Finger41
-    100176: R_L Finger42
-    100178: R_L Finger4Nub
-    100180: R_L Foot
-    100182: R_L Forearm
-    100184: R_L Hand
-    100186: R_L Thigh
-    100188: R_L Toe0
-    100190: R_L Toe0Nub
-    100192: R_L UpperArm
-    100194: R_Neck
-    100196: R_Pelvis
-    100198: R_R Calf
-    100200: R_R Clavicle
-    100202: R_R Finger0
-    100204: R_R Finger01
-    100206: R_R Finger02
-    100208: R_R Finger0Nub
-    100210: R_R Finger1
-    100212: R_R Finger11
-    100214: R_R Finger12
-    100216: R_R Finger1Nub
-    100218: R_R Finger2
-    100220: R_R Finger21
-    100222: R_R Finger22
-    100224: R_R Finger2Nub
-    100226: R_R Finger3
-    100228: R_R Finger31
-    100230: R_R Finger32
-    100232: R_R Finger3Nub
-    100234: R_R Finger4
-    100236: R_R Finger41
-    100238: R_R Finger42
-    100240: R_R Finger4Nub
-    100242: R_R Foot
-    100244: R_R Forearm
-    100246: R_R Hand
-    100248: R_R Thigh
-    100250: R_R Toe0
-    100252: R_R Toe0Nub
-    100254: R_R UpperArm
-    100256: R_Spine
-    100258: R_Spine1
-    100260: R_Spine2
-    100262: Reins
-    100264: Reins Carriage
-    100266: Reins Head
-    100268: Reins PA
-    100270: Reins_Bn_Hand_L
-    100272: Reins_Bn_Hand_R
-    100274: Reins_Bn_Head_L
-    100276: Reins_Bn_Head_R
-    100278: Reins_Bn_Neck_L
-    100280: Reins_Bn_Neck_R
-    100282: Root1
-    100284: Saddle
-    100286: Saddle Low
-    100288: Saddle PA
-    100290: Spine
-    100292: Spine1
-    100294: Spine2
-    100296: Tail01
-    100298: Tail02
-    100300: Tail03
-    100302: Tail04
-    100304: Tail05
-    100306: TailNub
-    100308: Wings004
-    100310: //RootNode
-    100312: Wng_ BeakBottom
-    100314: Wng_ BeakBottomNub
-    100316: Wng_ BeakTop
-    100318: Wng_ BeakTopNub
-    100320: Wng_ But
-    100322: Wng_ But02
-    100324: Wng_ ButNub
-    100326: Wng_ Footsteps
-    100328: Wng_ Head
-    100330: Wng_ HeadNub
-    100332: Wng_ L Calf
-    100334: Wng_ L Clavicle
-    100336: Wng_ L ClavicleNub
-    100338: Wng_ L Finger
-    100340: Wng_ L FingerNub
-    100342: Wng_ L Foot
-    100344: Wng_ L Forearm
-    100346: Wng_ L ForearmNub
-    100348: Wng_ L Hand
-    100350: Wng_ L HandNub
-    100352: Wng_ L Thigh
-    100354: Wng_ L Toe0
-    100356: Wng_ L Toe01
-    100358: Wng_ L Toe0Nub
-    100360: Wng_ L Toe1
-    100362: Wng_ L Toe11
-    100364: Wng_ L Toe1Nub
-    100366: Wng_ L Toe2
-    100368: Wng_ L Toe21
-    100370: Wng_ L Toe2Nub
-    100372: Wng_ L Toe3
-    100374: Wng_ L Toe31
-    100376: Wng_ L Toe3Nub
-    100378: Wng_ L UpperArm
-    100380: Wng_ L UpperArmNub
-    100382: Wng_ LEyeLid
-    100384: Wng_ LEyeLidNub
-    100386: Wng_ LFeather1
-    100388: Wng_ LFeather10
-    100390: Wng_ LFeather1002
-    100392: Wng_ LFeather102
-    100394: Wng_ LFeather10Nub
-    100396: Wng_ LFeather11
-    100398: Wng_ LFeather1102
-    100400: Wng_ LFeather11Nub
-    100402: Wng_ LFeather12
-    100404: Wng_ LFeather1202
-    100406: Wng_ LFeather12Nub
-    100408: Wng_ LFeather13
-    100410: Wng_ LFeather1302
-    100412: Wng_ LFeather13Nub
-    100414: Wng_ LFeather14
-    100416: Wng_ LFeather1402
-    100418: Wng_ LFeather14Nub
-    100420: Wng_ LFeather15
-    100422: Wng_ LFeather1502
-    100424: Wng_ LFeather15Nub
-    100426: Wng_ LFeather16
-    100428: Wng_ LFeather1602
-    100430: Wng_ LFeather16Nub
-    100432: Wng_ LFeather1Nub
-    100434: Wng_ LFeather2
-    100436: Wng_ LFeather202
-    100438: Wng_ LFeather2Nub
-    100440: Wng_ LFeather3
-    100442: Wng_ LFeather302
-    100444: Wng_ LFeather3Nub
-    100446: Wng_ LFeather4
-    100448: Wng_ LFeather402
-    100450: Wng_ LFeather4Nub
-    100452: Wng_ LFeather5
-    100454: Wng_ LFeather502
-    100456: Wng_ LFeather5Nub
-    100458: Wng_ LFeather6
-    100460: Wng_ LFeather602
-    100462: Wng_ LFeather6Nub
-    100464: Wng_ LFeather7
-    100466: Wng_ LFeather702
-    100468: Wng_ LFeather7Nub
-    100470: Wng_ LFeather8
-    100472: Wng_ LFeather802
-    100474: Wng_ LFeather8Nub
-    100476: Wng_ LFeather9
-    100478: Wng_ LFeather902
-    100480: Wng_ LFeather9Nub
-    100482: Wng_ LTail01
-    100484: Wng_ LTail01Nub
-    100486: Wng_ LTail02
-    100488: Wng_ LTail02Nub
-    100490: Wng_ LTail03
-    100492: Wng_ LTail03Nub
-    100494: Wng_ LTail04
-    100496: Wng_ LTail04Nub
-    100498: Wng_ LTail05
-    100500: Wng_ LTail05Nub
-    100502: Wng_ Neck
-    100504: Wng_ Pelvis
-    100506: Wng_ R Calf
-    100508: Wng_ R Clavicle
-    100510: Wng_ R ClavicleNub
-    100512: Wng_ R Finger
-    100514: Wng_ R FingerNub
-    100516: Wng_ R Foot
-    100518: Wng_ R Forearm
-    100520: Wng_ R ForearmNub
-    100522: Wng_ R Hand
-    100524: Wng_ R HandNub
-    100526: Wng_ R Thigh
-    100528: Wng_ R Toe0
-    100530: Wng_ R Toe01
-    100532: Wng_ R Toe0Nub
-    100534: Wng_ R Toe1
-    100536: Wng_ R Toe11
-    100538: Wng_ R Toe1Nub
-    100540: Wng_ R Toe2
-    100542: Wng_ R Toe21
-    100544: Wng_ R Toe2Nub
-    100546: Wng_ R Toe3
-    100548: Wng_ R Toe31
-    100550: Wng_ R Toe3Nub
-    100552: Wng_ R UpperArm
-    100554: Wng_ R UpperArmNub
-    100556: Wng_ REyeLid
-    100558: Wng_ REyeLidNub
-    100560: Wng_ RFeather1
-    100562: Wng_ RFeather10
-    100564: Wng_ RFeather1002
-    100566: Wng_ RFeather102
-    100568: Wng_ RFeather10Nub
-    100570: Wng_ RFeather11
-    100572: Wng_ RFeather1102
-    100574: Wng_ RFeather11Nub
-    100576: Wng_ RFeather12
-    100578: Wng_ RFeather1202
-    100580: Wng_ RFeather12Nub
-    100582: Wng_ RFeather13
-    100584: Wng_ RFeather1302
-    100586: Wng_ RFeather13Nub
-    100588: Wng_ RFeather14
-    100590: Wng_ RFeather1402
-    100592: Wng_ RFeather14Nub
-    100594: Wng_ RFeather15
-    100596: Wng_ RFeather1502
-    100598: Wng_ RFeather15Nub
-    100600: Wng_ RFeather16
-    100602: Wng_ RFeather1602
-    100604: Wng_ RFeather16Nub
-    100606: Wng_ RFeather1Nub
-    100608: Wng_ RFeather2
-    100610: Wng_ RFeather202
-    100612: Wng_ RFeather2Nub
-    100614: Wng_ RFeather3
-    100616: Wng_ RFeather302
-    100618: Wng_ RFeather3Nub
-    100620: Wng_ RFeather4
-    100622: Wng_ RFeather402
-    100624: Wng_ RFeather4Nub
-    100626: Wng_ RFeather5
-    100628: Wng_ RFeather502
-    100630: Wng_ RFeather5Nub
-    100632: Wng_ RFeather6
-    100634: Wng_ RFeather602
-    100636: Wng_ RFeather6Nub
-    100638: Wng_ RFeather7
-    100640: Wng_ RFeather702
-    100642: Wng_ RFeather7Nub
-    100644: Wng_ RFeather8
-    100646: Wng_ RFeather802
-    100648: Wng_ RFeather8Nub
-    100650: Wng_ RFeather9
-    100652: Wng_ RFeather902
-    100654: Wng_ RFeather9Nub
-    100656: Wng_ RTail01
-    100658: Wng_ RTail01Nub
-    100660: Wng_ RTail02
-    100662: Wng_ RTail02Nub
-    100664: Wng_ RTail03
-    100666: Wng_ RTail03Nub
-    100668: Wng_ RTail04
-    100670: Wng_ RTail04Nub
-    100672: Wng_ RTail05
-    100674: Wng_ RTail05Nub
-    100676: Wng_ Spine
-    100678: Wng_ Spine1
-    100680: Wng_ Tail Center
-    100682: Wng_ Tail CenterNub
-    100684: Wng_ Throat
-    100686: Wng_ ThroatNub
-    100688: Wng_ Tongue
-    100690: Wng_ TongueNub
-    100692: Wng_CG
-    100694: Root
-    400000: ' BackNub'
-    400002: ' ChestNub'
-    400004: ' Footsteps'
-    400006: ' HeadNub'
-    400008: ' JawNub'
-    400010: ' L Finger0Nub'
-    400012: ' L Toe0Nub'
-    400014: ' Ponytail1Nub'
-    400016: ' Ponytail2Nub'
-    400018: ' R Finger0Nub'
-    400020: ' R Toe0Nub'
-    400022: Armour
-    400024: Armour PA
-    400026: Back
-    400028: CG
-    400030: Chest
-    400032: CowBoy
-    400034: Ear L
-    400036: Ear R
-    400038: Feathers
-    400040: Feathers 1
-    400042: Feathers003
-    400044: Feathers004
-    400046: Feathers2
-    400048: Head
-    400050: Horn1
-    400052: Horn2
-    400054: Horse Body
-    400056: Horse Body Low
-    400058: Horse Body PA
-    400060: Horse Eyes
-    400062: Horse Mane1
-    400064: Horse Mane1 Low
-    400066: Horse Mane2
-    400068: Horse Mane2 Low
-    400070: Horse Tail
-    400072: Horse Tail Low
-    400074: Jaw
-    400076: L Calf
-    400078: L Clavicle
-    400080: L Finger0
-    400082: L Foot
-    400084: L Forearm
-    400086: L Hand
-    400088: L HorseLink
-    400090: L Thigh
-    400092: L Toe0
-    400094: L UpperArm
-    400096: Neck
-    400098: Neck1
-    400100: Neck2
-    400102: Pelvis
-    400104: Pistol 01
-    400106: Pistol 02
-    400108: R Calf
-    400110: R Clavicle
-    400112: R Finger0
-    400114: R Foot
-    400116: R Forearm
-    400118: R Hand
-    400120: R HorseLink
-    400122: R Thigh
-    400124: R Toe0
-    400126: R UpperArm
-    400128: R_CG
-    400130: R_Footsteps
-    400132: R_Head
-    400134: R_HeadNub
-    400136: R_L Calf
-    400138: R_L Clavicle
-    400140: R_L Finger0
-    400142: R_L Finger01
-    400144: R_L Finger02
-    400146: R_L Finger0Nub
-    400148: R_L Finger1
-    400150: R_L Finger11
-    400152: R_L Finger12
-    400154: R_L Finger1Nub
-    400156: R_L Finger2
-    400158: R_L Finger21
-    400160: R_L Finger22
-    400162: R_L Finger2Nub
-    400164: R_L Finger3
-    400166: R_L Finger31
-    400168: R_L Finger32
-    400170: R_L Finger3Nub
-    400172: R_L Finger4
-    400174: R_L Finger41
-    400176: R_L Finger42
-    400178: R_L Finger4Nub
-    400180: R_L Foot
-    400182: R_L Forearm
-    400184: R_L Hand
-    400186: R_L Thigh
-    400188: R_L Toe0
-    400190: R_L Toe0Nub
-    400192: R_L UpperArm
-    400194: R_Neck
-    400196: R_Pelvis
-    400198: R_R Calf
-    400200: R_R Clavicle
-    400202: R_R Finger0
-    400204: R_R Finger01
-    400206: R_R Finger02
-    400208: R_R Finger0Nub
-    400210: R_R Finger1
-    400212: R_R Finger11
-    400214: R_R Finger12
-    400216: R_R Finger1Nub
-    400218: R_R Finger2
-    400220: R_R Finger21
-    400222: R_R Finger22
-    400224: R_R Finger2Nub
-    400226: R_R Finger3
-    400228: R_R Finger31
-    400230: R_R Finger32
-    400232: R_R Finger3Nub
-    400234: R_R Finger4
-    400236: R_R Finger41
-    400238: R_R Finger42
-    400240: R_R Finger4Nub
-    400242: R_R Foot
-    400244: R_R Forearm
-    400246: R_R Hand
-    400248: R_R Thigh
-    400250: R_R Toe0
-    400252: R_R Toe0Nub
-    400254: R_R UpperArm
-    400256: R_Spine
-    400258: R_Spine1
-    400260: R_Spine2
-    400262: Reins
-    400264: Reins Carriage
-    400266: Reins Head
-    400268: Reins PA
-    400270: Reins_Bn_Hand_L
-    400272: Reins_Bn_Hand_R
-    400274: Reins_Bn_Head_L
-    400276: Reins_Bn_Head_R
-    400278: Reins_Bn_Neck_L
-    400280: Reins_Bn_Neck_R
-    400282: Root1
-    400284: Saddle
-    400286: Saddle Low
-    400288: Saddle PA
-    400290: Spine
-    400292: Spine1
-    400294: Spine2
-    400296: Tail01
-    400298: Tail02
-    400300: Tail03
-    400302: Tail04
-    400304: Tail05
-    400306: TailNub
-    400308: Wings004
-    400310: //RootNode
-    400312: Wng_ BeakBottom
-    400314: Wng_ BeakBottomNub
-    400316: Wng_ BeakTop
-    400318: Wng_ BeakTopNub
-    400320: Wng_ But
-    400322: Wng_ But02
-    400324: Wng_ ButNub
-    400326: Wng_ Footsteps
-    400328: Wng_ Head
-    400330: Wng_ HeadNub
-    400332: Wng_ L Calf
-    400334: Wng_ L Clavicle
-    400336: Wng_ L ClavicleNub
-    400338: Wng_ L Finger
-    400340: Wng_ L FingerNub
-    400342: Wng_ L Foot
-    400344: Wng_ L Forearm
-    400346: Wng_ L ForearmNub
-    400348: Wng_ L Hand
-    400350: Wng_ L HandNub
-    400352: Wng_ L Thigh
-    400354: Wng_ L Toe0
-    400356: Wng_ L Toe01
-    400358: Wng_ L Toe0Nub
-    400360: Wng_ L Toe1
-    400362: Wng_ L Toe11
-    400364: Wng_ L Toe1Nub
-    400366: Wng_ L Toe2
-    400368: Wng_ L Toe21
-    400370: Wng_ L Toe2Nub
-    400372: Wng_ L Toe3
-    400374: Wng_ L Toe31
-    400376: Wng_ L Toe3Nub
-    400378: Wng_ L UpperArm
-    400380: Wng_ L UpperArmNub
-    400382: Wng_ LEyeLid
-    400384: Wng_ LEyeLidNub
-    400386: Wng_ LFeather1
-    400388: Wng_ LFeather10
-    400390: Wng_ LFeather1002
-    400392: Wng_ LFeather102
-    400394: Wng_ LFeather10Nub
-    400396: Wng_ LFeather11
-    400398: Wng_ LFeather1102
-    400400: Wng_ LFeather11Nub
-    400402: Wng_ LFeather12
-    400404: Wng_ LFeather1202
-    400406: Wng_ LFeather12Nub
-    400408: Wng_ LFeather13
-    400410: Wng_ LFeather1302
-    400412: Wng_ LFeather13Nub
-    400414: Wng_ LFeather14
-    400416: Wng_ LFeather1402
-    400418: Wng_ LFeather14Nub
-    400420: Wng_ LFeather15
-    400422: Wng_ LFeather1502
-    400424: Wng_ LFeather15Nub
-    400426: Wng_ LFeather16
-    400428: Wng_ LFeather1602
-    400430: Wng_ LFeather16Nub
-    400432: Wng_ LFeather1Nub
-    400434: Wng_ LFeather2
-    400436: Wng_ LFeather202
-    400438: Wng_ LFeather2Nub
-    400440: Wng_ LFeather3
-    400442: Wng_ LFeather302
-    400444: Wng_ LFeather3Nub
-    400446: Wng_ LFeather4
-    400448: Wng_ LFeather402
-    400450: Wng_ LFeather4Nub
-    400452: Wng_ LFeather5
-    400454: Wng_ LFeather502
-    400456: Wng_ LFeather5Nub
-    400458: Wng_ LFeather6
-    400460: Wng_ LFeather602
-    400462: Wng_ LFeather6Nub
-    400464: Wng_ LFeather7
-    400466: Wng_ LFeather702
-    400468: Wng_ LFeather7Nub
-    400470: Wng_ LFeather8
-    400472: Wng_ LFeather802
-    400474: Wng_ LFeather8Nub
-    400476: Wng_ LFeather9
-    400478: Wng_ LFeather902
-    400480: Wng_ LFeather9Nub
-    400482: Wng_ LTail01
-    400484: Wng_ LTail01Nub
-    400486: Wng_ LTail02
-    400488: Wng_ LTail02Nub
-    400490: Wng_ LTail03
-    400492: Wng_ LTail03Nub
-    400494: Wng_ LTail04
-    400496: Wng_ LTail04Nub
-    400498: Wng_ LTail05
-    400500: Wng_ LTail05Nub
-    400502: Wng_ Neck
-    400504: Wng_ Pelvis
-    400506: Wng_ R Calf
-    400508: Wng_ R Clavicle
-    400510: Wng_ R ClavicleNub
-    400512: Wng_ R Finger
-    400514: Wng_ R FingerNub
-    400516: Wng_ R Foot
-    400518: Wng_ R Forearm
-    400520: Wng_ R ForearmNub
-    400522: Wng_ R Hand
-    400524: Wng_ R HandNub
-    400526: Wng_ R Thigh
-    400528: Wng_ R Toe0
-    400530: Wng_ R Toe01
-    400532: Wng_ R Toe0Nub
-    400534: Wng_ R Toe1
-    400536: Wng_ R Toe11
-    400538: Wng_ R Toe1Nub
-    400540: Wng_ R Toe2
-    400542: Wng_ R Toe21
-    400544: Wng_ R Toe2Nub
-    400546: Wng_ R Toe3
-    400548: Wng_ R Toe31
-    400550: Wng_ R Toe3Nub
-    400552: Wng_ R UpperArm
-    400554: Wng_ R UpperArmNub
-    400556: Wng_ REyeLid
-    400558: Wng_ REyeLidNub
-    400560: Wng_ RFeather1
-    400562: Wng_ RFeather10
-    400564: Wng_ RFeather1002
-    400566: Wng_ RFeather102
-    400568: Wng_ RFeather10Nub
-    400570: Wng_ RFeather11
-    400572: Wng_ RFeather1102
-    400574: Wng_ RFeather11Nub
-    400576: Wng_ RFeather12
-    400578: Wng_ RFeather1202
-    400580: Wng_ RFeather12Nub
-    400582: Wng_ RFeather13
-    400584: Wng_ RFeather1302
-    400586: Wng_ RFeather13Nub
-    400588: Wng_ RFeather14
-    400590: Wng_ RFeather1402
-    400592: Wng_ RFeather14Nub
-    400594: Wng_ RFeather15
-    400596: Wng_ RFeather1502
-    400598: Wng_ RFeather15Nub
-    400600: Wng_ RFeather16
-    400602: Wng_ RFeather1602
-    400604: Wng_ RFeather16Nub
-    400606: Wng_ RFeather1Nub
-    400608: Wng_ RFeather2
-    400610: Wng_ RFeather202
-    400612: Wng_ RFeather2Nub
-    400614: Wng_ RFeather3
-    400616: Wng_ RFeather302
-    400618: Wng_ RFeather3Nub
-    400620: Wng_ RFeather4
-    400622: Wng_ RFeather402
-    400624: Wng_ RFeather4Nub
-    400626: Wng_ RFeather5
-    400628: Wng_ RFeather502
-    400630: Wng_ RFeather5Nub
-    400632: Wng_ RFeather6
-    400634: Wng_ RFeather602
-    400636: Wng_ RFeather6Nub
-    400638: Wng_ RFeather7
-    400640: Wng_ RFeather702
-    400642: Wng_ RFeather7Nub
-    400644: Wng_ RFeather8
-    400646: Wng_ RFeather802
-    400648: Wng_ RFeather8Nub
-    400650: Wng_ RFeather9
-    400652: Wng_ RFeather902
-    400654: Wng_ RFeather9Nub
-    400656: Wng_ RTail01
-    400658: Wng_ RTail01Nub
-    400660: Wng_ RTail02
-    400662: Wng_ RTail02Nub
-    400664: Wng_ RTail03
-    400666: Wng_ RTail03Nub
-    400668: Wng_ RTail04
-    400670: Wng_ RTail04Nub
-    400672: Wng_ RTail05
-    400674: Wng_ RTail05Nub
-    400676: Wng_ Spine
-    400678: Wng_ Spine1
-    400680: Wng_ Tail Center
-    400682: Wng_ Tail CenterNub
-    400684: Wng_ Throat
-    400686: Wng_ ThroatNub
-    400688: Wng_ Tongue
-    400690: Wng_ TongueNub
-    400692: Wng_CG
-    400694: Root
-    2100000: Eyes
-    2100002: Mane
-    2100004: Cowboy
-    2100006: Horse
-    2100008: Sadle
-    2100010: 07 - Default
-    2100012: Hair Low
-    2100014: Wing
-    2100016: 16 - Default
-    2100018: Armour
-    2100020: 01 - Default
-    2100022: 'Material #69'
-    2100024: Horn
-    2100026: default
-    2100028: 'Material #318'
-    2300000: Feathers2
-    2300002: Horn1
-    2300004: Horn2
-    2300006: Horse Mane2
-    2300008: Pistol 01
-    2300010: Pistol 02
-    3300000: Feathers2
-    3300002: Horn1
-    3300004: Horn2
-    3300006: Horse Mane2
-    3300008: Pistol 01
-    3300010: Pistol 02
-    4300000: Horse Eyes
-    4300002: Horse Mane1
-    4300004: Pistol 01
-    4300006: Pistol 02
-    4300008: Horse Tail
-    4300010: CowBoy
-    4300012: Horse Body
-    4300014: Saddle
-    4300016: Reins Head
-    4300018: Reins
-    4300020: Saddle Low
-    4300022: Horse Body Low
-    4300024: Horse Tail Low
-    4300026: Horse Mane2 Low
-    4300028: Horse Mane2
-    4300030: Horse Mane1 Low
-    4300032: Reins Carriage
-    4300034: Armour
-    4300036: Horse Body PA
-    4300038: Saddle PA
-    4300040: Reins PA
-    4300042: Armour PA
-    4300044: Feathers
-    4300046: Horn1
-    4300048: Horn2
-    4300050: Feathers2
-    4300052: Feathers003
-    4300054: Feathers004
-    4300056: Wings004
-    4300058: Feathers
-    7400000: Wings_Jump_Forward
-    9500000: //RootNode
-    13700000: Armour
-    13700002: Armour PA
-    13700004: CowBoy
-    13700006: Feathers
-    13700008: Feathers 1
-    13700010: Feathers003
-    13700012: Feathers004
-    13700014: Horse Body
-    13700016: Horse Body Low
-    13700018: Horse Body PA
-    13700020: Horse Eyes
-    13700022: Horse Mane1
-    13700024: Horse Mane1 Low
-    13700026: Horse Mane2 Low
-    13700028: Horse Tail
-    13700030: Horse Tail Low
-    13700032: Reins
-    13700034: Reins Carriage
-    13700036: Reins Head
-    13700038: Reins PA
-    13700040: Saddle
-    13700042: Saddle Low
-    13700044: Saddle PA
-    13700046: Wings004
+  serializedVersion: 22200
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: ' BackNub'
+  - first:
+      1: 100002
+    second: ' ChestNub'
+  - first:
+      1: 100004
+    second: ' Footsteps'
+  - first:
+      1: 100006
+    second: ' HeadNub'
+  - first:
+      1: 100008
+    second: ' JawNub'
+  - first:
+      1: 100010
+    second: ' L Finger0Nub'
+  - first:
+      1: 100012
+    second: ' L Toe0Nub'
+  - first:
+      1: 100014
+    second: ' Ponytail1Nub'
+  - first:
+      1: 100016
+    second: ' Ponytail2Nub'
+  - first:
+      1: 100018
+    second: ' R Finger0Nub'
+  - first:
+      1: 100020
+    second: ' R Toe0Nub'
+  - first:
+      1: 100022
+    second: Armour
+  - first:
+      1: 100024
+    second: Armour PA
+  - first:
+      1: 100026
+    second: Back
+  - first:
+      1: 100028
+    second: CG
+  - first:
+      1: 100030
+    second: Chest
+  - first:
+      1: 100032
+    second: CowBoy
+  - first:
+      1: 100034
+    second: Ear L
+  - first:
+      1: 100036
+    second: Ear R
+  - first:
+      1: 100038
+    second: Feathers
+  - first:
+      1: 100040
+    second: Feathers 1
+  - first:
+      1: 100042
+    second: Feathers003
+  - first:
+      1: 100044
+    second: Feathers004
+  - first:
+      1: 100046
+    second: Feathers2
+  - first:
+      1: 100048
+    second: Head
+  - first:
+      1: 100050
+    second: Horn1
+  - first:
+      1: 100052
+    second: Horn2
+  - first:
+      1: 100054
+    second: Horse Body
+  - first:
+      1: 100056
+    second: Horse Body Low
+  - first:
+      1: 100058
+    second: Horse Body PA
+  - first:
+      1: 100060
+    second: Horse Eyes
+  - first:
+      1: 100062
+    second: Horse Mane1
+  - first:
+      1: 100064
+    second: Horse Mane1 Low
+  - first:
+      1: 100066
+    second: Horse Mane2
+  - first:
+      1: 100068
+    second: Horse Mane2 Low
+  - first:
+      1: 100070
+    second: Horse Tail
+  - first:
+      1: 100072
+    second: Horse Tail Low
+  - first:
+      1: 100074
+    second: Jaw
+  - first:
+      1: 100076
+    second: L Calf
+  - first:
+      1: 100078
+    second: L Clavicle
+  - first:
+      1: 100080
+    second: L Finger0
+  - first:
+      1: 100082
+    second: L Foot
+  - first:
+      1: 100084
+    second: L Forearm
+  - first:
+      1: 100086
+    second: L Hand
+  - first:
+      1: 100088
+    second: L HorseLink
+  - first:
+      1: 100090
+    second: L Thigh
+  - first:
+      1: 100092
+    second: L Toe0
+  - first:
+      1: 100094
+    second: L UpperArm
+  - first:
+      1: 100096
+    second: Neck
+  - first:
+      1: 100098
+    second: Neck1
+  - first:
+      1: 100100
+    second: Neck2
+  - first:
+      1: 100102
+    second: Pelvis
+  - first:
+      1: 100104
+    second: Pistol 01
+  - first:
+      1: 100106
+    second: Pistol 02
+  - first:
+      1: 100108
+    second: R Calf
+  - first:
+      1: 100110
+    second: R Clavicle
+  - first:
+      1: 100112
+    second: R Finger0
+  - first:
+      1: 100114
+    second: R Foot
+  - first:
+      1: 100116
+    second: R Forearm
+  - first:
+      1: 100118
+    second: R Hand
+  - first:
+      1: 100120
+    second: R HorseLink
+  - first:
+      1: 100122
+    second: R Thigh
+  - first:
+      1: 100124
+    second: R Toe0
+  - first:
+      1: 100126
+    second: R UpperArm
+  - first:
+      1: 100128
+    second: R_CG
+  - first:
+      1: 100130
+    second: R_Footsteps
+  - first:
+      1: 100132
+    second: R_Head
+  - first:
+      1: 100134
+    second: R_HeadNub
+  - first:
+      1: 100136
+    second: R_L Calf
+  - first:
+      1: 100138
+    second: R_L Clavicle
+  - first:
+      1: 100140
+    second: R_L Finger0
+  - first:
+      1: 100142
+    second: R_L Finger01
+  - first:
+      1: 100144
+    second: R_L Finger02
+  - first:
+      1: 100146
+    second: R_L Finger0Nub
+  - first:
+      1: 100148
+    second: R_L Finger1
+  - first:
+      1: 100150
+    second: R_L Finger11
+  - first:
+      1: 100152
+    second: R_L Finger12
+  - first:
+      1: 100154
+    second: R_L Finger1Nub
+  - first:
+      1: 100156
+    second: R_L Finger2
+  - first:
+      1: 100158
+    second: R_L Finger21
+  - first:
+      1: 100160
+    second: R_L Finger22
+  - first:
+      1: 100162
+    second: R_L Finger2Nub
+  - first:
+      1: 100164
+    second: R_L Finger3
+  - first:
+      1: 100166
+    second: R_L Finger31
+  - first:
+      1: 100168
+    second: R_L Finger32
+  - first:
+      1: 100170
+    second: R_L Finger3Nub
+  - first:
+      1: 100172
+    second: R_L Finger4
+  - first:
+      1: 100174
+    second: R_L Finger41
+  - first:
+      1: 100176
+    second: R_L Finger42
+  - first:
+      1: 100178
+    second: R_L Finger4Nub
+  - first:
+      1: 100180
+    second: R_L Foot
+  - first:
+      1: 100182
+    second: R_L Forearm
+  - first:
+      1: 100184
+    second: R_L Hand
+  - first:
+      1: 100186
+    second: R_L Thigh
+  - first:
+      1: 100188
+    second: R_L Toe0
+  - first:
+      1: 100190
+    second: R_L Toe0Nub
+  - first:
+      1: 100192
+    second: R_L UpperArm
+  - first:
+      1: 100194
+    second: R_Neck
+  - first:
+      1: 100196
+    second: R_Pelvis
+  - first:
+      1: 100198
+    second: R_R Calf
+  - first:
+      1: 100200
+    second: R_R Clavicle
+  - first:
+      1: 100202
+    second: R_R Finger0
+  - first:
+      1: 100204
+    second: R_R Finger01
+  - first:
+      1: 100206
+    second: R_R Finger02
+  - first:
+      1: 100208
+    second: R_R Finger0Nub
+  - first:
+      1: 100210
+    second: R_R Finger1
+  - first:
+      1: 100212
+    second: R_R Finger11
+  - first:
+      1: 100214
+    second: R_R Finger12
+  - first:
+      1: 100216
+    second: R_R Finger1Nub
+  - first:
+      1: 100218
+    second: R_R Finger2
+  - first:
+      1: 100220
+    second: R_R Finger21
+  - first:
+      1: 100222
+    second: R_R Finger22
+  - first:
+      1: 100224
+    second: R_R Finger2Nub
+  - first:
+      1: 100226
+    second: R_R Finger3
+  - first:
+      1: 100228
+    second: R_R Finger31
+  - first:
+      1: 100230
+    second: R_R Finger32
+  - first:
+      1: 100232
+    second: R_R Finger3Nub
+  - first:
+      1: 100234
+    second: R_R Finger4
+  - first:
+      1: 100236
+    second: R_R Finger41
+  - first:
+      1: 100238
+    second: R_R Finger42
+  - first:
+      1: 100240
+    second: R_R Finger4Nub
+  - first:
+      1: 100242
+    second: R_R Foot
+  - first:
+      1: 100244
+    second: R_R Forearm
+  - first:
+      1: 100246
+    second: R_R Hand
+  - first:
+      1: 100248
+    second: R_R Thigh
+  - first:
+      1: 100250
+    second: R_R Toe0
+  - first:
+      1: 100252
+    second: R_R Toe0Nub
+  - first:
+      1: 100254
+    second: R_R UpperArm
+  - first:
+      1: 100256
+    second: R_Spine
+  - first:
+      1: 100258
+    second: R_Spine1
+  - first:
+      1: 100260
+    second: R_Spine2
+  - first:
+      1: 100262
+    second: Reins
+  - first:
+      1: 100264
+    second: Reins Carriage
+  - first:
+      1: 100266
+    second: Reins Head
+  - first:
+      1: 100268
+    second: Reins PA
+  - first:
+      1: 100270
+    second: Reins_Bn_Hand_L
+  - first:
+      1: 100272
+    second: Reins_Bn_Hand_R
+  - first:
+      1: 100274
+    second: Reins_Bn_Head_L
+  - first:
+      1: 100276
+    second: Reins_Bn_Head_R
+  - first:
+      1: 100278
+    second: Reins_Bn_Neck_L
+  - first:
+      1: 100280
+    second: Reins_Bn_Neck_R
+  - first:
+      1: 100282
+    second: Root1
+  - first:
+      1: 100284
+    second: Saddle
+  - first:
+      1: 100286
+    second: Saddle Low
+  - first:
+      1: 100288
+    second: Saddle PA
+  - first:
+      1: 100290
+    second: Spine
+  - first:
+      1: 100292
+    second: Spine1
+  - first:
+      1: 100294
+    second: Spine2
+  - first:
+      1: 100296
+    second: Tail01
+  - first:
+      1: 100298
+    second: Tail02
+  - first:
+      1: 100300
+    second: Tail03
+  - first:
+      1: 100302
+    second: Tail04
+  - first:
+      1: 100304
+    second: Tail05
+  - first:
+      1: 100306
+    second: TailNub
+  - first:
+      1: 100308
+    second: Wings004
+  - first:
+      1: 100310
+    second: //RootNode
+  - first:
+      1: 100312
+    second: Wng_ BeakBottom
+  - first:
+      1: 100314
+    second: Wng_ BeakBottomNub
+  - first:
+      1: 100316
+    second: Wng_ BeakTop
+  - first:
+      1: 100318
+    second: Wng_ BeakTopNub
+  - first:
+      1: 100320
+    second: Wng_ But
+  - first:
+      1: 100322
+    second: Wng_ But02
+  - first:
+      1: 100324
+    second: Wng_ ButNub
+  - first:
+      1: 100326
+    second: Wng_ Footsteps
+  - first:
+      1: 100328
+    second: Wng_ Head
+  - first:
+      1: 100330
+    second: Wng_ HeadNub
+  - first:
+      1: 100332
+    second: Wng_ L Calf
+  - first:
+      1: 100334
+    second: Wng_ L Clavicle
+  - first:
+      1: 100336
+    second: Wng_ L ClavicleNub
+  - first:
+      1: 100338
+    second: Wng_ L Finger
+  - first:
+      1: 100340
+    second: Wng_ L FingerNub
+  - first:
+      1: 100342
+    second: Wng_ L Foot
+  - first:
+      1: 100344
+    second: Wng_ L Forearm
+  - first:
+      1: 100346
+    second: Wng_ L ForearmNub
+  - first:
+      1: 100348
+    second: Wng_ L Hand
+  - first:
+      1: 100350
+    second: Wng_ L HandNub
+  - first:
+      1: 100352
+    second: Wng_ L Thigh
+  - first:
+      1: 100354
+    second: Wng_ L Toe0
+  - first:
+      1: 100356
+    second: Wng_ L Toe01
+  - first:
+      1: 100358
+    second: Wng_ L Toe0Nub
+  - first:
+      1: 100360
+    second: Wng_ L Toe1
+  - first:
+      1: 100362
+    second: Wng_ L Toe11
+  - first:
+      1: 100364
+    second: Wng_ L Toe1Nub
+  - first:
+      1: 100366
+    second: Wng_ L Toe2
+  - first:
+      1: 100368
+    second: Wng_ L Toe21
+  - first:
+      1: 100370
+    second: Wng_ L Toe2Nub
+  - first:
+      1: 100372
+    second: Wng_ L Toe3
+  - first:
+      1: 100374
+    second: Wng_ L Toe31
+  - first:
+      1: 100376
+    second: Wng_ L Toe3Nub
+  - first:
+      1: 100378
+    second: Wng_ L UpperArm
+  - first:
+      1: 100380
+    second: Wng_ L UpperArmNub
+  - first:
+      1: 100382
+    second: Wng_ LEyeLid
+  - first:
+      1: 100384
+    second: Wng_ LEyeLidNub
+  - first:
+      1: 100386
+    second: Wng_ LFeather1
+  - first:
+      1: 100388
+    second: Wng_ LFeather10
+  - first:
+      1: 100390
+    second: Wng_ LFeather1002
+  - first:
+      1: 100392
+    second: Wng_ LFeather102
+  - first:
+      1: 100394
+    second: Wng_ LFeather10Nub
+  - first:
+      1: 100396
+    second: Wng_ LFeather11
+  - first:
+      1: 100398
+    second: Wng_ LFeather1102
+  - first:
+      1: 100400
+    second: Wng_ LFeather11Nub
+  - first:
+      1: 100402
+    second: Wng_ LFeather12
+  - first:
+      1: 100404
+    second: Wng_ LFeather1202
+  - first:
+      1: 100406
+    second: Wng_ LFeather12Nub
+  - first:
+      1: 100408
+    second: Wng_ LFeather13
+  - first:
+      1: 100410
+    second: Wng_ LFeather1302
+  - first:
+      1: 100412
+    second: Wng_ LFeather13Nub
+  - first:
+      1: 100414
+    second: Wng_ LFeather14
+  - first:
+      1: 100416
+    second: Wng_ LFeather1402
+  - first:
+      1: 100418
+    second: Wng_ LFeather14Nub
+  - first:
+      1: 100420
+    second: Wng_ LFeather15
+  - first:
+      1: 100422
+    second: Wng_ LFeather1502
+  - first:
+      1: 100424
+    second: Wng_ LFeather15Nub
+  - first:
+      1: 100426
+    second: Wng_ LFeather16
+  - first:
+      1: 100428
+    second: Wng_ LFeather1602
+  - first:
+      1: 100430
+    second: Wng_ LFeather16Nub
+  - first:
+      1: 100432
+    second: Wng_ LFeather1Nub
+  - first:
+      1: 100434
+    second: Wng_ LFeather2
+  - first:
+      1: 100436
+    second: Wng_ LFeather202
+  - first:
+      1: 100438
+    second: Wng_ LFeather2Nub
+  - first:
+      1: 100440
+    second: Wng_ LFeather3
+  - first:
+      1: 100442
+    second: Wng_ LFeather302
+  - first:
+      1: 100444
+    second: Wng_ LFeather3Nub
+  - first:
+      1: 100446
+    second: Wng_ LFeather4
+  - first:
+      1: 100448
+    second: Wng_ LFeather402
+  - first:
+      1: 100450
+    second: Wng_ LFeather4Nub
+  - first:
+      1: 100452
+    second: Wng_ LFeather5
+  - first:
+      1: 100454
+    second: Wng_ LFeather502
+  - first:
+      1: 100456
+    second: Wng_ LFeather5Nub
+  - first:
+      1: 100458
+    second: Wng_ LFeather6
+  - first:
+      1: 100460
+    second: Wng_ LFeather602
+  - first:
+      1: 100462
+    second: Wng_ LFeather6Nub
+  - first:
+      1: 100464
+    second: Wng_ LFeather7
+  - first:
+      1: 100466
+    second: Wng_ LFeather702
+  - first:
+      1: 100468
+    second: Wng_ LFeather7Nub
+  - first:
+      1: 100470
+    second: Wng_ LFeather8
+  - first:
+      1: 100472
+    second: Wng_ LFeather802
+  - first:
+      1: 100474
+    second: Wng_ LFeather8Nub
+  - first:
+      1: 100476
+    second: Wng_ LFeather9
+  - first:
+      1: 100478
+    second: Wng_ LFeather902
+  - first:
+      1: 100480
+    second: Wng_ LFeather9Nub
+  - first:
+      1: 100482
+    second: Wng_ LTail01
+  - first:
+      1: 100484
+    second: Wng_ LTail01Nub
+  - first:
+      1: 100486
+    second: Wng_ LTail02
+  - first:
+      1: 100488
+    second: Wng_ LTail02Nub
+  - first:
+      1: 100490
+    second: Wng_ LTail03
+  - first:
+      1: 100492
+    second: Wng_ LTail03Nub
+  - first:
+      1: 100494
+    second: Wng_ LTail04
+  - first:
+      1: 100496
+    second: Wng_ LTail04Nub
+  - first:
+      1: 100498
+    second: Wng_ LTail05
+  - first:
+      1: 100500
+    second: Wng_ LTail05Nub
+  - first:
+      1: 100502
+    second: Wng_ Neck
+  - first:
+      1: 100504
+    second: Wng_ Pelvis
+  - first:
+      1: 100506
+    second: Wng_ R Calf
+  - first:
+      1: 100508
+    second: Wng_ R Clavicle
+  - first:
+      1: 100510
+    second: Wng_ R ClavicleNub
+  - first:
+      1: 100512
+    second: Wng_ R Finger
+  - first:
+      1: 100514
+    second: Wng_ R FingerNub
+  - first:
+      1: 100516
+    second: Wng_ R Foot
+  - first:
+      1: 100518
+    second: Wng_ R Forearm
+  - first:
+      1: 100520
+    second: Wng_ R ForearmNub
+  - first:
+      1: 100522
+    second: Wng_ R Hand
+  - first:
+      1: 100524
+    second: Wng_ R HandNub
+  - first:
+      1: 100526
+    second: Wng_ R Thigh
+  - first:
+      1: 100528
+    second: Wng_ R Toe0
+  - first:
+      1: 100530
+    second: Wng_ R Toe01
+  - first:
+      1: 100532
+    second: Wng_ R Toe0Nub
+  - first:
+      1: 100534
+    second: Wng_ R Toe1
+  - first:
+      1: 100536
+    second: Wng_ R Toe11
+  - first:
+      1: 100538
+    second: Wng_ R Toe1Nub
+  - first:
+      1: 100540
+    second: Wng_ R Toe2
+  - first:
+      1: 100542
+    second: Wng_ R Toe21
+  - first:
+      1: 100544
+    second: Wng_ R Toe2Nub
+  - first:
+      1: 100546
+    second: Wng_ R Toe3
+  - first:
+      1: 100548
+    second: Wng_ R Toe31
+  - first:
+      1: 100550
+    second: Wng_ R Toe3Nub
+  - first:
+      1: 100552
+    second: Wng_ R UpperArm
+  - first:
+      1: 100554
+    second: Wng_ R UpperArmNub
+  - first:
+      1: 100556
+    second: Wng_ REyeLid
+  - first:
+      1: 100558
+    second: Wng_ REyeLidNub
+  - first:
+      1: 100560
+    second: Wng_ RFeather1
+  - first:
+      1: 100562
+    second: Wng_ RFeather10
+  - first:
+      1: 100564
+    second: Wng_ RFeather1002
+  - first:
+      1: 100566
+    second: Wng_ RFeather102
+  - first:
+      1: 100568
+    second: Wng_ RFeather10Nub
+  - first:
+      1: 100570
+    second: Wng_ RFeather11
+  - first:
+      1: 100572
+    second: Wng_ RFeather1102
+  - first:
+      1: 100574
+    second: Wng_ RFeather11Nub
+  - first:
+      1: 100576
+    second: Wng_ RFeather12
+  - first:
+      1: 100578
+    second: Wng_ RFeather1202
+  - first:
+      1: 100580
+    second: Wng_ RFeather12Nub
+  - first:
+      1: 100582
+    second: Wng_ RFeather13
+  - first:
+      1: 100584
+    second: Wng_ RFeather1302
+  - first:
+      1: 100586
+    second: Wng_ RFeather13Nub
+  - first:
+      1: 100588
+    second: Wng_ RFeather14
+  - first:
+      1: 100590
+    second: Wng_ RFeather1402
+  - first:
+      1: 100592
+    second: Wng_ RFeather14Nub
+  - first:
+      1: 100594
+    second: Wng_ RFeather15
+  - first:
+      1: 100596
+    second: Wng_ RFeather1502
+  - first:
+      1: 100598
+    second: Wng_ RFeather15Nub
+  - first:
+      1: 100600
+    second: Wng_ RFeather16
+  - first:
+      1: 100602
+    second: Wng_ RFeather1602
+  - first:
+      1: 100604
+    second: Wng_ RFeather16Nub
+  - first:
+      1: 100606
+    second: Wng_ RFeather1Nub
+  - first:
+      1: 100608
+    second: Wng_ RFeather2
+  - first:
+      1: 100610
+    second: Wng_ RFeather202
+  - first:
+      1: 100612
+    second: Wng_ RFeather2Nub
+  - first:
+      1: 100614
+    second: Wng_ RFeather3
+  - first:
+      1: 100616
+    second: Wng_ RFeather302
+  - first:
+      1: 100618
+    second: Wng_ RFeather3Nub
+  - first:
+      1: 100620
+    second: Wng_ RFeather4
+  - first:
+      1: 100622
+    second: Wng_ RFeather402
+  - first:
+      1: 100624
+    second: Wng_ RFeather4Nub
+  - first:
+      1: 100626
+    second: Wng_ RFeather5
+  - first:
+      1: 100628
+    second: Wng_ RFeather502
+  - first:
+      1: 100630
+    second: Wng_ RFeather5Nub
+  - first:
+      1: 100632
+    second: Wng_ RFeather6
+  - first:
+      1: 100634
+    second: Wng_ RFeather602
+  - first:
+      1: 100636
+    second: Wng_ RFeather6Nub
+  - first:
+      1: 100638
+    second: Wng_ RFeather7
+  - first:
+      1: 100640
+    second: Wng_ RFeather702
+  - first:
+      1: 100642
+    second: Wng_ RFeather7Nub
+  - first:
+      1: 100644
+    second: Wng_ RFeather8
+  - first:
+      1: 100646
+    second: Wng_ RFeather802
+  - first:
+      1: 100648
+    second: Wng_ RFeather8Nub
+  - first:
+      1: 100650
+    second: Wng_ RFeather9
+  - first:
+      1: 100652
+    second: Wng_ RFeather902
+  - first:
+      1: 100654
+    second: Wng_ RFeather9Nub
+  - first:
+      1: 100656
+    second: Wng_ RTail01
+  - first:
+      1: 100658
+    second: Wng_ RTail01Nub
+  - first:
+      1: 100660
+    second: Wng_ RTail02
+  - first:
+      1: 100662
+    second: Wng_ RTail02Nub
+  - first:
+      1: 100664
+    second: Wng_ RTail03
+  - first:
+      1: 100666
+    second: Wng_ RTail03Nub
+  - first:
+      1: 100668
+    second: Wng_ RTail04
+  - first:
+      1: 100670
+    second: Wng_ RTail04Nub
+  - first:
+      1: 100672
+    second: Wng_ RTail05
+  - first:
+      1: 100674
+    second: Wng_ RTail05Nub
+  - first:
+      1: 100676
+    second: Wng_ Spine
+  - first:
+      1: 100678
+    second: Wng_ Spine1
+  - first:
+      1: 100680
+    second: Wng_ Tail Center
+  - first:
+      1: 100682
+    second: Wng_ Tail CenterNub
+  - first:
+      1: 100684
+    second: Wng_ Throat
+  - first:
+      1: 100686
+    second: Wng_ ThroatNub
+  - first:
+      1: 100688
+    second: Wng_ Tongue
+  - first:
+      1: 100690
+    second: Wng_ TongueNub
+  - first:
+      1: 100692
+    second: Wng_CG
+  - first:
+      1: 100694
+    second: Root
+  - first:
+      4: 400000
+    second: ' BackNub'
+  - first:
+      4: 400002
+    second: ' ChestNub'
+  - first:
+      4: 400004
+    second: ' Footsteps'
+  - first:
+      4: 400006
+    second: ' HeadNub'
+  - first:
+      4: 400008
+    second: ' JawNub'
+  - first:
+      4: 400010
+    second: ' L Finger0Nub'
+  - first:
+      4: 400012
+    second: ' L Toe0Nub'
+  - first:
+      4: 400014
+    second: ' Ponytail1Nub'
+  - first:
+      4: 400016
+    second: ' Ponytail2Nub'
+  - first:
+      4: 400018
+    second: ' R Finger0Nub'
+  - first:
+      4: 400020
+    second: ' R Toe0Nub'
+  - first:
+      4: 400022
+    second: Armour
+  - first:
+      4: 400024
+    second: Armour PA
+  - first:
+      4: 400026
+    second: Back
+  - first:
+      4: 400028
+    second: CG
+  - first:
+      4: 400030
+    second: Chest
+  - first:
+      4: 400032
+    second: CowBoy
+  - first:
+      4: 400034
+    second: Ear L
+  - first:
+      4: 400036
+    second: Ear R
+  - first:
+      4: 400038
+    second: Feathers
+  - first:
+      4: 400040
+    second: Feathers 1
+  - first:
+      4: 400042
+    second: Feathers003
+  - first:
+      4: 400044
+    second: Feathers004
+  - first:
+      4: 400046
+    second: Feathers2
+  - first:
+      4: 400048
+    second: Head
+  - first:
+      4: 400050
+    second: Horn1
+  - first:
+      4: 400052
+    second: Horn2
+  - first:
+      4: 400054
+    second: Horse Body
+  - first:
+      4: 400056
+    second: Horse Body Low
+  - first:
+      4: 400058
+    second: Horse Body PA
+  - first:
+      4: 400060
+    second: Horse Eyes
+  - first:
+      4: 400062
+    second: Horse Mane1
+  - first:
+      4: 400064
+    second: Horse Mane1 Low
+  - first:
+      4: 400066
+    second: Horse Mane2
+  - first:
+      4: 400068
+    second: Horse Mane2 Low
+  - first:
+      4: 400070
+    second: Horse Tail
+  - first:
+      4: 400072
+    second: Horse Tail Low
+  - first:
+      4: 400074
+    second: Jaw
+  - first:
+      4: 400076
+    second: L Calf
+  - first:
+      4: 400078
+    second: L Clavicle
+  - first:
+      4: 400080
+    second: L Finger0
+  - first:
+      4: 400082
+    second: L Foot
+  - first:
+      4: 400084
+    second: L Forearm
+  - first:
+      4: 400086
+    second: L Hand
+  - first:
+      4: 400088
+    second: L HorseLink
+  - first:
+      4: 400090
+    second: L Thigh
+  - first:
+      4: 400092
+    second: L Toe0
+  - first:
+      4: 400094
+    second: L UpperArm
+  - first:
+      4: 400096
+    second: Neck
+  - first:
+      4: 400098
+    second: Neck1
+  - first:
+      4: 400100
+    second: Neck2
+  - first:
+      4: 400102
+    second: Pelvis
+  - first:
+      4: 400104
+    second: Pistol 01
+  - first:
+      4: 400106
+    second: Pistol 02
+  - first:
+      4: 400108
+    second: R Calf
+  - first:
+      4: 400110
+    second: R Clavicle
+  - first:
+      4: 400112
+    second: R Finger0
+  - first:
+      4: 400114
+    second: R Foot
+  - first:
+      4: 400116
+    second: R Forearm
+  - first:
+      4: 400118
+    second: R Hand
+  - first:
+      4: 400120
+    second: R HorseLink
+  - first:
+      4: 400122
+    second: R Thigh
+  - first:
+      4: 400124
+    second: R Toe0
+  - first:
+      4: 400126
+    second: R UpperArm
+  - first:
+      4: 400128
+    second: R_CG
+  - first:
+      4: 400130
+    second: R_Footsteps
+  - first:
+      4: 400132
+    second: R_Head
+  - first:
+      4: 400134
+    second: R_HeadNub
+  - first:
+      4: 400136
+    second: R_L Calf
+  - first:
+      4: 400138
+    second: R_L Clavicle
+  - first:
+      4: 400140
+    second: R_L Finger0
+  - first:
+      4: 400142
+    second: R_L Finger01
+  - first:
+      4: 400144
+    second: R_L Finger02
+  - first:
+      4: 400146
+    second: R_L Finger0Nub
+  - first:
+      4: 400148
+    second: R_L Finger1
+  - first:
+      4: 400150
+    second: R_L Finger11
+  - first:
+      4: 400152
+    second: R_L Finger12
+  - first:
+      4: 400154
+    second: R_L Finger1Nub
+  - first:
+      4: 400156
+    second: R_L Finger2
+  - first:
+      4: 400158
+    second: R_L Finger21
+  - first:
+      4: 400160
+    second: R_L Finger22
+  - first:
+      4: 400162
+    second: R_L Finger2Nub
+  - first:
+      4: 400164
+    second: R_L Finger3
+  - first:
+      4: 400166
+    second: R_L Finger31
+  - first:
+      4: 400168
+    second: R_L Finger32
+  - first:
+      4: 400170
+    second: R_L Finger3Nub
+  - first:
+      4: 400172
+    second: R_L Finger4
+  - first:
+      4: 400174
+    second: R_L Finger41
+  - first:
+      4: 400176
+    second: R_L Finger42
+  - first:
+      4: 400178
+    second: R_L Finger4Nub
+  - first:
+      4: 400180
+    second: R_L Foot
+  - first:
+      4: 400182
+    second: R_L Forearm
+  - first:
+      4: 400184
+    second: R_L Hand
+  - first:
+      4: 400186
+    second: R_L Thigh
+  - first:
+      4: 400188
+    second: R_L Toe0
+  - first:
+      4: 400190
+    second: R_L Toe0Nub
+  - first:
+      4: 400192
+    second: R_L UpperArm
+  - first:
+      4: 400194
+    second: R_Neck
+  - first:
+      4: 400196
+    second: R_Pelvis
+  - first:
+      4: 400198
+    second: R_R Calf
+  - first:
+      4: 400200
+    second: R_R Clavicle
+  - first:
+      4: 400202
+    second: R_R Finger0
+  - first:
+      4: 400204
+    second: R_R Finger01
+  - first:
+      4: 400206
+    second: R_R Finger02
+  - first:
+      4: 400208
+    second: R_R Finger0Nub
+  - first:
+      4: 400210
+    second: R_R Finger1
+  - first:
+      4: 400212
+    second: R_R Finger11
+  - first:
+      4: 400214
+    second: R_R Finger12
+  - first:
+      4: 400216
+    second: R_R Finger1Nub
+  - first:
+      4: 400218
+    second: R_R Finger2
+  - first:
+      4: 400220
+    second: R_R Finger21
+  - first:
+      4: 400222
+    second: R_R Finger22
+  - first:
+      4: 400224
+    second: R_R Finger2Nub
+  - first:
+      4: 400226
+    second: R_R Finger3
+  - first:
+      4: 400228
+    second: R_R Finger31
+  - first:
+      4: 400230
+    second: R_R Finger32
+  - first:
+      4: 400232
+    second: R_R Finger3Nub
+  - first:
+      4: 400234
+    second: R_R Finger4
+  - first:
+      4: 400236
+    second: R_R Finger41
+  - first:
+      4: 400238
+    second: R_R Finger42
+  - first:
+      4: 400240
+    second: R_R Finger4Nub
+  - first:
+      4: 400242
+    second: R_R Foot
+  - first:
+      4: 400244
+    second: R_R Forearm
+  - first:
+      4: 400246
+    second: R_R Hand
+  - first:
+      4: 400248
+    second: R_R Thigh
+  - first:
+      4: 400250
+    second: R_R Toe0
+  - first:
+      4: 400252
+    second: R_R Toe0Nub
+  - first:
+      4: 400254
+    second: R_R UpperArm
+  - first:
+      4: 400256
+    second: R_Spine
+  - first:
+      4: 400258
+    second: R_Spine1
+  - first:
+      4: 400260
+    second: R_Spine2
+  - first:
+      4: 400262
+    second: Reins
+  - first:
+      4: 400264
+    second: Reins Carriage
+  - first:
+      4: 400266
+    second: Reins Head
+  - first:
+      4: 400268
+    second: Reins PA
+  - first:
+      4: 400270
+    second: Reins_Bn_Hand_L
+  - first:
+      4: 400272
+    second: Reins_Bn_Hand_R
+  - first:
+      4: 400274
+    second: Reins_Bn_Head_L
+  - first:
+      4: 400276
+    second: Reins_Bn_Head_R
+  - first:
+      4: 400278
+    second: Reins_Bn_Neck_L
+  - first:
+      4: 400280
+    second: Reins_Bn_Neck_R
+  - first:
+      4: 400282
+    second: Root1
+  - first:
+      4: 400284
+    second: Saddle
+  - first:
+      4: 400286
+    second: Saddle Low
+  - first:
+      4: 400288
+    second: Saddle PA
+  - first:
+      4: 400290
+    second: Spine
+  - first:
+      4: 400292
+    second: Spine1
+  - first:
+      4: 400294
+    second: Spine2
+  - first:
+      4: 400296
+    second: Tail01
+  - first:
+      4: 400298
+    second: Tail02
+  - first:
+      4: 400300
+    second: Tail03
+  - first:
+      4: 400302
+    second: Tail04
+  - first:
+      4: 400304
+    second: Tail05
+  - first:
+      4: 400306
+    second: TailNub
+  - first:
+      4: 400308
+    second: Wings004
+  - first:
+      4: 400310
+    second: //RootNode
+  - first:
+      4: 400312
+    second: Wng_ BeakBottom
+  - first:
+      4: 400314
+    second: Wng_ BeakBottomNub
+  - first:
+      4: 400316
+    second: Wng_ BeakTop
+  - first:
+      4: 400318
+    second: Wng_ BeakTopNub
+  - first:
+      4: 400320
+    second: Wng_ But
+  - first:
+      4: 400322
+    second: Wng_ But02
+  - first:
+      4: 400324
+    second: Wng_ ButNub
+  - first:
+      4: 400326
+    second: Wng_ Footsteps
+  - first:
+      4: 400328
+    second: Wng_ Head
+  - first:
+      4: 400330
+    second: Wng_ HeadNub
+  - first:
+      4: 400332
+    second: Wng_ L Calf
+  - first:
+      4: 400334
+    second: Wng_ L Clavicle
+  - first:
+      4: 400336
+    second: Wng_ L ClavicleNub
+  - first:
+      4: 400338
+    second: Wng_ L Finger
+  - first:
+      4: 400340
+    second: Wng_ L FingerNub
+  - first:
+      4: 400342
+    second: Wng_ L Foot
+  - first:
+      4: 400344
+    second: Wng_ L Forearm
+  - first:
+      4: 400346
+    second: Wng_ L ForearmNub
+  - first:
+      4: 400348
+    second: Wng_ L Hand
+  - first:
+      4: 400350
+    second: Wng_ L HandNub
+  - first:
+      4: 400352
+    second: Wng_ L Thigh
+  - first:
+      4: 400354
+    second: Wng_ L Toe0
+  - first:
+      4: 400356
+    second: Wng_ L Toe01
+  - first:
+      4: 400358
+    second: Wng_ L Toe0Nub
+  - first:
+      4: 400360
+    second: Wng_ L Toe1
+  - first:
+      4: 400362
+    second: Wng_ L Toe11
+  - first:
+      4: 400364
+    second: Wng_ L Toe1Nub
+  - first:
+      4: 400366
+    second: Wng_ L Toe2
+  - first:
+      4: 400368
+    second: Wng_ L Toe21
+  - first:
+      4: 400370
+    second: Wng_ L Toe2Nub
+  - first:
+      4: 400372
+    second: Wng_ L Toe3
+  - first:
+      4: 400374
+    second: Wng_ L Toe31
+  - first:
+      4: 400376
+    second: Wng_ L Toe3Nub
+  - first:
+      4: 400378
+    second: Wng_ L UpperArm
+  - first:
+      4: 400380
+    second: Wng_ L UpperArmNub
+  - first:
+      4: 400382
+    second: Wng_ LEyeLid
+  - first:
+      4: 400384
+    second: Wng_ LEyeLidNub
+  - first:
+      4: 400386
+    second: Wng_ LFeather1
+  - first:
+      4: 400388
+    second: Wng_ LFeather10
+  - first:
+      4: 400390
+    second: Wng_ LFeather1002
+  - first:
+      4: 400392
+    second: Wng_ LFeather102
+  - first:
+      4: 400394
+    second: Wng_ LFeather10Nub
+  - first:
+      4: 400396
+    second: Wng_ LFeather11
+  - first:
+      4: 400398
+    second: Wng_ LFeather1102
+  - first:
+      4: 400400
+    second: Wng_ LFeather11Nub
+  - first:
+      4: 400402
+    second: Wng_ LFeather12
+  - first:
+      4: 400404
+    second: Wng_ LFeather1202
+  - first:
+      4: 400406
+    second: Wng_ LFeather12Nub
+  - first:
+      4: 400408
+    second: Wng_ LFeather13
+  - first:
+      4: 400410
+    second: Wng_ LFeather1302
+  - first:
+      4: 400412
+    second: Wng_ LFeather13Nub
+  - first:
+      4: 400414
+    second: Wng_ LFeather14
+  - first:
+      4: 400416
+    second: Wng_ LFeather1402
+  - first:
+      4: 400418
+    second: Wng_ LFeather14Nub
+  - first:
+      4: 400420
+    second: Wng_ LFeather15
+  - first:
+      4: 400422
+    second: Wng_ LFeather1502
+  - first:
+      4: 400424
+    second: Wng_ LFeather15Nub
+  - first:
+      4: 400426
+    second: Wng_ LFeather16
+  - first:
+      4: 400428
+    second: Wng_ LFeather1602
+  - first:
+      4: 400430
+    second: Wng_ LFeather16Nub
+  - first:
+      4: 400432
+    second: Wng_ LFeather1Nub
+  - first:
+      4: 400434
+    second: Wng_ LFeather2
+  - first:
+      4: 400436
+    second: Wng_ LFeather202
+  - first:
+      4: 400438
+    second: Wng_ LFeather2Nub
+  - first:
+      4: 400440
+    second: Wng_ LFeather3
+  - first:
+      4: 400442
+    second: Wng_ LFeather302
+  - first:
+      4: 400444
+    second: Wng_ LFeather3Nub
+  - first:
+      4: 400446
+    second: Wng_ LFeather4
+  - first:
+      4: 400448
+    second: Wng_ LFeather402
+  - first:
+      4: 400450
+    second: Wng_ LFeather4Nub
+  - first:
+      4: 400452
+    second: Wng_ LFeather5
+  - first:
+      4: 400454
+    second: Wng_ LFeather502
+  - first:
+      4: 400456
+    second: Wng_ LFeather5Nub
+  - first:
+      4: 400458
+    second: Wng_ LFeather6
+  - first:
+      4: 400460
+    second: Wng_ LFeather602
+  - first:
+      4: 400462
+    second: Wng_ LFeather6Nub
+  - first:
+      4: 400464
+    second: Wng_ LFeather7
+  - first:
+      4: 400466
+    second: Wng_ LFeather702
+  - first:
+      4: 400468
+    second: Wng_ LFeather7Nub
+  - first:
+      4: 400470
+    second: Wng_ LFeather8
+  - first:
+      4: 400472
+    second: Wng_ LFeather802
+  - first:
+      4: 400474
+    second: Wng_ LFeather8Nub
+  - first:
+      4: 400476
+    second: Wng_ LFeather9
+  - first:
+      4: 400478
+    second: Wng_ LFeather902
+  - first:
+      4: 400480
+    second: Wng_ LFeather9Nub
+  - first:
+      4: 400482
+    second: Wng_ LTail01
+  - first:
+      4: 400484
+    second: Wng_ LTail01Nub
+  - first:
+      4: 400486
+    second: Wng_ LTail02
+  - first:
+      4: 400488
+    second: Wng_ LTail02Nub
+  - first:
+      4: 400490
+    second: Wng_ LTail03
+  - first:
+      4: 400492
+    second: Wng_ LTail03Nub
+  - first:
+      4: 400494
+    second: Wng_ LTail04
+  - first:
+      4: 400496
+    second: Wng_ LTail04Nub
+  - first:
+      4: 400498
+    second: Wng_ LTail05
+  - first:
+      4: 400500
+    second: Wng_ LTail05Nub
+  - first:
+      4: 400502
+    second: Wng_ Neck
+  - first:
+      4: 400504
+    second: Wng_ Pelvis
+  - first:
+      4: 400506
+    second: Wng_ R Calf
+  - first:
+      4: 400508
+    second: Wng_ R Clavicle
+  - first:
+      4: 400510
+    second: Wng_ R ClavicleNub
+  - first:
+      4: 400512
+    second: Wng_ R Finger
+  - first:
+      4: 400514
+    second: Wng_ R FingerNub
+  - first:
+      4: 400516
+    second: Wng_ R Foot
+  - first:
+      4: 400518
+    second: Wng_ R Forearm
+  - first:
+      4: 400520
+    second: Wng_ R ForearmNub
+  - first:
+      4: 400522
+    second: Wng_ R Hand
+  - first:
+      4: 400524
+    second: Wng_ R HandNub
+  - first:
+      4: 400526
+    second: Wng_ R Thigh
+  - first:
+      4: 400528
+    second: Wng_ R Toe0
+  - first:
+      4: 400530
+    second: Wng_ R Toe01
+  - first:
+      4: 400532
+    second: Wng_ R Toe0Nub
+  - first:
+      4: 400534
+    second: Wng_ R Toe1
+  - first:
+      4: 400536
+    second: Wng_ R Toe11
+  - first:
+      4: 400538
+    second: Wng_ R Toe1Nub
+  - first:
+      4: 400540
+    second: Wng_ R Toe2
+  - first:
+      4: 400542
+    second: Wng_ R Toe21
+  - first:
+      4: 400544
+    second: Wng_ R Toe2Nub
+  - first:
+      4: 400546
+    second: Wng_ R Toe3
+  - first:
+      4: 400548
+    second: Wng_ R Toe31
+  - first:
+      4: 400550
+    second: Wng_ R Toe3Nub
+  - first:
+      4: 400552
+    second: Wng_ R UpperArm
+  - first:
+      4: 400554
+    second: Wng_ R UpperArmNub
+  - first:
+      4: 400556
+    second: Wng_ REyeLid
+  - first:
+      4: 400558
+    second: Wng_ REyeLidNub
+  - first:
+      4: 400560
+    second: Wng_ RFeather1
+  - first:
+      4: 400562
+    second: Wng_ RFeather10
+  - first:
+      4: 400564
+    second: Wng_ RFeather1002
+  - first:
+      4: 400566
+    second: Wng_ RFeather102
+  - first:
+      4: 400568
+    second: Wng_ RFeather10Nub
+  - first:
+      4: 400570
+    second: Wng_ RFeather11
+  - first:
+      4: 400572
+    second: Wng_ RFeather1102
+  - first:
+      4: 400574
+    second: Wng_ RFeather11Nub
+  - first:
+      4: 400576
+    second: Wng_ RFeather12
+  - first:
+      4: 400578
+    second: Wng_ RFeather1202
+  - first:
+      4: 400580
+    second: Wng_ RFeather12Nub
+  - first:
+      4: 400582
+    second: Wng_ RFeather13
+  - first:
+      4: 400584
+    second: Wng_ RFeather1302
+  - first:
+      4: 400586
+    second: Wng_ RFeather13Nub
+  - first:
+      4: 400588
+    second: Wng_ RFeather14
+  - first:
+      4: 400590
+    second: Wng_ RFeather1402
+  - first:
+      4: 400592
+    second: Wng_ RFeather14Nub
+  - first:
+      4: 400594
+    second: Wng_ RFeather15
+  - first:
+      4: 400596
+    second: Wng_ RFeather1502
+  - first:
+      4: 400598
+    second: Wng_ RFeather15Nub
+  - first:
+      4: 400600
+    second: Wng_ RFeather16
+  - first:
+      4: 400602
+    second: Wng_ RFeather1602
+  - first:
+      4: 400604
+    second: Wng_ RFeather16Nub
+  - first:
+      4: 400606
+    second: Wng_ RFeather1Nub
+  - first:
+      4: 400608
+    second: Wng_ RFeather2
+  - first:
+      4: 400610
+    second: Wng_ RFeather202
+  - first:
+      4: 400612
+    second: Wng_ RFeather2Nub
+  - first:
+      4: 400614
+    second: Wng_ RFeather3
+  - first:
+      4: 400616
+    second: Wng_ RFeather302
+  - first:
+      4: 400618
+    second: Wng_ RFeather3Nub
+  - first:
+      4: 400620
+    second: Wng_ RFeather4
+  - first:
+      4: 400622
+    second: Wng_ RFeather402
+  - first:
+      4: 400624
+    second: Wng_ RFeather4Nub
+  - first:
+      4: 400626
+    second: Wng_ RFeather5
+  - first:
+      4: 400628
+    second: Wng_ RFeather502
+  - first:
+      4: 400630
+    second: Wng_ RFeather5Nub
+  - first:
+      4: 400632
+    second: Wng_ RFeather6
+  - first:
+      4: 400634
+    second: Wng_ RFeather602
+  - first:
+      4: 400636
+    second: Wng_ RFeather6Nub
+  - first:
+      4: 400638
+    second: Wng_ RFeather7
+  - first:
+      4: 400640
+    second: Wng_ RFeather702
+  - first:
+      4: 400642
+    second: Wng_ RFeather7Nub
+  - first:
+      4: 400644
+    second: Wng_ RFeather8
+  - first:
+      4: 400646
+    second: Wng_ RFeather802
+  - first:
+      4: 400648
+    second: Wng_ RFeather8Nub
+  - first:
+      4: 400650
+    second: Wng_ RFeather9
+  - first:
+      4: 400652
+    second: Wng_ RFeather902
+  - first:
+      4: 400654
+    second: Wng_ RFeather9Nub
+  - first:
+      4: 400656
+    second: Wng_ RTail01
+  - first:
+      4: 400658
+    second: Wng_ RTail01Nub
+  - first:
+      4: 400660
+    second: Wng_ RTail02
+  - first:
+      4: 400662
+    second: Wng_ RTail02Nub
+  - first:
+      4: 400664
+    second: Wng_ RTail03
+  - first:
+      4: 400666
+    second: Wng_ RTail03Nub
+  - first:
+      4: 400668
+    second: Wng_ RTail04
+  - first:
+      4: 400670
+    second: Wng_ RTail04Nub
+  - first:
+      4: 400672
+    second: Wng_ RTail05
+  - first:
+      4: 400674
+    second: Wng_ RTail05Nub
+  - first:
+      4: 400676
+    second: Wng_ Spine
+  - first:
+      4: 400678
+    second: Wng_ Spine1
+  - first:
+      4: 400680
+    second: Wng_ Tail Center
+  - first:
+      4: 400682
+    second: Wng_ Tail CenterNub
+  - first:
+      4: 400684
+    second: Wng_ Throat
+  - first:
+      4: 400686
+    second: Wng_ ThroatNub
+  - first:
+      4: 400688
+    second: Wng_ Tongue
+  - first:
+      4: 400690
+    second: Wng_ TongueNub
+  - first:
+      4: 400692
+    second: Wng_CG
+  - first:
+      4: 400694
+    second: Root
+  - first:
+      21: 2100000
+    second: Eyes
+  - first:
+      21: 2100002
+    second: Mane
+  - first:
+      21: 2100004
+    second: Cowboy
+  - first:
+      21: 2100006
+    second: Horse
+  - first:
+      21: 2100008
+    second: Sadle
+  - first:
+      21: 2100010
+    second: 07 - Default
+  - first:
+      21: 2100012
+    second: Hair Low
+  - first:
+      21: 2100014
+    second: Wing
+  - first:
+      21: 2100016
+    second: 16 - Default
+  - first:
+      21: 2100018
+    second: Armour
+  - first:
+      21: 2100020
+    second: 01 - Default
+  - first:
+      21: 2100022
+    second: Material #69
+  - first:
+      21: 2100024
+    second: Horn
+  - first:
+      21: 2100026
+    second: default
+  - first:
+      21: 2100028
+    second: Material #318
+  - first:
+      23: 2300000
+    second: Feathers2
+  - first:
+      23: 2300002
+    second: Horn1
+  - first:
+      23: 2300004
+    second: Horn2
+  - first:
+      23: 2300006
+    second: Horse Mane2
+  - first:
+      23: 2300008
+    second: Pistol 01
+  - first:
+      23: 2300010
+    second: Pistol 02
+  - first:
+      33: 3300000
+    second: Feathers2
+  - first:
+      33: 3300002
+    second: Horn1
+  - first:
+      33: 3300004
+    second: Horn2
+  - first:
+      33: 3300006
+    second: Horse Mane2
+  - first:
+      33: 3300008
+    second: Pistol 01
+  - first:
+      33: 3300010
+    second: Pistol 02
+  - first:
+      43: 4300000
+    second: Horse Eyes
+  - first:
+      43: 4300002
+    second: Horse Mane1
+  - first:
+      43: 4300004
+    second: Pistol 01
+  - first:
+      43: 4300006
+    second: Pistol 02
+  - first:
+      43: 4300008
+    second: Horse Tail
+  - first:
+      43: 4300010
+    second: CowBoy
+  - first:
+      43: 4300012
+    second: Horse Body
+  - first:
+      43: 4300014
+    second: Saddle
+  - first:
+      43: 4300016
+    second: Reins Head
+  - first:
+      43: 4300018
+    second: Reins
+  - first:
+      43: 4300020
+    second: Saddle Low
+  - first:
+      43: 4300022
+    second: Horse Body Low
+  - first:
+      43: 4300024
+    second: Horse Tail Low
+  - first:
+      43: 4300026
+    second: Horse Mane2 Low
+  - first:
+      43: 4300028
+    second: Horse Mane2
+  - first:
+      43: 4300030
+    second: Horse Mane1 Low
+  - first:
+      43: 4300032
+    second: Reins Carriage
+  - first:
+      43: 4300034
+    second: Armour
+  - first:
+      43: 4300036
+    second: Horse Body PA
+  - first:
+      43: 4300038
+    second: Saddle PA
+  - first:
+      43: 4300040
+    second: Reins PA
+  - first:
+      43: 4300042
+    second: Armour PA
+  - first:
+      43: 4300044
+    second: Feathers
+  - first:
+      43: 4300046
+    second: Horn1
+  - first:
+      43: 4300048
+    second: Horn2
+  - first:
+      43: 4300050
+    second: Feathers2
+  - first:
+      43: 4300052
+    second: Feathers003
+  - first:
+      43: 4300054
+    second: Feathers004
+  - first:
+      43: 4300056
+    second: Wings004
+  - first:
+      43: 4300058
+    second: Feathers
+  - first:
+      74: 7400000
+    second: Wings_Jump_Forward
+  - first:
+      95: 9500000
+    second: //RootNode
+  - first:
+      137: 13700000
+    second: Armour
+  - first:
+      137: 13700002
+    second: Armour PA
+  - first:
+      137: 13700004
+    second: CowBoy
+  - first:
+      137: 13700006
+    second: Feathers
+  - first:
+      137: 13700008
+    second: Feathers 1
+  - first:
+      137: 13700010
+    second: Feathers003
+  - first:
+      137: 13700012
+    second: Feathers004
+  - first:
+      137: 13700014
+    second: Horse Body
+  - first:
+      137: 13700016
+    second: Horse Body Low
+  - first:
+      137: 13700018
+    second: Horse Body PA
+  - first:
+      137: 13700020
+    second: Horse Eyes
+  - first:
+      137: 13700022
+    second: Horse Mane1
+  - first:
+      137: 13700024
+    second: Horse Mane1 Low
+  - first:
+      137: 13700026
+    second: Horse Mane2 Low
+  - first:
+      137: 13700028
+    second: Horse Tail
+  - first:
+      137: 13700030
+    second: Horse Tail Low
+  - first:
+      137: 13700032
+    second: Reins
+  - first:
+      137: 13700034
+    second: Reins Carriage
+  - first:
+      137: 13700036
+    second: Reins Head
+  - first:
+      137: 13700038
+    second: Reins PA
+  - first:
+      137: 13700040
+    second: Saddle
+  - first:
+      137: 13700042
+    second: Saddle Low
+  - first:
+      137: 13700044
+    second: Saddle PA
+  - first:
+      137: 13700046
+    second: Wings004
   externalObjects: {}
   materials:
-    importMaterials: 0
+    materialImportMode: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -793,6 +2351,7 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
     motionNodeName: 
     rigImportErrors: 
     rigImportWarnings: 
@@ -813,6 +2372,7 @@ ModelImporter:
     - serializedVersion: 16
       name: Wings_Jump_Forward
       takeName: Take 001
+      internalID: 0
       firstFrame: 0
       lastFrame: 40
       wrapMode: 0
@@ -845,6 +2405,35 @@ ModelImporter:
       maskType: 3
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Wings_Land_Forward
+      takeName: Take 001
+      internalID: -998496362607748373
+      firstFrame: 26
+      lastFrame: 40
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     isReadable: 1
   meshes:
     lODScreenPercentages: []
@@ -852,25 +2441,36 @@ ModelImporter:
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
     importVisibility: 0
     importBlendShapes: 0
     importCameras: 0
     importLights: 0
+    nodeNameCollisionStrategy: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    bakeAxisConversion: 0
     preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 0
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 0.01
-    hasPreviousCalculatedGlobalScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 2
@@ -879,10 +2479,10 @@ ModelImporter:
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
     blendShapeNormalImportMode: 2
     normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 1
-  copyAvatar: 1
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
     skeleton: []
     armTwist: 0.5
@@ -892,15 +2492,29 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: Wng_ Spine1
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 4820e39e24c02e44ea2c1ea310028590,
     type: 3}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
+  avatarSetup: 2
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Horse AnimSet Pro/2 - Animations/Animations
+    Clips/Wings/Wings_Jump_Forward.fbx
+  uploadId: 848732

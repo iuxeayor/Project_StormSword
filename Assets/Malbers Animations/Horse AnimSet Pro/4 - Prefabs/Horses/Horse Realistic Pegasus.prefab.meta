@@ -1,9 +1,15 @@
 fileFormatVersion: 2
-guid: 47d20c194f5aa554596cb4628d0394ea
-timeCreated: 1559609353
-licenseType: Store
-NativeFormatImporter:
-  mainObjectFileID: 100100000
+guid: c0cb494e9c49cd549a46eed6916fbced
+PrefabImporter:
+  externalObjects: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Horse AnimSet Pro/4 - Prefabs/Horses/Horse
+    Realistic Pegasus.prefab
+  uploadId: 848732

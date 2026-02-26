@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace MalbersAnimations.Controller
 {
+    [AddTypeMenu("Death/Ragdoll Replace")]
     public class RagdollDeath : State
     {
         [Header("Ragdoll")]
@@ -16,17 +17,21 @@ namespace MalbersAnimations.Controller
         public bool EnablePreProcessing = true;
         public CollisionDetectionMode collision = CollisionDetectionMode.ContinuousSpeculative;
 
-        public override string StateName => "Death/Ragdoll Replace";
+        //public override string StateName => "Death/Ragdoll Replace";
         public override string StateIDName => "Death";
 
-
+        [Tooltip("Destroy the Animal after the Ragdoll is created. If is set to false then it will only Hide the GameObject")]
+        public bool DestroyAnimal = true;
 
         public override void Activate()
         {
-            animal.Mode_Stop();
-            animal.Mode_Interrupt();
-            base.Activate();
-            Replace();
+            animal.Delay_Action(3, () =>
+            {
+                animal.Mode_Stop();
+                animal.Mode_Interrupt();
+                base.Activate();
+                Replace();
+            });
         }
 
         public void Replace()
@@ -68,7 +73,6 @@ namespace MalbersAnimations.Controller
             }
 
             animal.Anim.enabled = false; //Disable Animator (?)
-
 
 
             //Disable/Remove all mesh renderers in the ragdoll
@@ -114,9 +118,6 @@ namespace MalbersAnimations.Controller
                 RemapSkinToNewBones(rdoll, ragdollInstance.transform);
             }
 
-
-
-
             //Move all Skinned mesh renderers to the Ragdoll 
             foreach (var rdoll in allMeshRendererAnimal)
             {
@@ -124,19 +125,19 @@ namespace MalbersAnimations.Controller
                 {
                     if (rdoll.GetComponentInParent<LODGroup>() == null)
                     {
-                        var Parent = ragdollInstance.transform.FindGrandChild(rdoll.transform.parent.name) ??
-                            ragdollInstance.transform.FindGrandChild(rdoll.transform.parent.parent.name);
+                        //CustomPatch: fixed wrong null check usage for Unity objects (can cause hard to track null ref exceptions)
+                        Transform foundParent = null;
+                        Transform possibleParentTransform = ragdollInstance.transform.FindGrandChild(rdoll.transform.parent.name);
+                        if (possibleParentTransform != null)
+                            foundParent = possibleParentTransform;
+                        else
+                            foundParent = ragdollInstance.transform.FindGrandChild(rdoll.transform.parent.parent.name);
 
-                        rdoll.transform.parent = Parent;
+                        rdoll.transform.parent = foundParent;
                     }
                 }
             }
-            //  return;
-
-
-
-
-
+            //  return; 
 
             Vector3 HitDirection = Vector3.zero;
             Vector3 HitPoint = Vector3.zero;
@@ -158,11 +159,11 @@ namespace MalbersAnimations.Controller
             foreach (var rb in ragdollRB)
             {
                 rb.collisionDetectionMode = collision;
+                rb.isKinematic = false;
+                rb.linearVelocity = animal.RB.linearVelocity;  //Match the velocity that the animal had onto the ragdoll
 
-                rb.velocity = animal.RB.velocity;  //Match the velocity that the animal had onto the ragdoll
-
-                rb.drag = Drag;
-                rb.angularDrag = AngularDrag;
+                rb.linearDamping = Drag;
+                rb.angularDamping = AngularDrag;
 
                 if (HitCollider != null && HitCollider.name.Contains(rb.name)) //Find the collider and the rigidbody
                 {
@@ -177,8 +178,10 @@ namespace MalbersAnimations.Controller
 
             animal.Delay_Action(() =>
             {
-                //animal.gameObject.SetActive(false);
-                Destroy(animal.gameObject);
+                if (DestroyAnimal)
+                    Destroy(animal.gameObject);
+                else
+                    animal.gameObject.SetActive(false);
             });
         }
 

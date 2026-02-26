@@ -9,6 +9,7 @@ namespace MalbersAnimations.Reactions
 
     public class UnityEventReaction : Reaction
     {
+        public override string DynamicName => $"Unity Event Reaction [{Invoke.GetPersistentEventCount()}]";
         public override System.Type ReactionType => typeof(Component);
 
         public ComponentEvent Invoke = new();

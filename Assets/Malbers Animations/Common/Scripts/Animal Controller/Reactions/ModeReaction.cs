@@ -1,40 +1,60 @@
 ﻿using MalbersAnimations.Controller;
+using MalbersAnimations.Scriptables;
 using UnityEngine;
 
 namespace MalbersAnimations.Reactions
 {
-    [System.Serializable]
-    [AddTypeMenu("Malbers/Animal/Mode")]
+    [System.Serializable, AddTypeMenu("Malbers/Animal/Mode")]
     public class ModeReaction : MReaction
     {
-        public Mode_Reaction type = Mode_Reaction.Activate;
+        public override string DynamicName
+        {
+            get
+            {
+                var display = $"{type} [{(ID != null ? ID.name : "<Select>")} Mode]";
+
+
+
+                if (type == Mode_Reaction.Play)
+                {
+                    display += $" [{(Ability == -99 ? "Any Ability" : "Ability " + Ability.Value)}] " + abilityStatus;
+                }
+                return display;
+            }
+        }
+
+
+
+        public Mode_Reaction type = Mode_Reaction.Play;
         public ModeID ID;
+        [Hide(nameof(type), (int)Mode_Reaction.Play, (int)Mode_Reaction.ForceActivate)]
+        public AbilityStatus abilityStatus = AbilityStatus.PlayOnce;
 
         [Tooltip("If set to -99 it will do a random ability from the Mode")]
-        [Hide("type",
-            (int)Mode_Reaction.Activate,
-            (int)Mode_Reaction.ActivateForever,
+        [Hide(nameof(type),
+            (int)Mode_Reaction.Play,
+            //(int)Mode_Reaction.PlayForever,
             (int)Mode_Reaction.SetActiveIndex,
             (int)Mode_Reaction.ForceActivate,
             (int)Mode_Reaction.EnableAbility,
             (int)Mode_Reaction.DisableAbility
             )]
-        public int Ability = -99;
+        public IntReference Ability = new(-99);
 
 
-        [Hide("type", (int)Mode_Reaction.CoolDown)]
+
+        [Hide(nameof(type), (int)Mode_Reaction.CoolDown)]
         public bool HasCoolDown = true;
 
-        [Hide("type", (int)Mode_Reaction.CoolDown)]
+        [Hide(nameof(type), (int)Mode_Reaction.CoolDown)]
         public float coolDown = 0;
 
-        [Hide("type", (int)Mode_Reaction.Activate, (int)Mode_Reaction.ForceActivate)]
-        public AbilityStatus abilityStatus = AbilityStatus.PlayOneTime;
+
 
         [Hide("abilityStatus", (int)AbilityStatus.ActiveByTime)]
         public float AbilityTime = 3f;
 
-        [Hide("type", (int)Mode_Reaction.Activate, (int)Mode_Reaction.ActivateForever, (int)Mode_Reaction.ForceActivate)]
+        [Hide(nameof(type), (int)Mode_Reaction.Play, /*(int)Mode_Reaction.PlayForever,*/ (int)Mode_Reaction.ForceActivate)]
         [Tooltip("Mode Power Value for the Animator Controller")]
         public float ModePower = 0;
 
@@ -43,16 +63,17 @@ namespace MalbersAnimations.Reactions
             var animal = component as MAnimal;
 
             var mode = animal.Mode_Get(ID);
-            if (mode == null || ID == null) return false;
-
+            if (mode == null || ID == null)
+            {
+                Debug.Log("Mode Reaction Failed", component);
+                return false;
+            }
             animal.Mode_SetPower(ModePower);
 
             switch (type)
             {
-                case Mode_Reaction.Activate:
+                case Mode_Reaction.Play:
                     return animal.Mode_TryActivate(ID, Ability, abilityStatus, AbilityTime);
-                case Mode_Reaction.ActivateForever:
-                    return animal.Mode_TryActivate(ID, Ability, AbilityStatus.Forever);
                 case Mode_Reaction.Interrupt:
                     if (animal.ActiveMode.ID == ID)
                     {
@@ -86,6 +107,8 @@ namespace MalbersAnimations.Reactions
                     return animal.Mode_Ability_Enable(ID, Ability, true);
                 case Mode_Reaction.DisableAbility:
                     return animal.Mode_Ability_Enable(ID, Ability, false);
+                case Mode_Reaction.PlayActiveIndex:
+                    return animal.Mode_TryActivate(ID, mode.AbilityIndex);
                 default:
                     return false;
             }
@@ -94,12 +117,12 @@ namespace MalbersAnimations.Reactions
         public enum Mode_Reaction
         {
             /// <summary>Tries to Activate the State of the Zone</summary>
-            Activate,
+            Play,
             /// <summary>Activate  a Mode Forever</summary>
-            ActivateForever,
-            /// <summary>If the Animal will set the Mode Status to Interrput -2</summary>
+         //   PlayForever,
+            /// <summary>If the Animal will set the Mode Status to Interrupt -2</summary>
             Interrupt,
-            /// <summary>The Mode will be Stopped and its Input Reseted</summary>
+            /// <summary>The Mode will be Stopped and its Input Reset</summary>
             Stop,
             /// <summary>Force the State of the Zone to be enable even if it cannot be activate at the moment</summary>
             SetActiveIndex,
@@ -117,6 +140,8 @@ namespace MalbersAnimations.Reactions
             EnableAbility,
             /// <summary>Force a Mode to be activated.. ignoring if another mode is playing</summary>
             DisableAbility,
+            /// <summary>Play the current active index</summary>
+            PlayActiveIndex
         }
     }
 }

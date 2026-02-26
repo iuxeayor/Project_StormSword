@@ -1,11 +1,12 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Pool;
 
 
 namespace MalbersAnimations
 {
     /// <summary> Interface to identify Projectiles   </summary>
-    public interface IProjectile : IMLayer
+    public interface IProjectile : IMLayer, IPoolGameObject
     {
         /// <summary>Initial Velocity (Direction * Power) </summary>
         Vector3 Velocity { get; set; }
@@ -20,16 +21,18 @@ namespace MalbersAnimations
         Vector3 PosOffset { get; set; }
 
         /// <summary>Offset to rotate the projectile </summary>
-        Vector3 RotOffset { get; set; } 
+        Vector3 RotOffset { get; set; }
 
         /// <summary>Has the projectile impacted with something</summary>
         bool HasImpacted { get; set; }
 
         /// <summary>Prefab to instantiate when the projectile has collider with something</summary>
         GameObject HitEffect { get; set; }
-
+        /// <summary> Pool - Added IObjectPool<GameObject> thisProjectilePool new parameter to Prepare  </summary>  
         /// <summary>Prepares the Projectile to be fired</summary>
-        void Prepare(GameObject Owner, Vector3 Gravity, Vector3 ProjectileVelocity, LayerMask HitLayer, QueryTriggerInteraction triggerInteraction);
+        void Prepare(GameObject Owner, Vector3 Gravity, Vector3 ProjectileVelocity, LayerMask HitLayer, QueryTriggerInteraction triggerInteraction, IObjectPool<GameObject> thisProjectilePool);
+        /// <summary>  Pool - End </summary>  
+
 
         /// <summary>Multiplies the Damage for a value, Same as the MDamager</summary>
         void SetDamageMultiplier(float multiplier);
@@ -54,7 +57,7 @@ namespace MalbersAnimations
         float AfterDistance { get; set; }
 
         /// <summary>Starting Position for the  Projectile Launch</summary>
-        Vector3 AimOriginPos { get; } 
+        Vector3 AimOriginPos { get; }
 
         /// <summary>Start Position of the Thrower</summary>
         Transform AimOrigin { get; }

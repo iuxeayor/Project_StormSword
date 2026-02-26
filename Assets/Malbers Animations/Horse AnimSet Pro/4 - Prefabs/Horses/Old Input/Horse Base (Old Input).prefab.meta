@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c2ba1750189eb284bbbfec773e30b5d5
+labels:
+- Animal
+- Base
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Horse AnimSet Pro/4 - Prefabs/Horses/Old Input/Horse
+    Base (Old Input).prefab
+  uploadId: 848732

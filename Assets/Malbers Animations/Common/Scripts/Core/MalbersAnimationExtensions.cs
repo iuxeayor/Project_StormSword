@@ -1,29 +1,51 @@
-﻿using System;
+﻿using MalbersAnimations.Scriptables;
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace MalbersAnimations
 {
     public static class MalbersAnimationsExtensions
     {
-        #region Dictionary Extensions
-        public static T Get<T>(this Dictionary<string, object> instance, string key)
-        {
-            return (T)instance[key];
-        }
-
-        public static void Add<T>(this Dictionary<string, object> instance, string key, object newValue)
-        {
-            instance.Add(key, (T)newValue);
-        }
-        #endregion
-
-
         #region Types
+        /// <summary>
+        /// Checks if a given type inherits or implements a specified base type.
+        /// </summary>
+        /// <param name="type">The type which needs to be checked.</param>
+        /// <param name="baseType">The base type/interface which is expected to be inherited or implemented by the 'type'</param>
+        /// <returns>Return true if 'type' inherits or implements 'baseType'. False otherwise</returns>        
+        public static bool InheritsOrImplements(this Type type, Type baseType)
+        {
+            type = ResolveGenericType(type);
+            baseType = ResolveGenericType(baseType);
+
+            while (type != typeof(object))
+            {
+                if (baseType == type || HasAnyInterfaces(type, baseType)) return true;
+
+                type = ResolveGenericType(type.BaseType);
+                if (type == null) return false;
+            }
+
+            return false;
+        }
+
+        static Type ResolveGenericType(Type type)
+        {
+            if (type is not { IsGenericType: true }) return type;
+
+            var genericType = type.GetGenericTypeDefinition();
+            return genericType != type ? genericType : type;
+        }
+
+        static bool HasAnyInterfaces(Type type, Type interfaceType)
+        {
+            return type.GetInterfaces().Any(i => ResolveGenericType(i) == interfaceType);
+        }
+
+
         public static bool IsSubclassDeep(this Type type, Type parenType)
         {
             while (type != null)
@@ -37,14 +59,14 @@ namespace MalbersAnimations
         }
 
         public static bool TryGetGenericTypeOfDefinition(this Type type, Type genericTypeDefinition,
-            out Type generictype)
+            out Type genericType)
         {
-            generictype = null;
+            genericType = null;
             while (type != null)
             {
                 if (type.IsGenericType && type.GetGenericTypeDefinition() == genericTypeDefinition)
                 {
-                    generictype = type;
+                    genericType = type;
                     return true;
                 }
                 type = type.BaseType;
@@ -81,10 +103,25 @@ namespace MalbersAnimations
 
         #region NullCheck
         /// <summary> Use this to check if a Unity Object is null or not. Usage:  [ a=b.Ref() ?? c; ] </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //: optimize very simple method call (especially in hot paths)
         public static T Ref<T>(this T o) where T : UnityEngine.Object
         {
-            return o == null ? null : o;
+            return o ?? null;
         }
+
+        /// <summary>  Use on custom C# types that are Unity objects to double check if the underlying Unity object is actually null or not.  </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //: optimize very simple method call (especially in hot paths)
+        public static bool IsUnityRefNull<T>(this T o) where T : class
+            => o == null || (o is UnityEngine.Object unityObj) && unityObj == null;
+
+        /// <summary>
+        /// Use this to check if a Unity Object or a C# object is null or not and returns the reference (as a C# null if Unity object is null).
+        /// Usage:  [ a=b.NullCheckedRef() ?? c; ]
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //: added compiler optimization taken also into account by IL2CPP
+        public static T NullCheckedRef<T>(this T o) where T : class //: Renamed Ref method for better clarity and made it work with any C# or Unity type
+            => o.IsUnityRefNull() ? null : o;
+
         #endregion
 
         #region Float Int
@@ -115,17 +152,6 @@ namespace MalbersAnimations
 
         #endregion
 
-        /// <summary> Same as StartCoroutine but it also stores the coroytine in an IEnumerator </summary>
-        public static void StartCoroutine(this MonoBehaviour Mono, out IEnumerator Cor, IEnumerator newCoro)
-        {
-            Cor = null;
-            if (Mono.gameObject.activeInHierarchy)
-            {
-                Cor = newCoro;
-                Mono.StartCoroutine(Cor);
-            }
-        }
-
         #region Vector3
         /// <summary>A useful Epsilon</summary>
         public const float Epsilon = 0.0001f;
@@ -145,12 +171,20 @@ namespace MalbersAnimations
         }
 
 
-        public static Vector3 FlattenY(this Vector3 origin)
-        {
-            return new Vector3(origin.x, 0, origin.z);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
+        public static Vector3 FlattenY(this Vector3 origin) => new(origin.x, 0f, origin.z);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
+        public static Vector3 SetY(this Vector3 origin, float value) => new(origin.x, value, origin.z);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
+        public static Vector3 SetX(this Vector3 origin, float value) => new(value, origin.y, origin.z);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
+        public static Vector3 SetZ(this Vector3 origin, float value) => new(origin.x, origin.y, value);
 
         /// <summary>Checks if a vector is close to Vector3.zero</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
         public static bool CloseToZero(this Vector3 v, float threshold = 0.0001f) => v.sqrMagnitude < threshold * threshold;
 
         /// <summary> Get the closest point on a line segment. </summary>
@@ -171,6 +205,40 @@ namespace MalbersAnimations
         }
 
 
+        public static Vector3 ProjectPointOnPlane(this Vector3 point, Vector3 planeNormal, Vector3 planePoint)
+        {
+            float distance;
+            Vector3 translationVector;
+
+            //First calculate the distance from the point to the plane:
+            distance = SignedDistancePlanePoint(planeNormal, planePoint, point);
+
+            //Reverse the sign of the distance
+            distance *= -1;
+
+            //Get a translation vector
+            translationVector = SetVectorLength(planeNormal, distance);
+
+            //Translate the point to form a projection
+            return point + translationVector;
+        }
+
+        public static float SignedDistancePlanePoint(Vector3 planeNormal, Vector3 planePoint, Vector3 point)
+        {
+            return Vector3.Dot(planeNormal, (point - planePoint));
+        }
+
+        //create a vector of direction "vector" with length "size"
+        public static Vector3 SetVectorLength(Vector3 vector, float size)
+        {
+
+            //normalize the vector
+            Vector3 vectorNormalized = Vector3.Normalize(vector);
+
+            //scale the vector
+            return vectorNormalized *= size;
+        }
+
         /// <summary>Get the closest point (0-1) on a line segment</summary>
         /// <param name="p">A point in space</param>
         /// <param name="s0">Start of line segment</param>
@@ -187,7 +255,18 @@ namespace MalbersAnimations
 
 
         /// <summary> Calculate the Direction from an Origin to a Target or Destination  </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
         public static Vector3 DirectionTo(this Vector3 origin, Vector3 destination) => Vector3.Normalize(destination - origin);
+
+        //CustomPatch: added extra useful vector math helper to avoid normalizing a vector that has its length already previously calculated
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 NormalizeWithLength(this Vector3 heading, float preCalculatedLength)
+        {
+            if (preCalculatedLength > 1E-05f)
+                return heading / preCalculatedLength;
+
+            return Vector3.zero;
+        }
 
         /// <summary>returns the delta position from a rotation.</summary>
         public static Vector3 DeltaPositionFromRotate(this Transform transform, Vector3 point, Vector3 axis, float deltaAngle)
@@ -221,6 +300,7 @@ namespace MalbersAnimations
 
         /// <summary>  Returns if a point is inside a Sphere Radius </summary>
         /// <param name="point">Point you want to find inside a sphere</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
         public static bool PointInsideSphere(this Vector3 point, Vector3 sphereCenter, float sphereRadius)
         {
             Vector3 direction = point - sphereCenter;
@@ -250,7 +330,7 @@ namespace MalbersAnimations
             return null;
         }
 
-        /// <summary>  Returns the Real Transform Core   </summary> 
+        /// <summary>Returns the Real Transform Core</summary> 
         public static Transform FindObjectCore(this Transform transf)
         {
             var core = transf;
@@ -261,25 +341,22 @@ namespace MalbersAnimations
         }
 
 
-        /// <summary> Find the if a Transform is in the same hierachy of a another. Returns true also if the Child = Parent</summary>
-        public static bool SameHierarchy(this Transform child, Transform Parent)
+        /// <summary> Find the if a Transform is in the same hierarchy(grandchild) of a parent. Returns true also if the Child = Parent</summary>
+        public static bool SameHierarchy(this Transform child, Transform parent)
         {
-            if (child == Parent) return true; //Include yourself!! IMPORTANT
+            if (child == parent) return true; //Include yourself!! IMPORTANT
             if (child.parent == null) return false;
-            if (child.parent == Parent) return true;
+            if (child.parent == parent) return true;
 
-            return SameHierarchy(child.parent, Parent);
+            return SameHierarchy(child.parent, parent);
         }
 
-        [Obsolete("Use [SameHierarchy] Instead")]
-        public static bool IsGrandchild(this Transform child, Transform Parent) => SameHierarchy(child, Parent);
-
-
         /// <summary> Calculate the Direction from an Origin to a Target or Destination  </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
         public static Vector3 DirectionTo(this Transform origin, Transform destination) => DirectionTo(origin.position, destination.position);
         /// <summary> Calculate the Direction from an Origin to a Target or Destination  </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
         public static Vector3 DirectionTo(this Transform origin, Vector3 destination) => DirectionTo(origin.position, destination);
-
 
         /// <summary> Find the closest transform from the origin </summary>
         public static Transform NearestTransform(this Transform origin, params Transform[] transforms)
@@ -301,9 +378,48 @@ namespace MalbersAnimations
             return bestTarget;
         }
 
+        /// <summary> Find the closest TransformReference from the origin </summary>
+        public static Transform NearestTransform(this Transform origin, params TransformReference[] transforms)
+        {
+            Transform bestTarget = null;
+            float closestDistanceSqr = Mathf.Infinity;
+            Vector3 currentPosition = origin.position;
+            foreach (Transform potentialTarget in transforms)
+            {
+                Vector3 directionToTarget = potentialTarget.position - currentPosition;
+                float dSqrToTarget = directionToTarget.sqrMagnitude;
+                if (dSqrToTarget < closestDistanceSqr)
+                {
+                    closestDistanceSqr = dSqrToTarget;
+                    bestTarget = potentialTarget;
+                }
+            }
 
-        /// <summary> Find the farest transform from the origin </summary>
-        public static Transform FarestTransform(this Transform t, params Transform[] transforms)
+            return bestTarget;
+        }
+
+        /// <summary> Find the closest point from a transform </summary>
+        public static Vector3 NearestPoint(this Transform origin, params Vector3[] allPoints)
+        {
+            Vector3 nearest = Vector3.zero;
+            float closestDistanceSqr = Mathf.Infinity;
+            Vector3 currentPosition = origin.position;
+            foreach (var point in allPoints)
+            {
+                float dSqrToTarget = (point - currentPosition).sqrMagnitude;
+
+                if (dSqrToTarget < closestDistanceSqr)
+                {
+                    closestDistanceSqr = dSqrToTarget;
+                    nearest = point;
+                }
+            }
+
+            return nearest;
+        }
+
+        /// <summary> Find the Furthest transform from the origin </summary>
+        public static Transform FurthestTransform(this Transform t, params Transform[] transforms)
         {
             Transform bestTarget = null;
             float closestDistanceSqr = Mathf.Infinity;
@@ -333,14 +449,15 @@ namespace MalbersAnimations
         }
 
         /// <summary>Resets the Local Position and rotation of a transform</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
         public static void ResetLocal(this Transform transform)
         {
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
+            transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             transform.localScale = Vector3.one;
         }
 
         /// <summary>Resets the Local Position and rotation of a transform</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
         public static void SetLocalTransform(this Transform transform, Vector3 LocalPos, Vector3 LocalRot, Vector3 localScale)
         {
             transform.localPosition = LocalPos;
@@ -349,50 +466,70 @@ namespace MalbersAnimations
         }
 
         /// <summary>Resets the Local Position and rotation of a transform</summary>
-        public static void SetLocalTransform(this Transform transform, TransformOffset offset)
-        {
-            transform.localPosition = offset.Position;
-            transform.localEulerAngles = offset.Rotation;
-            transform.localScale = offset.Scale;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: added compiler optimization taken also into account by IL2CPP
+        public static void SetLocalTransform(this Transform transform, TransformOffset offset) => offset.RestoreTransform(transform);
+
 
         /// <summary>Parent a transform to another Transform, and Solves the Scale problem in case the Parent has a deformed scale  </summary>
         /// <param name="parent">Transform to be the parent</param>
         /// <param name="Position">Relative position to the Parent (World Position)</param>
-        public static Transform SetParentScaleFixer(this Transform transform, Transform parent, Vector3 Position)
+        public static Transform SetParentScaleFixer(this Transform transform, Transform parent, Vector3 Position, GameObject Link = null)
         {
-            if (parent.lossyScale.x == parent.lossyScale.y && parent.lossyScale.x == parent.lossyScale.z) //Check if the Scale is Uniform
-            {
-                transform.SetParent(parent, true);
-                transform.position = Position;
-                return null;
-            }
-
             Vector3 NewScale = parent.transform.lossyScale;
             NewScale.x = 1f / Mathf.Max(NewScale.x, Epsilon);
             NewScale.y = 1f / Mathf.Max(NewScale.y, Epsilon);
             NewScale.z = 1f / Mathf.Max(NewScale.z, Epsilon);
 
-            GameObject Hlper = new GameObject { name = transform.name + "Link" };
+            //CustomPatch: modified below Link creation to add some optimizations
+            Transform linkTransform = null;
+            //Create a new Link if is not created already.
+            if (Link == null)
+            {
+                //CustomPatch: added a standard name for the link and cached transform for repeated operations below (even if Unity now uses a cache for the transform internally, it still has an extra cost because marshaling/unmarshaling when calling native c++ engine methods that add up quickly on mobile devices)
+                Link = new("AC-HierarchyLink");
+                linkTransform = Link.transform;
+                //CustomPatch: removed extra memory allocation for non development builds
+#if UNITY_EDITOR || MALBERS_DEBUG || DEVELOPMENT_BUILD
+                Link.name = transform.name + "Link";
+#endif
+            }
+            else
+                linkTransform = Link.transform;
 
-            //  Debug.Log("Hlper = " + Hlper);
+            linkTransform.SetParent(parent);
+            linkTransform.localScale = NewScale;
+            linkTransform.position = Position;
+            linkTransform.localRotation = Quaternion.identity;
 
-            Hlper.transform.SetParent(parent);
-            Hlper.transform.localScale = NewScale;
-            Hlper.transform.position = Position;
-            Hlper.transform.localRotation = Quaternion.identity;
-
-            transform.SetParent(Hlper.transform);
+            transform.SetParent(linkTransform);
             transform.localPosition = Vector3.zero;
-            return Hlper.transform;
+            return linkTransform;
         }
+
+        /// <summary>Returns the hash value of a parameter if it exists on the Animator; otherwise, returns 0.</summary>
+        public static int TryOptionalParameter(this Animator animator, string param)
+        {
+            if (string.IsNullOrEmpty(param) || animator == null) return 0;
+
+            int animHash = Animator.StringToHash(param);
+
+            // Use a for loop for better performance (avoid foreach allocation in old Unity versions)
+            var parameters = animator.parameters;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].nameHash == animHash)
+                    return animHash;
+            }
+            return 0;
+        }
+
 
         #endregion
 
         #region String
         public static string RemoveSpecialCharacters(this string str)
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            System.Text.StringBuilder sb = new(); //CustomPatch: TODO: use Unity's Pooling API to get a pooled string builders (will get back to this)
             foreach (char c in str)
             {
                 if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '.' || c == '_')
@@ -404,43 +541,28 @@ namespace MalbersAnimations
         }
         #endregion
 
-        /// <summary>  Resize a List </summary>
-        public static void Resize<T>(this List<T> list, int size, T element = default(T))
-        {
-            int count = list.Count;
-
-            if (size < count)
-            {
-                list.RemoveRange(size, count - size);
-            }
-            else if (size > count)
-            {
-                if (size > list.Capacity)   // Optimization
-                    list.Capacity = size;
-
-                list.AddRange(Enumerable.Repeat(element, size - count));
-            }
-        }
-
-
-        /// <summary>  Resize a Listener Number from a Unity Event Base </summary>
-        public static int GetListenerNumber(this UnityEventBase unityEvent)
-        {
-            var field = typeof(UnityEventBase).GetField("m_Calls", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
-            var invokeCallList = field.GetValue(unityEvent);
-            var property = invokeCallList.GetType().GetProperty("Count");
-            return (int)property.GetValue(invokeCallList);
-        }
-
-
         #region GameObjects
         /// <summary>The GameObject is a prefab, Meaning in not in any scene</summary>
         public static bool IsPrefab(this GameObject go) => !go.scene.IsValid();
-
         #endregion
 
-
         #region Delay Action
+
+        ///// <summary> Same as StartCoroutine but if the coroutine was playing it stop it. it also stores the new coroutine in the IEnumerator </summary>
+        //public static void StartCoroutine(this MonoBehaviour Mono, ref IEnumerator Cor, IEnumerator newCoro)
+        //{
+        //    if (Cor != null) //If there is a Coroutine running stop it
+        //    {
+        //        Mono.StopCoroutine(Cor);
+        //    }
+        //    Cor = null;
+
+        //    if (Mono.gameObject.activeInHierarchy)
+        //    {
+        //        Cor = newCoro;
+        //        Mono.StartCoroutine(Cor);
+        //    }
+        //}
 
         /// <summary>Do an action the next frame</summary>
         public static IEnumerator Delay_Action(this MonoBehaviour mono, Action action) => Delay_Action(mono, (int)1, action);
@@ -479,7 +601,7 @@ namespace MalbersAnimations
             return null;
         }
 
-        /// <summary>Do an action after certain time and stop an oldone</summary>
+        /// <summary>Do an action after certain time and stop an old one</summary>
         public static void Delay_Action(this MonoBehaviour mono, ref IEnumerator oldAction, float time, Action action)
         {
             if (oldAction != null) mono.StopCoroutine(oldAction);
@@ -525,20 +647,11 @@ namespace MalbersAnimations
             action.Invoke();
         }
 
-
-        /// <summary>  Use on custom C# types that are Unity objects to double check if the underlying Unity object is actually null or not.
-        /// </summary>
-        public static bool IsUnityRefNull<T>(this T o) where T : class
-            => o == null || (o is UnityEngine.Object unityObj) && unityObj == null;
-
+        //CustomPatch: TODO: HIDDEN BUG (already causing issue with projectiles: if time == 0f there should be NO 1 frame yielding like it happens now => fixing it now could create issues for logic that relies on this extra frame without knowing
         private static IEnumerator DelayedAction(float time, Action action)
         {
-            //Debug.Log("DelayStart");
-
             yield return new WaitForSeconds(time);
             action.Invoke();
-
-            // Debug.Log("DelayEnd");
         }
 
         private static IEnumerator DelayedAction(WaitForSeconds time, Action action)
@@ -549,7 +662,7 @@ namespace MalbersAnimations
 
         #endregion
 
-        #region Find Components/Interfaces
+        #region Components/Interfaces
         public static T CopyComponent<T>(this T original, GameObject destination) where T : Component
         {
             Type type = original.GetType();
@@ -566,8 +679,7 @@ namespace MalbersAnimations
 
         public static T FindComponent<T>(this GameObject c) where T : Component
         {
-            T Ttt = c.GetComponent<T>();
-            if (Ttt != null) return Ttt;
+            if (c.TryGetComponent<T>(out var Ttt)) return Ttt;
 
             Ttt = c.GetComponentInParent<T>();
             if (Ttt != null) return Ttt;
@@ -578,12 +690,9 @@ namespace MalbersAnimations
             return default;
         }
 
-
-
         public static Component FindComponent(this GameObject c, Type t)
         {
-            var Ttt = c.GetComponent(t);
-            if (Ttt != null) return Ttt;
+            if (c.TryGetComponent(t, out var Ttt)) return Ttt;
 
             Ttt = c.GetComponentInParent(t);
             if (Ttt != null) return Ttt;
@@ -624,11 +733,9 @@ namespace MalbersAnimations
             return default;
         }
 
-
         public static T FindInterface<T>(this GameObject c)
         {
-            T Ttt = c.GetComponent<T>();
-            if (Ttt != null) return Ttt;
+            if (c.TryGetComponent<T>(out var Ttt)) return Ttt;
 
             Ttt = c.GetComponentInParent<T>(true);
             if (Ttt != null) return Ttt;
@@ -641,8 +748,7 @@ namespace MalbersAnimations
 
         public static T FindInterface<T>(this GameObject c, bool includeInactive)
         {
-            T Ttt = c.GetComponent<T>();
-            if (Ttt != null) return Ttt;
+            if (c.TryGetComponent<T>(out var Ttt)) return Ttt;
 
             Ttt = c.GetComponentInParent<T>(includeInactive);
             if (Ttt != null) return Ttt;
@@ -651,6 +757,22 @@ namespace MalbersAnimations
             if (Ttt != null) return Ttt;
 
             return default;
+        }
+
+        /// <summary>  Gets the component if it exists, or adds it if it doesn't.  </summary>
+        public static T GetOrAddComponent<T>(this GameObject go) where T : Component
+        {
+            if (!go.TryGetComponent<T>(out var comp))
+                comp = go.AddComponent<T>();
+            return comp;
+        }
+
+        /// <summary>  Gets the component if it exists, or adds it if it doesn't.  </summary>
+        public static T GetOrAddComponent<T>(this Transform go) where T : Component
+        {
+            if (!go.TryGetComponent<T>(out var comp))
+                comp = go.gameObject.AddComponent<T>();
+            return comp;
         }
 
         public static T[] FindInterfaces<T>(this GameObject c)
@@ -677,87 +799,24 @@ namespace MalbersAnimations
         /// <summary>Search for the Component in the root of the Object </summary>
         public static T MFindComponentInRoot<T>(this Component c) where T : Component => c.gameObject.MFindComponentInRoot<T>();
 
-
-        /// <summary> Uses Getcomponent in childern but with a string</summary>
-        public static Component GetComponentInChildren(this Component owner, string classtype)
-        {
-            var sender = owner.GetComponent(classtype);
-            if (sender) return sender;
-            else
-            {
-                foreach (Transform item in owner.transform)
-                {
-                    var found = item.GetComponentInChildren(classtype);
-                    if (found) return found;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary> Uses GetComponent in Parent but with a string</summary>
-        public static Component GetComponentInParent(this Component owner, string classtype)
-        {
-            var sender = owner.GetComponent(classtype);
-
-            if (sender != null)
-            {
-                return sender;
-            }
-            else
-            {
-                if (owner.transform.parent == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    return owner.transform.parent.GetComponentInParent(classtype);
-                }
-            }
-        }
-
-        /// <summary> Gets a real copy of a component / </summary>
-        private static T GetCopyOf<T>(this Component comp, T other) where T : Component
-        {
-            Type type = comp.GetType();
-            if (type != other.GetType()) return null; // type mis-match
-            BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Default | BindingFlags.DeclaredOnly;
-            PropertyInfo[] pinfos = type.GetProperties(flags);
-            foreach (var pinfo in pinfos)
-            {
-                if (pinfo.CanWrite)
-                {
-                    try
-                    {
-                        pinfo.SetValue(comp, pinfo.GetValue(other, null), null);
-                    }
-                    // In case of NotImplementedException being thrown. For some reason specifying that exception didn't seem to catch it, so I didn't catch anything specific.
-                    catch { }
-                }
-            }
-            FieldInfo[] finfos = type.GetFields(flags);
-            foreach (var finfo in finfos)
-            {
-                finfo.SetValue(comp, finfo.GetValue(other));
-            }
-            return comp as T;
-        }
-
-
-        public static T AddCopyComponent<T>(this GameObject go, T toAdd) where T : Component
-        {
-            return go.AddComponent<T>().GetCopyOf(toAdd) as T;
-        }
-
-
         /// <summary>  Reset the delta RootMotion of the Animator  </summary>
-        public static IDeltaRootMotion TryDeltaRootMotion(this Component c)
+        public static IDeltaRootMotion TryResetDeltaRootMotion(this Component c)
         {
             if (c.TryGetComponent(out IDeltaRootMotion target))
             {
                 target.ResetDeltaRootMotion();
                 return target;
+            }
+            return null;
+        }
+
+        //CustomPatch: added overload for above method to be used in hot paths (update loops)
+        public static IDeltaRootMotion TryResetDeltaRootMotion(this Component c, ref IDeltaRootMotion cachedDeltaRootMotion)
+        {
+            if (!cachedDeltaRootMotion.IsUnityRefNull() || c.TryGetComponent(out cachedDeltaRootMotion))
+            {
+                cachedDeltaRootMotion.ResetDeltaRootMotion();
+                return cachedDeltaRootMotion;
             }
             return null;
         }
@@ -769,216 +828,12 @@ namespace MalbersAnimations
         /// <returns>If the game object has been marked as destroyed by UnityEngine</returns>
         public static bool IsDestroyed(this GameObject gameObject)
         {
-            // UnityEngine overloads the == opeator for the GameObject type
+            // UnityEngine overloads the == operator for the GameObject type
             // and returns null when the object has been destroyed, but 
             // actually the object is still there but has not been cleaned up yet
             // if we test both we can determine if the object has been destroyed.
             return gameObject == null && !ReferenceEquals(gameObject, null);
         }
-
-
-        #region Reflections
-
-        public static UnityAction<T> CreateDelegate<T>(object target, MethodInfo method)
-        {
-            var del = (UnityAction<T>)Delegate.CreateDelegate(typeof(UnityAction<T>), target, method);
-            return del;
-        }
-
-        /// <summary>Converts a Method Info into a Unity Action</summary>
-        public static UnityAction CreateDelegate(object target, MethodInfo method)
-        {
-            var del = (UnityAction)Delegate.CreateDelegate(typeof(UnityAction), target, method);
-            return del;
-        }
-
-        /// <summary> Returns a Unity Action from a component and a method. Used to connect methods in the inspector </summary>
-        public static UnityAction GetUnityAction(this Component c, string component, string method)
-        {
-            var sender = (c.GetComponent(component) ?? c.GetComponentInParent(component)) ?? c.GetComponentInChildren(component);
-
-            MethodInfo methodPtr;
-
-            //Debug.Log("sender = " + sender);
-
-            if (sender != null)
-            {
-                methodPtr = sender.GetType().GetMethod(method, new Type[0]);
-            }
-            else return null;
-
-            if (methodPtr != null)
-            {
-                // Debug.Log("methodPtr = " + methodPtr.Name);
-                var action = CreateDelegate(sender, methodPtr);
-                return (action);
-            }
-
-            return null;
-        }
-
-        public static Type FindType(string qualifiedTypeName)
-        {
-            Type t = Type.GetType(qualifiedTypeName);
-
-            if (t != null)
-            {
-                return t;
-            }
-            else
-            {
-                foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    t = asm.GetType(qualifiedTypeName);
-                    if (t != null)
-                        return t;
-                }
-                return null;
-            }
-        }
-
-        public static UnityAction<T> GetUnityAction<T>(this Component c, string component, string method)
-        {
-            if (string.IsNullOrEmpty(component)) return null;
-
-            var sender = (c.GetComponent(component) ?? c.GetComponentInParent(component)) ?? c.GetComponentInChildren(component);
-            if (sender == null) return null;
-
-            var methodPtr = sender.GetType().GetMethod(method, new Type[] { typeof(T) });
-
-            if (methodPtr != null)
-            {
-                var action = CreateDelegate<T>(sender, methodPtr);
-                return (action);
-            }
-
-            PropertyInfo property = sender.GetType().GetProperty(method);
-
-            if (property != null)
-            {
-                var action = CreateDelegate<T>(sender, property.SetMethod);
-                return (action);
-            }
-
-            return null;
-        }
-
-
-        #endregion
-
-
-        public static T GetFieldClass<T>(this Component owner, string component, string field) where T : class
-        {
-            var sender = owner.GetComponent(component);
-
-            if (sender != null)
-            {
-                FieldInfo methodPtr = sender.GetType().GetField(field, BindingFlags.Public | BindingFlags.Instance);
-
-                if (methodPtr != null)
-                {
-                    return methodPtr.GetValue(sender) as T;
-                }
-            }
-            return null;
-        }
-
-
-        /// <summary> Invoke with Parameters </summary>
-        public static bool InvokeWithParams(this MonoBehaviour sender, string method, object args)
-        {
-            Type argType = null;
-
-            if (args != null) argType = args.GetType();
-
-            MethodInfo methodPtr;
-
-            if (argType != null)
-            {
-                methodPtr = sender.GetType().GetMethod(method, new Type[] { argType });
-            }
-            else
-            {
-                try
-                {
-                    methodPtr = sender.GetType().GetMethod(method);
-                }
-                catch (Exception)
-                {
-                    //methodPtr = sender.GetType().GetMethods().First
-                    //(m => m.Name == method && m.GetParameters().Count() == 0);
-
-                    //Debug.Log("OTHER");
-
-                    throw;
-                }
-
-            }
-
-            if (methodPtr != null)
-            {
-                if (args != null)
-                {
-                    var arguments = new object[1] { args };
-                    methodPtr.Invoke(sender, arguments);
-                    return true;
-                }
-                else
-                {
-                    methodPtr.Invoke(sender, null);
-                    return true;
-                }
-            }
-
-            PropertyInfo property = sender.GetType().GetProperty(method);
-
-            if (property != null)
-            {
-                property.SetValue(sender, args, null);
-                return true;
-
-            }
-            return false;
-        }
-
-
-        /// <summary>Invoke with Parameters and Delay </summary>
-        public static void InvokeDelay(this MonoBehaviour behaviour, string method, object options, YieldInstruction wait)
-        {
-            behaviour.StartCoroutine(_invoke(behaviour, method, wait, options));
-        }
-
-        private static IEnumerator _invoke(this MonoBehaviour behaviour, string method, YieldInstruction wait, object options)
-        {
-            yield return wait;
-
-            Type instance = behaviour.GetType();
-            MethodInfo mthd = instance.GetMethod(method);
-            mthd.Invoke(behaviour, new object[] { options });
-
-            yield return null;
-        }
-
-
-        /// <summary>Invoke with Parameters for Scriptable objects</summary>
-        public static void Invoke(this ScriptableObject sender, string method, object args)
-        {
-            var methodPtr = sender.GetType().GetMethod(method);
-
-            if (methodPtr != null)
-            {
-                if (args != null)
-                {
-                    var arguments = new object[1] { args };
-                    methodPtr.Invoke(sender, arguments);
-                }
-                else
-                {
-                    methodPtr.Invoke(sender, null);
-                }
-            }
-        }
-
 
         #region Layers and Colliders
         /// <summary> Changes the Layer of a GameObject and its children.  </summary>

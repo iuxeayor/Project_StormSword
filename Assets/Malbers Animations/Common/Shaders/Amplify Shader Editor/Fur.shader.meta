@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: a585ea739537dc340acceaa41c77f52c
+labels:
+- AllCreature
 ShaderImporter:
   externalObjects: {}
   defaultTextures: []
@@ -9,8 +11,8 @@ ShaderImporter:
   assetBundleVariant: 
 AssetOrigin:
   serializedVersion: 1
-  productId: 148877
-  packageName: Animal Controller
-  packageVersion: 1.4.2d
-  assetPath: Assets/Malbers Animations/Common/Shaders/Fur.shader
-  uploadId: 620293
+  productId: 79902
+  packageName: Horse Animset Pro (Riding System)
+  packageVersion: 4.5.1
+  assetPath: Assets/Malbers Animations/Common/Shaders/Amplify Shader Editor/Fur.shader
+  uploadId: 848732

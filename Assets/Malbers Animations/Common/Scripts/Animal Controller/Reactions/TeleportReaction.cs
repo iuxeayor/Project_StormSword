@@ -1,13 +1,16 @@
-﻿using MalbersAnimations.Scriptables;
-using MalbersAnimations.Controller;
+﻿using MalbersAnimations.Controller;
+using MalbersAnimations.Scriptables;
 using UnityEngine;
- 
+
 namespace MalbersAnimations.Reactions
 {
     [System.Serializable]
     [AddTypeMenu("Malbers/Animal/Teleport")]
     public class TeleportReaction : MReaction
     {
+        override public string DynamicName =>
+        $"Teleport Animal to [{(Destination.Value != null ? Destination.Value.name : "Null")}]  {(UseRotation.Value ? "[Use Rotation]" : " ")}";
+
         public TransformReference Destination;
         public BoolReference UseRotation;
 
@@ -24,7 +27,7 @@ namespace MalbersAnimations.Reactions
                 animal.TeleportRot(Destination.Value);
             else
                 animal.Teleport(Destination.Value);
-          
+
             return true;
         }
     }

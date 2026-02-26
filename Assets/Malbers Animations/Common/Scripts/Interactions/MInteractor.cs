@@ -4,10 +4,10 @@ using UnityEngine;
 using System.Collections.Generic;
 using MalbersAnimations.Reactions;
 
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
 
 namespace MalbersAnimations.Utilities
 {
@@ -16,40 +16,41 @@ namespace MalbersAnimations.Utilities
     public class MInteractor : MonoBehaviour, IInteractor
     {
         [Tooltip("Layer for the Interact with colliders")]
-        [SerializeField] private LayerReference Layer = new LayerReference(-1);
+        [SerializeField] private LayerReference Layer = new(-1);
         [SerializeField] private QueryTriggerInteraction TriggerInteraction = QueryTriggerInteraction.Ignore;
 
-
         [Tooltip("ID for the Interactor")]
-        public IntReference m_ID = new IntReference(0);
+        public IntReference m_ID = new(0);
 
         [Tooltip("Collider set as Trigger to Find Interactables OnTrigger Enter")]
-        //[RequiredField] 
+        //[RequiredField]
         public Collider InteractionArea;
 
-        [Tooltip("When an Interaction is executed these events will be invoked." +
-         "\n\nOnInteractWithGO(GameObject) -> will have the *INTERACTABLE* gameObject as parameter" +
-         "\n\nOnInteractWith(Int) -> will have the *INTERACTABLE* ID as parameter")]
-        public InteractionEvents events = new InteractionEvents();
-        public GameObjectEvent OnFocused = new GameObjectEvent();
-        public GameObjectEvent OnUnfocused = new GameObjectEvent();
+        public GameObjectEvent OnFocused = new();
+        public GameObjectEvent OnUnfocused = new();
+        public GameObjectEvent OnInteractWithGO = new();
+        public IntEvent OnInteractWith = new();
+
+        public System.Action<IInteractable> OnFocusing;
+        public System.Action<IInteractable> OnUnFocusing;
+        public System.Action<IInteractable> OnInteract;
 
         public int ID => m_ID.Value;
 
-        public bool Enabled { get => !enabled; set => enabled = !value; }
+        public bool Active { get => !enabled; set => enabled = !value; }
 
         public GameObject Owner => RealRoot.gameObject;
 
         /// <summary>Current Interactable this interactor has on its Interaction Area </summary>
-        public List<IInteractable> FocusedInteractables;
+        public HashSet<IInteractable> FocusedInteractables;
 
-
-        /// <summary>Interaction Trigger Proxy to Subsribe to OnEnter OnExit Trigger</summary>
+        /// <summary>Interaction Trigger Proxy to Subscribe to OnEnter OnExit Trigger</summary>
         public TriggerProxy Proxy { get; set; }
-
 
         public List<MInteractorReaction> reactions = new();
         private Transform RealRoot;
+
+        //  public IInteractable FocusedItem;
 
         public bool debug;
 
@@ -61,27 +62,44 @@ namespace MalbersAnimations.Utilities
 
         private void OnEnable()
         {
-            FocusedInteractables = new List<IInteractable>();
+            FocusedInteractables = new();
+
+            //if (InteractionArea == null) InteractionArea = GetComponent<Collider>();
+            //if (InteractionArea == null) Debugging("Interaction Collider is missing, please assign a Collider to the Interactor");
 
             RealRoot = transform.FindObjectCore();
 
-            Proxy = TriggerProxy.CheckTriggerProxy(InteractionArea, Layer, TriggerInteraction, RealRoot);
-
-            if (Proxy)
+            if (InteractionArea)
             {
-                Proxy.OnTrigger_Enter.AddListener(TriggerEnter);
-                Proxy.OnTrigger_Exit.AddListener(TriggerExit);
+                Proxy = TriggerProxy.CheckTriggerProxy(InteractionArea, Layer, TriggerInteraction, RealRoot, true);
+
+                if (Proxy)
+                {
+                    Proxy.OnTrigger_Enter.AddListener(TriggerEnter);
+                    Proxy.OnTrigger_Exit.AddListener(TriggerExit);
+
+                    Proxy.Layer = Layer; //Set the Layer of the Proxy
+                    Proxy.TriggerInteraction = TriggerInteraction; //Set the Trigger Interaction of the Proxy
+                }
             }
         }
 
+
         private void OnDisable()
         {
-            var focusCache = FocusedInteractables.ToArray(); //Cache in case the List changes (Crazy Error)
+            foreach (var item in FocusedInteractables)
+            {
+                if (item.Owner)
+                {
+                    OnUnfocused.Invoke(item.Owner);
+                    OnUnFocusing?.Invoke(item);     //System.Action to notify the UnFocusing of an Interactable
+                }
 
-            foreach (var item in focusCache) UnFocus(item);
+                //UnFocus the Interactable
+                item.UnFocus(this);
+            }
 
-
-            FocusedInteractables = null;
+            FocusedInteractables = new();
 
             if (Proxy)
             {
@@ -90,16 +108,16 @@ namespace MalbersAnimations.Utilities
             }
         }
 
+
         private void TriggerEnter(Collider collider)
         {
-            if (collider.isTrigger && TriggerInteraction == QueryTriggerInteraction.Ignore) return;    //Skip colliders
-
             var NewInteractables = collider.FindInterfaces<IInteractable>(); //Find all Interactables
 
             if (NewInteractables != null)
                 foreach (var item in NewInteractables)
                 {
-                    if (FocusedInteractables.Contains(item)) continue; //The new interactable its already there
+                    //The new interactable its already there
+                    if (FocusedInteractables.Contains(item)) continue;
                     Focus(item);
                 }
         }
@@ -108,47 +126,46 @@ namespace MalbersAnimations.Utilities
         {
             if (collider != null)
             {
-                var NewInteractabless = collider.FindInterfaces<IInteractable>();
+                var NewInteractable = collider.FindInterfaces<IInteractable>();
 
-                if (NewInteractabless != null)
-                    foreach (var item in NewInteractabless)
+                if (NewInteractable != null)
+                {
+                    foreach (var item in NewInteractable)
                     {
                         if (item != null && FocusedInteractables.Contains(item)) //means the interactor is exiting
                             UnFocus(item);
                     }
+                }
             }
         }
-
 
         public virtual void Focus(IInteractable item)
         {
-            if (item != null && item.Active) //Ignore One Disable Interactors
+            if (item != null && item.Active)           //Ignore One Disable Interactors
             {
-                item.CurrentInteractor = this;
+                FocusedInteractables.Add(item);        //add to the list all the focus items
+                item.Focus(this);                      //Focus the Interactable
+
                 OnFocused.Invoke(item.Owner);
-                item.Focused = true;
-                FocusedInteractables.Add(item);
-                if (item.Auto) Interact(item); //Interact if the interacter is on Auto
+                OnFocusing?.Invoke(item);              //System.Action to notify the Focusing of an Interactable
+
+
+                if (item.Auto) Interact(item);         //Interact if the interactable is on Auto
             }
-        }
-
-        public virtual void Focus(Component item)
-        {
-            if (item is IInteractable) Focus(item as IInteractable);
-        }
-
-        public virtual void Focus(GameObject item)
-        {
-            if (item != null) Focus(item.FindInterface<IInteractable>());
         }
 
         public void UnFocus(IInteractable item)
         {
-            if (item != null)
+            if (item != null && FocusedInteractables.Contains(item))
             {
-                OnUnfocused.Invoke(item.Owner);
-                item.Focused = false;
-                item.CurrentInteractor = null;
+                if (item.Owner)
+                {
+                    OnUnfocused.Invoke(item.Owner);
+                    OnUnFocusing?.Invoke(item); //System.Action to notify the UnFocusing of an Interactable
+                }
+
+                //UnFocus the Interactable
+                item.UnFocus(this);
                 FocusedInteractables.Remove(item);
             }
         }
@@ -159,33 +176,54 @@ namespace MalbersAnimations.Utilities
         {
             if (inter.Interact(this))
             {
-                events.OnInteractWithGO.Invoke(inter.Owner);
-                events.OnInteractWith.Invoke(inter.Index);
+                OnInteractWithGO.Invoke(inter.Owner);
+                OnInteractWith.Invoke(inter.Index);
 
-                foreach (var r in reactions)
-                {
-                    r.React(inter.Index);
-                }
+                OnInteract?.Invoke(inter); //System.Action to notify the Interaction of an Interactable
 
-                if (debug) Debug.Log($"{RealRoot.name} -> Interact ({inter.Index} : {inter.Owner.name})",this);
+                reactions.ForEach(r => r.React(inter.Index, inter.Owner)); //React with all the reactions
+
+                Debugging($"Interact with <B>[{inter.transform.name}] [ID: {inter.Index}]</B>");
+
                 return true;
             }
             return false;
         }
 
-
+        /// <summary> Interact with multiple focused items at the same time (in reverse order) </summary>
         public void Interact()
         {
-            var focusCache = FocusedInteractables.ToArray(); //Cache in case the List changes (Crazy Error)
-            foreach (var item in focusCache)
-                Interact(item);
+            if (FocusedInteractables == null || FocusedInteractables.Count == 0)
+                return;
+
+            var interactablesArray = new IInteractable[FocusedInteractables.Count];
+            FocusedInteractables.CopyTo(interactablesArray);
+
+            for (int i = interactablesArray.Length - 1; i >= 0; i--)
+            {
+                Interact(interactablesArray[i]);
+            }
+        }
+
+        public void RemoveFocusedItem(IInteractable item)
+        {
+            if (FocusedInteractables != null && FocusedInteractables.Contains(item))
+            {
+                FocusedInteractables.Remove(item);
+                item.UnFocus(this);
+                OnUnfocused.Invoke(item.Owner);
+                OnUnFocusing?.Invoke(item);             //System.Action to notify the UnFocusing of an Interactable
+            }
         }
 
         public void Restart()
         {
-            FocusedInteractables = new List<IInteractable>();
+            FocusedInteractables = new();
             OnUnfocused.Invoke(null);
             OnFocused.Invoke(null);
+
+            OnUnFocusing?.Invoke(null);
+            OnFocusing?.Invoke(null);
         }
 
         public void Interact(GameObject interactable)
@@ -200,6 +238,13 @@ namespace MalbersAnimations.Utilities
                 Interact(interactable.FindInterface<IInteractable>());
         }
 
+        private void Debugging(string msg)
+        {
+            if (debug)
+                MDebug.Log($"<B><color=yellow>Interactor: </color>[{Owner.name}]</B> -> [<color=yellow>{msg}</color>]", this);
+        }
+
+
         [SerializeField] private int Editor_Tabs1;
     }
 
@@ -207,48 +252,50 @@ namespace MalbersAnimations.Utilities
     [System.Serializable]
     public class MInteractorReaction
     {
+        public string Description = "Reaction by Interactor";
+        public ComparerInt Is = ComparerInt.Equal;
         [Tooltip("Interactable Index. Set it to Zero or 1 to use this reaction with all Interactables")]
         public IntReference Index = new();
-        public ComparerInt Is = ComparerInt.Equal;
-        public Component target;
-        [SerializeReference, SubclassSelector]
-        public Reaction reaction;
+        public Reaction2 reaction;
 
-
-        public void React(int newInteractable)
+        public bool React(int ID, GameObject Target)
         {
-            if (reaction != null)
+            if (reaction.IsValid)
             {
-                //if newInteractable is -1 mean is a interactable that all interactors can interact
-                if (Index.Value <= 0 || Index.Value.CompareInt(newInteractable, Is))
+                if (Index.Value <= 0 || Index.Value.CompareInt(ID, Is))
                 {
-                    target = reaction.VerifyComponent(target);
-                    reaction.TryReact(target);
+                    return reaction.TryReact(Target);
                 }
             }
-            else
-            {
-                Debug.LogError("Reaction is Empty. Please use any reaction");
-            }
+            return false;
         }
     }
+
+
+
 
 #if UNITY_EDITOR
     [UnityEditor.CustomEditor(typeof(MInteractor))]
     public class MInteractorEditor : UnityEditor.Editor
     {
-        SerializedProperty m_ID, InteractionArea, events, Editor_Tabs1, OnFocusedInteractable, OnUnfocusedInteractable, reactions, debug,
+        SerializedProperty m_ID, InteractionArea, Editor_Tabs1,
+            OnFocusedInteractable,
+            OnUnfocusedInteractable,
+            OnInteractWithGO, OnInteractWith,
+            reactions, debug,
             triggerInteraction, Layer;
-        protected string[] Tabs1 = new string[] { "General", "Events" ,"Reactions"};
+        protected string[] Tabs1 = new string[] { "General", "Events", "Reactions" };
 
         MInteractor M;
 
         private void OnEnable()
         {
             M = (MInteractor)target;
+
             m_ID = serializedObject.FindProperty("m_ID");
             InteractionArea = serializedObject.FindProperty("InteractionArea");
-            events = serializedObject.FindProperty("events");
+            OnInteractWithGO = serializedObject.FindProperty("OnInteractWithGO");
+            OnInteractWith = serializedObject.FindProperty("OnInteractWith");
             Editor_Tabs1 = serializedObject.FindProperty("Editor_Tabs1");
             OnFocusedInteractable = serializedObject.FindProperty("OnFocused");
             OnUnfocusedInteractable = serializedObject.FindProperty("OnUnfocused");
@@ -256,7 +303,6 @@ namespace MalbersAnimations.Utilities
             triggerInteraction = serializedObject.FindProperty("TriggerInteraction");
             reactions = serializedObject.FindProperty("reactions");
             debug = serializedObject.FindProperty("debug");
-
         }
 
         public override void OnInspectorGUI()
@@ -269,27 +315,30 @@ namespace MalbersAnimations.Utilities
                 Editor_Tabs1.intValue = GUILayout.Toolbar(Editor_Tabs1.intValue, Tabs1);
                 MalbersEditor.DrawDebugIcon(debug);
             }
+
             switch (Editor_Tabs1.intValue)
             {
                 case 0: DrawGeneral(); break;
                 case 1: DrawEvents(); break;
                 case 2: DrawReactions(); break;
-                default:break;
+                default: break;
             }
 
-           
             if (Application.isPlaying)
             {
                 using (new EditorGUI.DisabledGroupScope(true))
                 {
-                    if (M.FocusedInteractables != null)
+                    using (new GUILayout.VerticalScope(EditorStyles.helpBox))
                     {
-                        foreach (var item in M.FocusedInteractables)
+                        if (M.FocusedInteractables != null)
                         {
-                            EditorGUILayout.ObjectField($"Focused Item [ID:{item.Index}]", item.Owner, typeof(GameObject), false);
+                            foreach (var item in M.FocusedInteractables)
+                            {
+                                EditorGUILayout.ObjectField($"Focused Item [ID:{item.Index}]", item.Owner, typeof(GameObject), false);
+                            }
                         }
                     }
-                } 
+                }
                 Repaint();
             }
 
@@ -307,20 +356,17 @@ namespace MalbersAnimations.Utilities
             {
                 EditorGUILayout.PropertyField(Layer);
                 EditorGUILayout.PropertyField(triggerInteraction);
-                EditorGUILayout.PropertyField(m_ID); 
+                EditorGUILayout.PropertyField(m_ID);
                 EditorGUILayout.PropertyField(InteractionArea);
             }
         }
 
         private void DrawEvents()
         {
-            EditorGUILayout.PropertyField(events);
-
-            if (events.isExpanded)
-            {
-                EditorGUILayout.PropertyField(OnFocusedInteractable);
-                EditorGUILayout.PropertyField(OnUnfocusedInteractable);
-            }
+            EditorGUILayout.PropertyField(OnInteractWithGO);
+            EditorGUILayout.PropertyField(OnInteractWith);
+            EditorGUILayout.PropertyField(OnFocusedInteractable);
+            EditorGUILayout.PropertyField(OnUnfocusedInteractable);
         }
     }
 #endif

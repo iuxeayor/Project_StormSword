@@ -6,8 +6,8 @@ namespace MalbersAnimations.Controller.AI
     public class SetLookAtTask : MTask
     {
         public override string DisplayName => "General/Set Look At-Aim";
-        public enum LookAtOption1 { CurrentTarget, TransformVar }
-        public enum LookAtOption2 { AIAnimal, TransformVar }
+        public enum LookAtOption1 { CurrentTarget, TransformVar, ClearTarget }
+        public enum LookAtOption2 { This, TransformVar, ClearTarget }
 
         [Tooltip("Check the Look At Component on the Target or on Self")]
         [UnityEngine.Serialization.FormerlySerializedAs("SetLookAtOn")]
@@ -16,7 +16,7 @@ namespace MalbersAnimations.Controller.AI
         [Hide("SetAimOn", (int)Affected.Self)]
         public LookAtOption1 LookAtTargetS = LookAtOption1.CurrentTarget;
         [Hide("SetAimOn", (int)Affected.Target)]
-        public LookAtOption2 LookAtTargetT = LookAtOption2.AIAnimal;
+        public LookAtOption2 LookAtTargetT = LookAtOption2.This;
         [Hide("showTransformVar")]
         public TransformVar TargetVar;
 
@@ -32,37 +32,29 @@ namespace MalbersAnimations.Controller.AI
 
         public override void StartTask(MAnimalBrain brain, int index)
         {
-            Transform child = null;
+            Transform FinalTarget;
 
-            if (SetAimOn == Affected.Self)
+            IAim Aimer = SetAimOn == Affected.Self ?
+                brain.Animal.FindInterface<IAim>() :
+                brain.Target != null ? brain.Target.FindInterface<IAim>() : null;
+
+            if (Aimer.IsUnityRefNull()) { brain.TaskDone(index); return; } //: corrected null check for Unity object interface type (Aimer)
+
+            //Try to clear target first
+            if (SetAimOn == Affected.Self && LookAtTargetS == LookAtOption1.ClearTarget) Aimer.ClearTarget();
+            else if (SetAimOn == Affected.Target && LookAtTargetT == LookAtOption2.ClearTarget) Aimer.ClearTarget();
+
+            else if (SetAimOn == Affected.Self)
             {
-                switch (LookAtTargetS)
-                {
-                    case LookAtOption1.CurrentTarget:
-                        child = UseTag ? GetGameObjectByTag(brain.Target) : GetChildByName(brain.Target);
-                        break;
-                    case LookAtOption1.TransformVar:
-                        child = UseTag ? GetGameObjectByTag(TargetVar.Value) : GetChildByName(TargetVar.Value);
-                        break;
-                    default:
-                        break;
-                }
-
-                brain.Animal.FindInterface<IAim>()?.SetTarget(child);
+                Transform AimTarget = LookAtTargetS == LookAtOption1.CurrentTarget ? brain.Target : TargetVar.Value;
+                FinalTarget = UseTag ? AimTarget.FindWithMalbersTag(tag) : GetChildByName(AimTarget);
+                Aimer.SetTarget(FinalTarget);
             }
             else
             {
-                if (LookAtTargetT == LookAtOption2.AIAnimal)
-                {
-                    child = UseTag ? GetGameObjectByTag(brain.Animal.transform) : GetChildByName(brain.Animal.transform);
-                }
-                else
-                {
-                    child = UseTag ? GetGameObjectByTag(TargetVar.Value) : GetChildByName(TargetVar.Value);
-                }
-
-                if (brain.Target)
-                    brain.Target.FindInterface<IAim>()?.SetTarget(child);
+                var AimTarget = LookAtTargetT == LookAtOption2.This ? brain.Animal.transform : TargetVar.Value;
+                FinalTarget = UseTag ? AimTarget.FindWithMalbersTag(tag) : GetChildByName(AimTarget);
+                Aimer.SetTarget(FinalTarget);
             }
 
             brain.TaskDone(index);
@@ -79,33 +71,16 @@ namespace MalbersAnimations.Controller.AI
             return Target;
         }
 
-        private Transform GetGameObjectByTag(Transform Target)
-        {
-            if (Target)
-            {
-                var allTags = Target.root.GetComponentsInChildren<Tags>();
 
-                if (allTags == null) return null;
-
-                foreach (var item in allTags)
-                {
-                    if (item.HasTag(tag))
-                        return item.transform;
-                }
-            }
-            return null;
-        }
 
         public override void ExitAIState(MAnimalBrain brain, int index)
         {
             if (DisableOnExit)
             {
-                brain.Animal.FindInterface<IAim>()?.SetTarget(null);
-                if (brain.Target) brain.Target.FindInterface<IAim>()?.SetTarget(null);
+                brain.Animal.FindInterface<IAim>()?.ClearTarget();
+                if (brain.Target) brain.Target.FindInterface<IAim>()?.ClearTarget();
             }
         }
-
-
 
         [HideInInspector] public bool showTransformVar = false;
         private void OnValidate()
@@ -115,7 +90,6 @@ namespace MalbersAnimations.Controller.AI
                 (LookAtTargetT == LookAtOption2.TransformVar && SetAimOn == Affected.Target);
         }
 
-
-        private void Reset() { Description = "Find a child gameObject with the name given on the Target and set it as the Target for the Look At and the Aim Component on the Animal "; }
+        private void Reset() { Description = "Find a child gameObject with the name given on the Target and set it as the Target for Aim Component"; }
     }
 }

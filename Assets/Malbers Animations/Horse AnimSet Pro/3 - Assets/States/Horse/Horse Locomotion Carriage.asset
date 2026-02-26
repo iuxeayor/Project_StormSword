@@ -19,6 +19,14 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 
     Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
     ConstantValue: 0
@@ -30,9 +38,12 @@ MonoBehaviour:
   Priority: 2
   resetInputOnFailed: 0
   ResetLastState: 0
+  RemoveForceOnEnter: 0
+  ForceDamping: 0
   General:
     modify: 3199
     RootMotion: 0
+    RootMotionRotation: 1
     Sprint: 1
     Gravity: 0
     Grounded: 1
@@ -54,10 +65,26 @@ MonoBehaviour:
   IncludeSleepState: 1
   SleepFromState: []
   SleepFromMode: []
+  DisableModes: []
+  noModes:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   QueueFrom: []
   ResetFrom: []
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 1
@@ -89,13 +116,21 @@ MonoBehaviour:
   IdleStrafe: 1
   m_debug: 1
   Editor_Tabs1: 1
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets: []
   ID: {fileID: 11400000, guid: 3787b6d94d5454740bf36d57436185b0, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   FallRayBackwards:
     UseConstant: 1
     ConstantValue: 0.3
     Variable: {fileID: 0}
-  ResetIntertia:
+  ResetInertia:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
@@ -103,6 +138,7 @@ MonoBehaviour:
   StopLayer:
     serializedVersion: 2
     m_Bits: 1
+  RootRotation: 1
   wallStopProfiles: []
   AntiFall: 0
   frontDistance: 0.5
@@ -111,6 +147,7 @@ MonoBehaviour:
   BackSpace: 0.2
   FallMultiplier: 1
   DebugColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  noRMRotation: 1
   references:
     version: 2
     RefIds: []

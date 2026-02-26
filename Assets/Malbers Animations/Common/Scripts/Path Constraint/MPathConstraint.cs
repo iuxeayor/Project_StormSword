@@ -487,6 +487,7 @@ namespace MalbersAnimations.PathCreation
             LastPath.Add(Path);
             Path = null;
             Weight = 0;
+            NextPath = null;
 
             Debugging("Exit");
         }
@@ -619,6 +620,8 @@ namespace MalbersAnimations.PathCreation
             {
                 JustExit = null;
                 //  LastPath = null;
+                LastPath.Remove(mPath); // Clear after cooldown
+
             });
 
         }
@@ -784,13 +787,16 @@ namespace MalbersAnimations.PathCreation
         {
             using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
+
                 using (new GUILayout.HorizontalScope())
                 {
                     EditorGUILayout.PropertyField(animal);
                     MalbersEditor.DrawDebugIcon(debug);
                 }
+
                 EditorGUILayout.PropertyField(m_Path);
-                EditorGUILayout.PropertyField(AutoMove);
+
+        EditorGUILayout.PropertyField(AutoMove);
                 // EditorGUILayout.PropertyField(PathPosition);
             }
 

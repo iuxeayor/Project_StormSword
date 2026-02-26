@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using MalbersAnimations.Scriptables;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -43,7 +45,7 @@ namespace MalbersAnimations.Utilities
         [Tooltip("Type of the Animator Parameter")]
         public AnimatorControllerParameterType type;
         [Tooltip("Value to set on the Parameter. Float and Int parameters are represented by this variable. Bool is calculated if this value is not equal to 0")]
-        public float Value;
+        public FloatReference Value;
 
         public int ParamHash { get; set; }
 
@@ -53,6 +55,8 @@ namespace MalbersAnimations.Utilities
         {
             if (ParamHash == 0) GetHashValue(); //Find the hash first
             if (anim == null) return;
+
+            if (ParamHash == 0) return; //If the hash is not found return
 
             switch (type)
             {
@@ -104,7 +108,9 @@ namespace MalbersAnimations.Utilities
                 valueRect.width = widthVal - 5;
 
                 typeRect.x += widthName + 5;
-                valueRect.x += widthName + widthType+5;
+                valueRect.x += widthName + widthType + 20;
+                valueRect.width -= 10; // Reduce the width of the value field to fit better in the layout
+
 
 
 
@@ -114,7 +120,7 @@ namespace MalbersAnimations.Utilities
                 EditorGUI.PropertyField(typeRect, type, GUIContent.none);
 
 
-                AnimatorControllerParameterType t =(AnimatorControllerParameterType) type.intValue;
+                AnimatorControllerParameterType t = (AnimatorControllerParameterType)type.intValue;
                 if (t == AnimatorControllerParameterType.Trigger)
                     typeRect.width = (widthType * 2) - 5;
 
@@ -128,7 +134,7 @@ namespace MalbersAnimations.Utilities
                         break;
                     case AnimatorControllerParameterType.Bool:
                         bool val = Value.floatValue != 0f;
-                        val = EditorGUI.ToggleLeft(valueRect, new GUIContent(val ? "True":"False"), val);
+                        val = EditorGUI.ToggleLeft(valueRect, new GUIContent(val ? "True" : "False"), val);
                         Value.floatValue = val ? 1 : 0;
                         break;
                     case AnimatorControllerParameterType.Trigger:

@@ -137,12 +137,12 @@ namespace MalbersAnimations
                 {
                     using (new GUILayout.HorizontalScope())
                     {
-                        var Row1 = (internalComponents.arraySize+1) / 2;
+                        var Row1 = (internalComponents.arraySize + 1) / 2;
 
                         //Row1
                         using (new GUILayout.VerticalScope())
                         {
-                            for (int i = 0; i < Row1; i ++)
+                            for (int i = 0; i < internalComponents.arraySize; i += 2)
                             {
                                 var element = internalComponents.GetArrayElementAtIndex(i);
 
@@ -156,7 +156,7 @@ namespace MalbersAnimations
                         //Row2
                         using (new GUILayout.VerticalScope())
                         {
-                            for (int i = Row1; i < internalComponents.arraySize; i ++)
+                            for (int i = 1; i < internalComponents.arraySize; i += 2)
                             {
                                 var element = internalComponents.GetArrayElementAtIndex(i);
 

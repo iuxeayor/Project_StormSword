@@ -5,6 +5,7 @@ using MalbersAnimations.Scriptables;
 using UnityEngine.Serialization;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -17,13 +18,11 @@ namespace MalbersAnimations.Controller.AI
     {
         /// <summary>Reference for the Ai Control Movement</summary>
         public IAIControl AIControl;
-        [Obsolete("Use AIControl Instead")]
-        public IAIControl AIMovement => AIControl;
 
         /// <summary>Transform used to raycast Rays to interact with the world</summary>
         [RequiredField, Tooltip("Transform used to raycast Rays to interact with the world")]
         public Transform Eyes;
-        /// <summary>Time needed to make a new transition. Necesary to avoid Changing to multiple States in the same frame</summary>
+        /// <summary>Time needed to make a new transition. Necessary to avoid Changing to multiple States in the same frame</summary>
         [Tooltip("Time needed to make a new transition. Necessary to avoid Changing to multiple States in the same frame")]
         public FloatReference TransitionCoolDown = new(0.2f);
 
@@ -81,17 +80,27 @@ namespace MalbersAnimations.Controller.AI
             return TasksDone[index % TasksDone.Length];
         }
 
+
+        [Tooltip("Maximum amount of memory allocated for the Brain Arrays.")]
+        public int MaxAlloc = 20;
+
         /// <summary>Tasks Local Vars (1 Int,1 Bool,1 Float)</summary>
-        public BrainVars[] TasksVars;
+        public BrainVars[] TasksVars { get; set; }
         /// <summary>Saves on the a Task that it has finish is stuff</summary>
-        internal bool[] TasksDone;
-        /// <summary>Current Decision Results</summary>
-        internal bool[] DecisionResult;
+        internal bool[] TasksDone { get; set; }
         /// <summary>Store if a Task has Started</summary>
-        internal bool[] TasksStarted;
+        internal bool[] TasksStarted { get; set; }
+
+        /// <summary>Time Elapsed for the Tasks on an AI State</summary>
+        public float[] TasksStartTime { get; set; }
+        public float[] TasksUpdateTime { get; set; }
+
+
+        /// <summary>Current Decision Results</summary>
+        internal bool[] DecisionResult { get; set; }
         /// <summary>Decision Local Vars to store values on Prepare Decision</summary>
-        public BrainVars[] DecisionsVars;
-        internal bool BrainInitialize;
+        public BrainVars[] DecisionsVars { get; set; }
+        internal bool BrainInitialize { get; set; }
 
         #region Properties
 
@@ -99,10 +108,8 @@ namespace MalbersAnimations.Controller.AI
         /// <summary>Reference for the Animal</summary>
         public MAnimal Animal { get; private set; }
 
-
-
         /// <summary>Reference for the AnimalStats</summary>
-        public Dictionary<int, Stat> AnimalStats { get; set; }
+        public Stats AnimalStats { get; set; }
 
         #region Target References
         /// <summary>Reference for the Current Target the Animal is using</summary>
@@ -125,7 +132,7 @@ namespace MalbersAnimations.Controller.AI
         /// <summary>Reference for the Local Variables</summary>
         public MLocalVars LocalVars { get; private set; }
 
-        /// <summary>Reference Exra locas Local Variables</summary>
+        /// <summary>Reference Extra Local Variables</summary>
         public MLocalVars ExtraLocalVars { get; set; }
 
         public Vector3 Position => AIControl.Transform.position;
@@ -133,18 +140,16 @@ namespace MalbersAnimations.Controller.AI
         public float AIHeight => Animal.transform.lossyScale.y * AIControl.StoppingDistance;
 
         /// <summary>True if the Current Target has Stats</summary>
-        public bool TargetHasStats { get; private set; }
+        public bool TargetHasStats => TargetStats != null;
 
         /// <summary>Reference for the Target the Stats Component</summary>
-        public Dictionary<int, Stat> TargetStats { get; set; }
+        public Stats TargetStats { get; set; }
         #endregion
 
         /// <summary>Reference for the Last WayPoint the Animal used</summary>
         public IWayPoint LastWayPoint { get; set; }
 
-        /// <summary>Time Elapsed for the Tasks on an AI State</summary>
-        public float[] TasksStartTime { get; set; }
-        public float[] TasksUpdateTime { get; set; }
+
 
         /// <summary>Time Elapsed for the State Decisions</summary>
         [HideInInspector] public float[] DecisionsTime;// { get; set; }
@@ -158,13 +163,23 @@ namespace MalbersAnimations.Controller.AI
             if (LocalVars == null) LocalVars = gameObject.FindComponent<MLocalVars>();
             if (LocalVars == null) LocalVars = gameObject.AddComponent<MLocalVars>();  //Add it if you do not have the component
 
-            AIControl ??= gameObject.FindInterface<IAIControl>();
+            if (AIControl.IsUnityRefNull()) //CustomPatch: fixed wrong null-check for unity object interface type
+                AIControl = gameObject.FindInterface<IAIControl>();
 
-            var AnimalStatscomponent = Animal.FindComponent<Stats>();
-            if (AnimalStatscomponent) AnimalStats = AnimalStatscomponent.Stats_Dictionary();
+            AnimalStats = Animal.FindComponent<Stats>();
 
             Animal.isPlayer.Value = false; //If is using a brain... disable that he is the main player
-                                           // ResetVarsOnNewState();
+
+            //Optimize the Memory Allocations for the Brain Arrays
+            TasksVars = new BrainVars[MaxAlloc];
+            TasksUpdateTime = new float[MaxAlloc];
+            TasksStartTime = new float[MaxAlloc];
+            TasksDone = new bool[MaxAlloc];
+            TasksStarted = new bool[MaxAlloc];
+
+            DecisionsVars = new BrainVars[MaxAlloc];
+            DecisionsTime = new float[MaxAlloc];
+            DecisionResult = new bool[MaxAlloc];
         }
 
 
@@ -205,8 +220,14 @@ namespace MalbersAnimations.Controller.AI
 
             if (currentState)
             {
-                for (int i = 0; i < currentState.tasks.Length; i++)         //Exit the Current Tasks
-                    currentState.tasks[i]?.ExitAIState(this, i);
+                for (int i = 0; i < currentState.tasks.Length; i++)
+                {
+                    if (currentState.tasks[i] != null) //CustomPatch: fixed wrong null-check for unity object
+                    {
+                        //Exit the Current Tasks
+                        currentState.tasks[i].ExitAIState(this, i);
+                    }
+                }
             }
             BrainInitialize = false;
         }
@@ -238,7 +259,8 @@ namespace MalbersAnimations.Controller.AI
                         Debug.LogError($"The [{currentState.name}] AI State has an Empty Task. AI States can't have empty Tasks. {Animal.name}", currentState);
                         // enabled = false;
                         return;
-                    };
+                    }
+                    ;
 
                 }
 
@@ -268,8 +290,7 @@ namespace MalbersAnimations.Controller.AI
 
                     decision.FinishDecision(this, Index);
 
-
-                    Debuging($"<color=white>Changed AI State from <B>[{currentState.name}]</B> to" +
+                    Debugging($"<color=white>Changed AI State from <B>[{currentState.name}]</B> to" +
                         $" <B>[{nextState.name}]</B>. Decision: <b>[{decision.name}]</b> = <B>[{decisionValue}]</B>.</color>", currentState);
 
                     InvokeDecisionEvent(decisionValue, decision);
@@ -278,7 +299,13 @@ namespace MalbersAnimations.Controller.AI
                 }
             }
         }
-        protected virtual void Debuging(string Log, UnityEngine.Object val) { if (debug) Debug.Log($"<B><color=green>[{Animal.name}]</color> - </B> " + Log, val); }
+
+        protected virtual void Debugging(string Log, UnityEngine.Object val)
+        {
+#if UNITY_EDITOR
+            if (debug) MDebug.Log($"<B><color=green>[{Animal.name}]</color> - </B> " + Log, val);
+#endif
+        }
 
         private void InvokeDecisionEvent(bool decisionValue, MAIDecision decision)
         {
@@ -317,7 +344,7 @@ namespace MalbersAnimations.Controller.AI
             currentState.Prepare_Decisions(this);               //Start all Tasks on the new State
 
 
-            Debuging($"<color=white>Play AI State <B>[{currentState.name}]</B>. " +
+            Debugging($"<color=white>Play AI State <B>[{currentState.name}]</B>. " +
                 $"Tasks[{currentState.tasks.Length}]. Decisions[{currentState.transitions.Length}]</color>", currentState);
 
         }
@@ -327,23 +354,42 @@ namespace MalbersAnimations.Controller.AI
         {
             if (currentState)
             {
-                var tasks = (currentState.tasks != null && currentState.tasks.Length > 0) ? currentState.tasks.Length : 1;
-                var transitions = (currentState.transitions != null && currentState.transitions.Length > 0) ? currentState.transitions.Length : 1;
+                var tasks = (currentState.tasks != null && currentState.tasks.Length > 0) ? currentState.tasks.Length : -1;
+                var transitions = (currentState.transitions != null && currentState.transitions.Length > 0) ? currentState.transitions.Length : -1;
 
-                TasksVars = new BrainVars[tasks];                //Local Variables you can use on your tasks
-                TasksUpdateTime = new float[tasks];              //Reset all the Tasks    Time elapsed time
-                TasksStartTime = new float[tasks];               //Reset all the Tasks    Time elapsed time
 
-                TasksDone = new bool[tasks];                     //Reset if they are Done
-                TasksStarted = new bool[tasks];                  //Reset if they tasks are started
+                //OPTIMIZATION  TIP:
 
-                DecisionsVars = new BrainVars[transitions];      //Local Variables you can use on your Decisions
-                DecisionsTime = new float[transitions];          //Reset all the Decisions Time elapsed time
-                DecisionResult = new bool[transitions];          //Reset if they tasks are started
+                if (tasks > 0)
+                {
+                    Array.Clear(TasksVars, 0, tasks);
+                    Array.Clear(TasksUpdateTime, 0, tasks);
+                    Array.Clear(TasksStartTime, 0, tasks);
+                    Array.Clear(TasksDone, 0, tasks);
+                    Array.Clear(TasksStarted, 0, tasks);
+                }
+
+                if (transitions > 0)
+                {
+                    Array.Clear(DecisionsVars, 0, transitions);
+                    Array.Clear(DecisionsTime, 0, transitions);
+                    Array.Clear(DecisionResult, 0, transitions);
+                }
+
+                //TasksVars = new BrainVars[tasks];                //Local Variables you can use on your tasks
+                //TasksUpdateTime = new float[tasks];              //Reset all the Tasks    Time elapsed time
+                //TasksStartTime = new float[tasks];               //Reset all the Tasks    Time elapsed time
+
+                //TasksDone = new bool[tasks];                     //Reset if they are Done
+                //TasksStarted = new bool[tasks];                  //Reset if they tasks are started
+
+                //DecisionsVars = new BrainVars[transitions];      //Local Variables you can use on your Decisions
+                //DecisionsTime = new float[transitions];          //Reset all the Decisions Time elapsed time
+                //DecisionResult = new bool[transitions];          //Reset if they tasks are started
 
 
                 //Make sure disabled Tasks are set to Task Done!!! Important!
-                for (int i = 0; i < currentState.tasks.Length; i++)
+                for (int i = 0; i < tasks; i++)
                 {
                     if (!currentState.tasks[i].active) TasksDone[i] = true;
                 }
@@ -352,9 +398,7 @@ namespace MalbersAnimations.Controller.AI
 
         public bool IsTaskDone(int TaskIndex) => TasksDone[TaskIndex];
 
-        /// <summary>
-        /// Set if a Task is finished or not
-        /// </summary>
+        /// <summary>  Set if a Task is finished or not </summary>
         /// <param name="TaskIndex">Index of the task</param>
         /// <param name="value">True[Default] if the Task is finished, False is not</param>
         public void TaskDone(int TaskIndex, bool value = true) //If the first task is done then go and do the next one
@@ -364,7 +408,7 @@ namespace MalbersAnimations.Controller.AI
                 TasksDone[TaskIndex] = value;
                 OnTaskDone.Invoke(currentState[TaskIndex].MessageID.Value); //Invoke when a task is done!!!
 
-                //Start the next task that needs to wait for the previus one
+                //Start the next task that needs to wait for the previous one
                 if (TaskIndex + 1 < currentState.tasks.Length && currentState.tasks[TaskIndex + 1].WaitForPreviousTask)
                 {
                     currentState.StartWaitforPreviusTask(this, TaskIndex + 1);
@@ -399,9 +443,11 @@ namespace MalbersAnimations.Controller.AI
         #region SelfAnimal Event Listeners
         void OnAnimalStateChange(int state)
         {
-            currentState?.OnAnimalStateEnter(this, Animal.ActiveState);
-            currentState?.OnAnimalStateExit(this, Animal.LastState);
-
+            if (currentState != null) //CustomPatch: fixed wrong null-check for unity object
+            {
+                currentState.OnAnimalStateEnter(this, Animal.ActiveState);
+                currentState.OnAnimalStateExit(this, Animal.LastState);
+            }
 
             if (state == StateEnum.Death) //meaning this animal has died
             {
@@ -420,11 +466,26 @@ namespace MalbersAnimations.Controller.AI
             }
         }
 
-        void OnAnimalStanceChange(int stance) => currentState.OnAnimalStanceChange(this, Animal.Stance.ID);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: hint optimize small method call
+        void OnAnimalStanceChange(int stance)
+        {
+            if (currentState != null) //CustomPatch: fixed wrong null-check for unity object
+                currentState.OnAnimalStanceChange(this, Animal.Stance.ID);
+        }
 
-        void OnAnimalModeStart(int mode, int ability) => currentState.OnAnimalModeStart(this, Animal.ActiveMode);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: hint optimize small method call
+        void OnAnimalModeStart(int mode, int ability)
+        {
+            if (currentState != null) //CustomPatch: fixed wrong null-check for unity object
+                currentState.OnAnimalModeStart(this, Animal.ActiveMode);
+        }
 
-        void OnAnimalModeEnd(int mode, int ability) => currentState.OnAnimalModeEnd(this, Animal.ActiveMode);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //CustomPatch: hint optimize small method call
+        void OnAnimalModeEnd(int mode, int ability)
+        {
+            if (currentState != null) //CustomPatch: fixed wrong null-check for unity object
+                currentState.OnAnimalModeEnd(this, Animal.ActiveMode);
+        }
 
 
         #endregion
@@ -451,20 +512,16 @@ namespace MalbersAnimations.Controller.AI
             TargetAnimal = null;
             TargetVars = null;
             TargetStats = null;
-            TargetHasStats = false;
 
             if (target)
             {
-                TargetAnimal = target.FindComponent<MAnimal>();  //  target.GetComponentInChildren<MAnimal>();
-                TargetVars = target.FindComponent<MLocalVars>(); //  target.GetComponentInChildren<MLocalVars>();
-
-                var TargetStatsC = target.FindComponent<Stats>();//  target.GetComponentInChildren<Stats>();
-                TargetHasStats = TargetStatsC != null;
-                if (TargetHasStats) TargetStats = TargetStatsC.Stats_Dictionary();
+                TargetAnimal = target.FindComponent<MAnimal>();
+                TargetVars = target.FindComponent<MLocalVars>();
+                TargetStats = target.FindComponent<Stats>();
             }
         }
 
-        public bool CheckForPreviusTaskDone(int index)
+        public bool CheckForPreviousTaskDone(int index)
         {
             if (index == 0) return true;
 
@@ -477,7 +534,8 @@ namespace MalbersAnimations.Controller.AI
         public void SetLastWayPoint(Transform target)
         {
             var newLastWay = target.gameObject.FindInterface<IWayPoint>();
-            if (newLastWay != null) LastWayPoint = target?.gameObject.FindInterface<IWayPoint>(); //If not is a waypoint save the last one
+            if (newLastWay != null && target != null) //CustomPatch: fixed wrong null-check for unity object (target)
+                LastWayPoint = target.gameObject.FindInterface<IWayPoint>(); //If not is a waypoint save the last one
         }
 
 
@@ -489,7 +547,7 @@ namespace MalbersAnimations.Controller.AI
             //   remainInState = MTools.GetInstance<MAIState>("Remain in State");
             AIControl = this.FindComponent<MAnimalAIControl>();
 
-            if (AIControl != null)
+            if (!AIControl.IsUnityRefNull()) //CustomPatch: fixed wrong null-check for unity object interface type
             {
                 AIControl.AutoNextTarget = false;
                 AIControl.UpdateDestinationPosition = false;
@@ -517,23 +575,29 @@ namespace MalbersAnimations.Controller.AI
                     {
                         if (currentState.tasks != null)
                             foreach (var task in currentState.tasks)
-                                task?.DrawGizmos(this);
+                            {
+                                if (task != null) //CustomPatch: fixed wrong null-check for unity object
+                                    task.DrawGizmos(this);
+                            }
 
 
                         if (currentState.transitions != null)
                             foreach (var tran in currentState.transitions)
-                                tran?.decision?.DrawGizmos(this);
+                            {
+                                if (tran != null && tran.decision != null)  //CustomPatch: fixed wrong null-check for unity object (tran.decision)
+                                    tran.decision.DrawGizmos(this);
+                            }
                     }
                 }
 
                 if (Application.isPlaying && debugAIStates)
                 {
-                    string desicions = "";
+                    string decisions = "";
 
                     var Styl = new GUIStyle(EditorStyles.boldLabel);
                     Styl.normal.textColor = Color.yellow;
 
-                    UnityEditor.Handles.Label(Eyes.position, "State: " + currentState.name + desicions, Styl);
+                    UnityEditor.Handles.Label(Eyes.position, "State: " + currentState.name + decisions, Styl);
                 }
             }
         }
@@ -615,8 +679,8 @@ namespace MalbersAnimations.Controller.AI
     [CustomEditor(typeof(MAnimalBrain)), CanEditMultipleObjects]
     public class MAnimalBrainEditor : Editor
     {
-        SerializedProperty Eyes, debug, TransitionCoolDown, DisableAIOnDeath, Editor_Tabs1, debugAIStates, OnTaskDone,
-            currentState, OnTaskStarted, OnDecisionSucceded, OnAIStateChanged;
+        SerializedProperty Eyes, debug, TransitionCoolDown, DisableAIOnDeath, Editor_Tabs1, debugAIStates, OnTaskDone, MaxAlloc,
+            currentState, OnTaskStarted, OnDecisionSucceeded, OnAIStateChanged;
 
         protected string[] Tabs1 = new string[] { "General", "Events", "Debug" };
 
@@ -633,12 +697,13 @@ namespace MalbersAnimations.Controller.AI
 
             OnTaskStarted = serializedObject.FindProperty("OnTaskStarted");
             OnTaskDone = serializedObject.FindProperty("OnTaskDone");
-            OnDecisionSucceded = serializedObject.FindProperty("OnDecisionSucceeded");
+            OnDecisionSucceeded = serializedObject.FindProperty("OnDecisionSucceeded");
             OnAIStateChanged = serializedObject.FindProperty("OnAIStateChanged");
             Editor_Tabs1 = serializedObject.FindProperty("Editor_Tabs1");
             debug = serializedObject.FindProperty("debug");
             //  AISource = serializedObject.FindProperty("AISource");
             debugAIStates = serializedObject.FindProperty("debugAIStates");
+            MaxAlloc = serializedObject.FindProperty("MaxAlloc");
         }
 
         public override void OnInspectorGUI()
@@ -765,6 +830,7 @@ namespace MalbersAnimations.Controller.AI
                 // EditorGUILayout.PropertyField(remainInState);
                 EditorGUILayout.PropertyField(TransitionCoolDown);
                 EditorGUILayout.PropertyField(DisableAIOnDeath);
+                EditorGUILayout.PropertyField(MaxAlloc);
             }
         }
 
@@ -775,7 +841,7 @@ namespace MalbersAnimations.Controller.AI
                 EditorGUILayout.PropertyField(OnAIStateChanged);
                 EditorGUILayout.PropertyField(OnTaskStarted);
                 EditorGUILayout.PropertyField(OnTaskDone);
-                EditorGUILayout.PropertyField(OnDecisionSucceded);
+                EditorGUILayout.PropertyField(OnDecisionSucceeded);
             }
         }
     }

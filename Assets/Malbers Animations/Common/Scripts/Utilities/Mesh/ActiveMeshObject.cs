@@ -1,5 +1,4 @@
-﻿using MalbersAnimations.Reactions;
-using MalbersAnimations.Scriptables;
+﻿using MalbersAnimations.Scriptables;
 using UnityEngine;
 
 namespace MalbersAnimations.Utilities
@@ -24,12 +23,8 @@ namespace MalbersAnimations.Utilities
         [Tooltip("Parent of the new Item Mesh")]
         public StringReference Parent = new();
 
-
-        [Header("Reactions")]
-        [SerializeReference, SubclassSelector]
-        public Reaction OnActive;
-        [SerializeReference, SubclassSelector]
-        public Reaction OnDeactive;
+        public Reactions.Reaction2 OnActive;
+        public Reactions.Reaction2 OnDeactive;
 
         public void AddMesh(ActiveMeshes ACM)
         {
@@ -42,7 +37,7 @@ namespace MalbersAnimations.Utilities
                 {
                     Name = SetName,
                     name = SetName,
-                    Onwer = ACM,
+                    Owner = ACM,
                     MeshItems = new() //Create a new list of MeshItems
 
                 };
@@ -51,9 +46,7 @@ namespace MalbersAnimations.Utilities
                 if (ACM.debug) Debug.Log($"<B>Active Mesh</B> Set <B>{SetName.Value}</B> Added to the list", this);
             }
 
-            var NewParent = ACM.Owner.FindGrandChild(Parent.Value) ?? ACM.transform;
-
-
+            var NewParent = (ACM.Owner.FindGrandChild(Parent.Value) ?? null) ?? ACM.RootBone.FindGrandChild(Parent.Value) ?? ACM.transform;
             var meshItem = set.MeshItems.Find(item => item.Mesh != null && item.Mesh.name == name);
 
             if (meshItem == null)
@@ -72,7 +65,7 @@ namespace MalbersAnimations.Utilities
                             FoundSame = item;
                             MeshTransform = item.Mesh;
                             meshRenderer = item.MainRenderer;
-                            Debug.Log($"Found Equal Skinned Mesh Renderer (Using same Object)... {MeshTransform.name}");
+                            if (ACM.debug) Debug.Log($"Found Equal Skinned Mesh Renderer (Using same Object)... {MeshTransform.name}");
                             break;
                         }
                     }
@@ -83,7 +76,7 @@ namespace MalbersAnimations.Utilities
                             FoundSame = item;
                             MeshTransform = item.Mesh;
                             meshRenderer = item.MainRenderer;
-                            Debug.Log($"Found Equal  Mesh Renderer (Using same Object)...{MeshTransform.name}");
+                            if (ACM.debug) Debug.Log($"Found Equal  Mesh Renderer (Using same Object)...{MeshTransform.name}");
                             break;
                         }
                     }

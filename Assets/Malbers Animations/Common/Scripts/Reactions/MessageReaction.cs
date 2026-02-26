@@ -12,7 +12,7 @@ namespace MalbersAnimations
         public bool sendToChildren = true;
         [Tooltip("Use Component.SendMessage Instead of ")]
         public bool UseSendMessage = false;
-        public MesssageItem[] messages;
+        public MessageItem[] messages;
         public bool debug = false;
         public override System.Type ReactionType => typeof(Component); //set the Type of component this Reaction Needs
 
@@ -28,7 +28,7 @@ namespace MalbersAnimations
         }
 
 
-        private void Deliver(MesssageItem m, Component go)
+        private void Deliver(MessageItem m, Component go)
         {
             if (UseSendMessage)
                 m.DeliverMessage(go, sendToChildren, debug);

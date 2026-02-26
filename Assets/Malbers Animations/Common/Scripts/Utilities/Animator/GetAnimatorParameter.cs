@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using MalbersAnimations.Events;
 
 
@@ -83,10 +82,10 @@ namespace MalbersAnimations.Utilities
             using (new GUILayout.HorizontalScope())
             {
                 EditorGUILayout.PropertyField(parameter);
-                EditorGUILayout.PropertyField(type,GUIContent.none, GUILayout.Width(75));
+                EditorGUILayout.PropertyField(type, GUIContent.none, GUILayout.Width(75));
             }
 
-            var typeenum = (AnimatorType) type.intValue;
+            var typeenum = (AnimatorType)type.intValue;
 
             switch (typeenum)
             {

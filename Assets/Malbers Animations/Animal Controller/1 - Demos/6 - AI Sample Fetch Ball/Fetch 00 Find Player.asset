@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4681abb1579a87d4ca46923c098ddece, type: 3}
-  m_Name: Ball in Ground
+  m_Name: D_Ball in Ground
   m_EditorClassIdentifier: 
   active: 1
   Description: Find Ball, and Get if the Ball was not picked. If it was on the Ground
@@ -28,7 +28,7 @@ MonoBehaviour:
   list_index: 1
   decisions:
   - {fileID: 937891121743794051}
-  - {fileID: 3004435546196534271}
+  - {fileID: 827197030198368770}
   invert: 0000
   debug: 0
 --- !u!114 &11400000
@@ -59,7 +59,56 @@ MonoBehaviour:
   CreateTaskAsset: 1
   CreateDecisionAsset: 1
   TasksIndex: -1
-  DecisionIndex: 0
+  DecisionIndex: 1
+--- !u!114 &827197030198368770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a989d4960ed58644923fc6c2a3270ac, type: 3}
+  m_Name: D_Is NOT Picked by Player
+  m_EditorClassIdentifier: 
+  active: 1
+  Description: Type Description Here
+  DecisionID:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  send: 0
+  interval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
+  WaitForAllTasks: 0
+  waitForTask: -1
+  checkOn: 2
+  TransformHook: {fileID: 11400000, guid: c8299d746a30bb648b942478d903bef1, type: 2}
+  GameObjectVar: {fileID: 0}
+  compare: 0
+  value:
+    name: Picked by Player
+    type: 2
+    intValue: 0
+    floatValue: 0
+    boolValue: 0
+    stringValue: 
+    vector3Value: {x: 0, y: 0, z: 0}
+    vector2Value: {x: 0, y: 0}
+    gameObjectValue:
+      UseConstant: 1
+      ConstantValue: {fileID: 0}
+      Variable: {fileID: 0}
+    transformValue:
+      UseConstant: 1
+      ConstantValue: {fileID: 0}
+      Variable: {fileID: 0}
+    materialValue: {fileID: 0}
+    objectValue: {fileID: 0}
+  isNumber: 0
 --- !u!114 &937891121743794051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70,7 +119,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b00a63bfc37e3794ea3b0af5a3c6381e, type: 3}
-  m_Name: Look For Ball
+  m_Name: D_Look For Ball
   m_EditorClassIdentifier: 
   active: 1
   Description: Look for Ball No Obstacle
@@ -106,55 +155,19 @@ MonoBehaviour:
   transform: {fileID: 11400000, guid: c8299d746a30bb648b942478d903bef1, type: 2}
   gameObject: {fileID: 0}
   gameObjectSet: {fileID: 0}
-  tags:
-  - {fileID: 0}
   zoneType: 0
   AllZones: 1
   ZoneID: 0
   ZoneModeAbility: -1
+  tags: []
+  ReactionOnSelf:
+    reactions: []
+  ReactionOnTarget:
+    reactions: []
   debugColor: {r: 0, g: 0, b: 0.7, a: 0.3}
---- !u!114 &3004435546196534271
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b74a9381c853d664c87e919a6ed0253e, type: 3}
-  m_Name: Ball was NOT Picked
-  m_EditorClassIdentifier: 
-  active: 1
-  Description: "Check is the ball  is Picked \nPicked -> True\nDropped/On The Ground
-    -> False"
-  DecisionID:
-    UseConstant: 1
-    ConstantValue: 0
-    Variable: {fileID: 0}
-  send: 0
-  interval:
-    UseConstant: 1
-    ConstantValue: 0.2
-    Variable: {fileID: 0}
-  WaitForAllTasks: 0
-  waitForTask: -1
-  ListenerID:
-    UseConstant: 1
-    ConstantValue: 1
-    Variable: {fileID: 0}
-  checkOn: 3
-  PlacedOn: 0
-  tag: {fileID: 0}
-  Transform: {fileID: 11400000, guid: c8299d746a30bb648b942478d903bef1, type: 2}
-  GameObject: {fileID: 0}
-  GameObjectSet: {fileID: 0}
-  varType: 0
-  comparer: 0
-  boolValue: 0
-  intValue: 0
-  floatValue: 0
-  debug: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &4480350964151212690
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -165,7 +178,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b00a63bfc37e3794ea3b0af5a3c6381e, type: 3}
-  m_Name: Look For Player
+  m_Name: D_Look For Player
   m_EditorClassIdentifier: 
   active: 1
   Description: Look for Player No Obstacle
@@ -201,10 +214,17 @@ MonoBehaviour:
   transform: {fileID: 11400000, guid: 0c45a2c5e368c004eb9efaa6152aa0ea, type: 2}
   gameObject: {fileID: 0}
   gameObjectSet: {fileID: 0}
-  tags:
-  - {fileID: 11400000, guid: f45a3d7e9fbf2074496de5b9b0ab09b0, type: 2}
   zoneType: 0
   AllZones: 1
   ZoneID: 0
   ZoneModeAbility: -1
+  tags:
+  - {fileID: 11400000, guid: f45a3d7e9fbf2074496de5b9b0ab09b0, type: 2}
+  ReactionOnSelf:
+    reactions: []
+  ReactionOnTarget:
+    reactions: []
   debugColor: {r: 0, g: 0, b: 0.7, a: 0.3}
+  references:
+    version: 2
+    RefIds: []

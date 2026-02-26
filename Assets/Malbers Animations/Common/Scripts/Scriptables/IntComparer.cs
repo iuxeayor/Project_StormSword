@@ -178,13 +178,11 @@ namespace MalbersAnimations
             };
         }
 
-        protected override void DrawEvents()
+        protected override void DrawElements()
         {
             reo_compare.DoLayoutList();
 
-
             int SelectedItem = reo_compare.index;
-
             if (SelectedItem != -1 && SelectedItem < reo_compare.count)
             {
                 var element = compare.GetArrayElementAtIndex(SelectedItem);
@@ -192,8 +190,7 @@ namespace MalbersAnimations
                 {
                     UnityEditor.EditorGUILayout.Space(-20);
 
-                    var description = element.FindPropertyRelative("description");
-                    var UpdateAfterCompare = element.FindPropertyRelative("UpdateAfterCompare");
+
 
 
                     if (styleDesc == null)
@@ -207,6 +204,8 @@ namespace MalbersAnimations
 
                     styleDesc.normal.textColor = UnityEditor.EditorStyles.boldLabel.normal.textColor;
 
+                    var description = element.FindPropertyRelative("description");
+                    var UpdateAfterCompare = element.FindPropertyRelative("UpdateAfterCompare");
 
                     UnityEditor.EditorGUILayout.LabelField("Description", UnityEditor.EditorStyles.boldLabel);
                     description.stringValue = UnityEditor.EditorGUILayout.TextArea(description.stringValue, styleDesc);
@@ -216,6 +215,7 @@ namespace MalbersAnimations
                         var name = element.FindPropertyRelative("name").stringValue;
                         if (UpdateAfterCompare != null) UnityEditor.EditorGUILayout.PropertyField(UpdateAfterCompare);
                         UnityEditor.EditorGUILayout.PropertyField(Response, new GUIContent("Response: [" + name + "]   "));
+                        ExtraEvents(element);
                     }
                 }
             }
@@ -223,7 +223,11 @@ namespace MalbersAnimations
             if (OnValueChanged != null)
                 UnityEditor.EditorGUILayout.PropertyField(OnValueChanged);
 
+
         }
+
+        protected virtual void ExtraEvents(UnityEditor.SerializedProperty element)
+        { }
     }
 #endif
 }

@@ -32,6 +32,7 @@ namespace MalbersAnimations
             if (value.Variable != null && Auto) value.Variable.OnValueChanged -= Invoke;
         }
 
+        public virtual void Invoke() => Invoke(Value);
         public virtual void Invoke(int value) { if (Enable) Raise.Invoke(value); }
         public virtual void Invoke(float value) => Invoke((int)value);
         public virtual void Invoke(IDs value) => Invoke(value.ID);
@@ -41,9 +42,22 @@ namespace MalbersAnimations
         public virtual void SetValue(IDs value) => Value = value.ID;
         public virtual void SetValue(bool value) => Value = value ? 1 : 0;
 
-        //  public virtual void InvokeInt(int value) => Invoke(value);
 
-        public virtual void Invoke() => Invoke(Value);
+        #region Math Operations
+        public virtual void _Add(IntVar var) => _Add(var.Value);
+        public virtual void _Substract(IntVar var) => _Substract(var.Value);
+        public virtual void _Multiply(IntVar var) => Value *= var;
+        public virtual void _Divide(IntVar var) => Value /= var;
+        public virtual void _Add(int var) => Value += var;
+        public virtual void _Substract(int var) => Value -= var;
+        public virtual void _Multiply(int var) => Value *= var;
+        public virtual void _Divide(int var) => Value /= var;
+        public virtual void _Add(float var) => _Add((int)var);
+        public virtual void _Substract(float var) => _Substract((int)var);
+        public virtual void _Multiply(float var) => _Multiply((int)var);
+        public virtual void _Divide(float var) => _Divide((int)var);
+        #endregion
+
     }
 
 
@@ -61,7 +75,7 @@ namespace MalbersAnimations
             Raise = serializedObject.FindProperty("Raise");
         }
 
-        protected override void DrawEvents() => UnityEditor.EditorGUILayout.PropertyField(Raise);
+        protected override void DrawElements() => UnityEditor.EditorGUILayout.PropertyField(Raise);
     }
 #endif
 }

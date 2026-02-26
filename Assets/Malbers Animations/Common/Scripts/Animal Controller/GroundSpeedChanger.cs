@@ -10,7 +10,7 @@ namespace MalbersAnimations.Controller
         [Min(0)] public float Lerp = 2f;
 
 
-        [Tooltip("Adittional Position added to the Movement on the Floor")]
+        [Tooltip("Additional Position added to the Movement on the Floor")]
         [Hide(nameof(Lerp), true)]
         public float Position;
 
@@ -18,7 +18,7 @@ namespace MalbersAnimations.Controller
         [Hide(nameof(Lerp), true)]
         public float SlideAmount = 0.25f;
 
-        [Tooltip("Slide activation using the Max Slope Limit")]
+        [Tooltip("Slide activation using the Max Slope Limit if the slope angle is greater than this value, then the sliding will start.")]
         [Hide(nameof(Lerp), true)]
         public float SlideThreshold = 30f;
 
@@ -29,12 +29,8 @@ namespace MalbersAnimations.Controller
         [Tooltip("Values used on the [Slide] State")]
         public SlideData SlideData;
 
-
-
-        [SubclassSelector, SerializeReference]
-        public Reaction OnEnter;
-        [SubclassSelector, SerializeReference]
-        public Reaction OnExit;
+        public Reaction2 OnEnter;
+        public Reaction2 OnExit;
 
         private void Reset()
         {
@@ -48,10 +44,10 @@ namespace MalbersAnimations.Controller
         [Tooltip("If is set to true then this Ground Changer can activate the Slide State on the Animal")]
         public bool Slide;
 
-        [Tooltip("If true, then the rotation will be ignored in the Slide State")]
+        [Tooltip("If true, then the rotation of the character will be ignored during the Slide State")]
         public bool IgnoreRotation;
 
-        [Tooltip("Minimun Slope Direction Angle to activate the Slide State")]
+        [Tooltip("Minimum  Slope Direction Angle to activate the Slide State")]
         [Min(0)] public float MinAngle;
 
         [Tooltip("Slide activation angle to activate the state. The character needs to be looking/align at the Slope, Default value 180")]

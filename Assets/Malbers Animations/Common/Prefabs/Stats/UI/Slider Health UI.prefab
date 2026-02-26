@@ -145,6 +145,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Events:
   - Event: {fileID: 11400000, guid: bee0895a0f76ff840bfba0a11f37d898, type: 2}
+    active: 1
     useInt: 0
     useFloat: 1
     useVoid: 0
@@ -260,11 +261,17 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     IntEventList: []
+    FloatEventList: []
     AdvancedInteger: 0
+    AdvancedFloat: 0
     AdvancedBool: 0
     InvertBool: 0
-    multiplier: 1
+    multiplier:
+      UseConstant: 1
+      ConstantValue: 1
+      Variable: {fileID: 0}
   - Event: {fileID: 11400000, guid: 598cd94b343a5eb46a97d567ded5a5f0, type: 2}
+    active: 1
     useInt: 0
     useFloat: 1
     useVoid: 0
@@ -343,10 +350,15 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     IntEventList: []
+    FloatEventList: []
     AdvancedInteger: 0
+    AdvancedFloat: 0
     AdvancedBool: 0
     InvertBool: 0
-    multiplier: 2
+    multiplier:
+      UseConstant: 1
+      ConstantValue: 2
+      Variable: {fileID: 0}
   ShowEvents: 1
   SelectedEvent: 0
 --- !u!114 &4228069162931873985
@@ -481,6 +493,7 @@ MonoBehaviour:
             m_StringArgument: HurtUI
             m_BoolArgument: 0
           m_CallState: 2
+    UpdateAfterCompare: 0
   OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -902,7 +915,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e5ef11550ece2674c93243b43958f682, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 91a64f749ce1c9942acc52bd955e7931, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1002,7 +1015,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Object: {fileID: 4876601837898352110}
+  update: 1
   loopType: 0
+  endType: 0
+  Laps:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  UnScaleTime: 0
+  CannotBeInterrupted: 1
   StartDelay:
     UseConstant: 1
     ConstantValue: 0
@@ -1039,19 +1060,20 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  events: 0
+  WaitStart:
+    m_PersistentCalls:
+      m_Calls: []
   OnStart:
     m_PersistentCalls:
       m_Calls: []
   OnEnd:
     m_PersistentCalls:
       m_Calls: []
-  onEnable:
+  EndWait:
     m_PersistentCalls:
       m_Calls: []
-  onDisable:
-    m_PersistentCalls:
-      m_Calls: []
-  previewPosition: 0
+  preview: 0
   startScale:
     UseConstant: 1
     ConstantValue: {x: 0, y: 0, z: 0}

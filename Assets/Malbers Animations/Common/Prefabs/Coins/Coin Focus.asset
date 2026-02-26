@@ -64,12 +64,21 @@ MonoBehaviour:
     m_RotationOrder: 4
   propertyName:
     UseConstant: 1
-    ConstantValue: _Color
+    ConstantValue: _EmissionColor
     Variable: {fileID: 0}
-  propertyType: 1
+  propertyType: 2
   FloatValue:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
   ColorValue: {r: 1, g: 1, b: 1, a: 1}
-  ColorHDRValue: {r: 1, g: 1, b: 1, a: 1}
+  ColorHDRValue: {r: 1.4980394, g: 1.4980394, b: 1.4980394, a: 1}
+  StartMultiplier:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  revertColorAfterLerp: 0
+  ResetToOriginalBefore: 0
+  FloatOriginal: 0
+  ColorOriginal: {r: 0, g: 0, b: 0, a: 1}
+  ColorHDROriginal: {r: 0, g: 0, b: 0, a: 1}

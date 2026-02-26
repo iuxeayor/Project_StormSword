@@ -1,7 +1,6 @@
 ﻿using MalbersAnimations.Scriptables;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace MalbersAnimations.Events
 {
@@ -13,9 +12,9 @@ namespace MalbersAnimations.Events
         public FloatReference Delayed = new();
         public FloatReference RepeatTime = new();
         public bool Repeat;
+        //[Tooltip("Disable this component after the event is raised")]
+        //public bool Once;
 
-
-        [FormerlySerializedAs("OnEnableEvent")]
         public UnityEngine.Events.UnityEvent onEnable = new();
 
 
@@ -40,7 +39,12 @@ namespace MalbersAnimations.Events
             }
         }
 
-        public void StartEvent() => onEnable.Invoke();
+        public void StartEvent()
+        {
+            onEnable.Invoke();
+
+            //  if (Once) enabled = false;
+        }
 
         private void OnDisable()
         {
@@ -48,16 +52,15 @@ namespace MalbersAnimations.Events
             StopAllCoroutines();
         }
 
-        /// <summary>
-        /// Disable all Invokes and Call again the OnEnable
-        /// </summary>
+        /// <summary> Disable all Invokes and Call again the OnEnable </summary>
         public virtual void Restart()
         {
+            enabled = true;
             CancelInvoke();
             OnEnable();
         }
 
-        //#if UNITY_EDITOR 
+        //#if UNITY_EDITOR
         //        private void OnDrawGizmosSelected()
         //        {
         //            MalbersEditor.DrawEventConnection(transform, onEnable, true);
@@ -75,12 +78,10 @@ namespace MalbersAnimations.Events
     [UnityEditor.CustomEditor(typeof(UnityEventRaiser)), UnityEditor.CanEditMultipleObjects]
     public class UnityEventRaiserInspector : UnityEditor.Editor
     {
-        UnityEditor.SerializedProperty Delayed, Repeat, RepeatTime, OnEnableEvent, ShowDescription, Description;
+        UnityEditor.SerializedProperty Delayed, Repeat, RepeatTime, OnEnableEvent, ShowDescription, Description;//,// Once;
         public static GUIStyle StyleBlue => Style(new Color(0, 0.5f, 1f, 0.3f));
         private GUIStyle style;
         private GUIContent _ReactIcon;
-
-
 
 
         private void OnEnable()
@@ -91,6 +92,7 @@ namespace MalbersAnimations.Events
             Repeat = serializedObject.FindProperty("Repeat");
             RepeatTime = serializedObject.FindProperty("RepeatTime");
             OnEnableEvent = serializedObject.FindProperty("onEnable");
+            // Once = serializedObject.FindProperty("Once");
         }
 
         public override void OnInspectorGUI()
@@ -137,6 +139,7 @@ namespace MalbersAnimations.Events
                 }
 
                 Repeat.boolValue = GUILayout.Toggle(Repeat.boolValue, new GUIContent("R", "Repeat"), UnityEditor.EditorStyles.miniButton, GUILayout.Width(25));
+                //Once.boolValue = GUILayout.Toggle(Once.boolValue, new GUIContent("1", "Disable this component after the event is raised"), EditorStyles.miniButton, GUILayout.Width(25));
             }
             UnityEditor.EditorGUILayout.PropertyField(OnEnableEvent);
             serializedObject.ApplyModifiedProperties();
@@ -156,7 +159,7 @@ namespace MalbersAnimations.Events
             Texture2D bgActual = currentStyle.normal.scaledBackgrounds[0];
 
 #if UNITY_2023_2_OR_NEWER
-            if (SystemInfo.IsFormatSupported(bgActual.graphicsFormat, UnityEngine.Experimental.Rendering.GraphicsFormatUsage.Sample ) == false)
+            if (SystemInfo.IsFormatSupported(bgActual.graphicsFormat, UnityEngine.Experimental.Rendering.GraphicsFormatUsage.Sample) == false)
 #else
             if (SystemInfo.IsFormatSupported(bgActual.graphicsFormat, UnityEngine.Experimental.Rendering.FormatUsage.Sample) == false)
 #endif

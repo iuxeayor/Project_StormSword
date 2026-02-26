@@ -5,6 +5,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1024626565931582, guid: f973176897d258f4bafcd8155d6125bf, type: 3}
@@ -59,6 +60,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4598879409358134, guid: f973176897d258f4bafcd8155d6125bf, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 114148778366862054, guid: f973176897d258f4bafcd8155d6125bf,
         type: 3}
       propertyPath: m_Text
@@ -73,7 +78,7 @@ PrefabInstance:
     - target: {fileID: 114325918912131826, guid: f973176897d258f4bafcd8155d6125bf,
         type: 3}
       propertyPath: RemoveAnimalOnActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114756136543715440, guid: f973176897d258f4bafcd8155d6125bf,
         type: 3}
@@ -136,6 +141,9 @@ PrefabInstance:
       value: Crawl
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f973176897d258f4bafcd8155d6125bf, type: 3}
 --- !u!4 &486868759095558894 stripped
 Transform:

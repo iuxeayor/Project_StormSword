@@ -1,4 +1,5 @@
-﻿using MalbersAnimations.Controller;
+﻿using MalbersAnimations.Conditions;
+using MalbersAnimations.Controller;
 using MalbersAnimations.Events;
 using MalbersAnimations.Scriptables;
 using MalbersAnimations.Weapons;
@@ -15,8 +16,8 @@ namespace MalbersAnimations
         public bool UseWeaponsOnlyWhileRiding = true;
         public Transform IgnoreTransform { get; set; }
 
-        public IRider Rider { get; private set; }
-        public IInputSource MInput { get; private set; }
+        public IRider Rider { get; protected set; }
+        public IInputSource MInput { get; protected set; }
         #endregion
 
         #region Animal Controller
@@ -34,7 +35,7 @@ namespace MalbersAnimations
 
 
         /// <summary>Store if the Animal was already Strafing</summary>
-        public bool WasStrafing { get; private set; }
+        public bool DefaultStrafing { get; set; }
 
         /// <summary>Is the Current weapon Action Reload?</summary>
         public bool IsReloading => Weapon.IsReloading;
@@ -67,13 +68,11 @@ namespace MalbersAnimations
         public int SecondAttackBranch { get => secondAttackBranch.Value; set => secondAttackBranch.Value = value; }
 
 
-
-
         [Tooltip("Ignore the Left and Right hand Offsets")]
         public BoolReference IgnoreHandOffset = new();
 
         [Tooltip("Ignore all Draw|Unsheathe animations for all weapons")]
-        [SerializeField] protected BoolReference m_IgnoreDraw = new(false);   //Ignore Draw/Store Aniamtions
+        [SerializeField] protected BoolReference m_IgnoreDraw = new(false);   //Ignore Draw/Store Animations
 
         [Tooltip("Ignore all Store|sheathe animations for all weapons")]
         [SerializeField] protected BoolReference m_IgnoreStore = new(false);
@@ -90,14 +89,19 @@ namespace MalbersAnimations
         [Tooltip("Disable these States when a weapon is equipped")]
         public List<StateID> DisableStates = new();
 
-        [Tooltip("Unequip Weapons If any of these modes are Activated")]
+        [Tooltip("Unequip Weapons If any of these states are Activated")]
         public List<StateID> ExitOnState = new();
 
-        [Tooltip("Unequip Weapons If any of these modes are Activated.Ignore Store|Sheathe animations")]
+
+        [Tooltip("Drop Weapons If any of these states are Activated")]
+        public List<StateID> DropWeapon = new();
+
+
+        [Tooltip("Unequip Weapons If any of these states are Activated.Ignore Store|Sheathe animations")]
         public bool ExitFast = false;
 
 
-        [Tooltip("Store current active weapon to its own holster. (Disable for Assasing Creed Mode)")]
+        [Tooltip("Store current active weapon to its own holster. (Disable for Assassin Creed Mode)")]
         public bool StoreSelfHolster = false;
 
         /// <summary>Ignore Draw|Unsheathe and Store|Sheathe Animations for the weapon</summary>
@@ -108,61 +112,64 @@ namespace MalbersAnimations
         public int ComboBranch => comboManager.Branch;
 
         /// <summary>Stores if the Animal has a Mode for the weapon</summary>
-        public Mode WeaponMode { get; private set; }
+        public Mode WeaponMode { get; protected set; }
 
         /// <summary>Stores if the Animal has a Draw weapon mode</summary>
-        public Mode DrawMode { get; private set; }
+        public Mode DrawMode { get; protected set; }
         /// <summary>Stores if the Animal has a Store weapon mode</summary>
-        public Mode StoreMode { get; private set; }
+        public Mode StoreMode { get; protected set; }
         /// <summary>Stores if the Animal has a Unarmed  mode</summary>
-        public Mode UnArmedMode { get; private set; }
+        public Mode UnArmedMode { get; protected set; }
         #endregion
 
         #region Animator System.Actions
         /// <summary>Sets a bool Parameter on the Animator using the parameter Hash</summary>
-        public System.Action<int, bool> SetBoolParameter { get; set; } = delegate { };
+        public System.Action<int, bool> SetBoolParameter { get; set; }
         /// <summary>Sets a float Parameter on the Animator using the parameter Hash</summary>
-        public System.Action<int, float> SetFloatParameter { get; set; } = delegate { };
+        public System.Action<int, float> SetFloatParameter { get; set; }
 
         /// <summary>Sets a Integer Parameter on the Animator using the parameter Hash</summary> 
-        public System.Action<int, int> SetIntParameter { get; set; } = delegate { };
+        public System.Action<int, int> SetIntParameter { get; set; }
 
         /// <summary>Sets a Trigger Parameter on the Animator using the parameter Hash</summary> 
-        public System.Action<int> SetTriggerParameter { get; set; } = delegate { };
+        public System.Action<int> SetTriggerParameter { get; set; }
         #endregion
 
         #region Public Entries
         public bool UseExternal = true;                                //Use this if the weapons came from an external source
 
         [Tooltip("If the Weapon sent on the EquipExternal Method is a Prefab... instantiate it")]
-        public bool InstantiateOnEquip = true;                         //If the weapons comes from an inventory check if they are already intantiate
+        public bool InstantiateOnEquip = true;                         //If the weapons comes from an inventory check if they are already instantiate
         [Tooltip("Destroy the Weapon when is unequipped")]
-        public bool DestroyOnUnequip = false;                         //If the weapons comes from an inventory check if they are already intantiate
+        public bool DestroyOnUnequip = false;                         //If the weapons comes from an inventory check if they are already instantiate
+
+        [Tooltip("Ignore the Parent Weapon when equipping a new weapon. Use this for Invector Controller")]
+        public bool IgnoreParentWeapon = false;
 
         [Tooltip("Override the Weapon Layer Mask when equipped. This will be ignored when is set to none")]
         public LayerReference OverrideWeaponLayer = new(0);
-
 
         #region Holsters
         public bool UseHolsters = false;                                 //Use this if the weapons are on the Holsters
         //   public HolsterID DefaultHolster;
         public List<Holster> holsters = new();
-        public float HolsterTime = 0.2f;
-        /// <summary> Used to change to the Next/Previus Holster</summary>
+        //public float HolsterTime = 0.2f;
+
+        /// <summary> Used to change to the Next/Previous Holster</summary>
         public int ActiveHolsterIndex { get; set; }
         /// <summary> ID Value of the Active Holster</summary>
         public Holster ActiveHolster { get; set; }
         #endregion
 
-        [Tooltip("Tranform Reference for the Left Hand. The weapon will be parented to this transform when is equipped")]
+        [Tooltip("Transform Reference for the Left Hand. The weapon will be parented to this transform when is equipped")]
         [ContextMenuItem("Find Left Hand", nameof(FindLHand))]
-        public Transform LeftHandEquipPoint;
-        [Tooltip("Tranform Reference for the Right Hand. The weapon will be parented to this transform when is equipped")]
+        [RequiredField] public Transform LeftHandEquipPoint;
+        [Tooltip("Transform Reference for the Right Hand. The weapon will be parented to this transform when is equipped")]
         [ContextMenuItem("Find Right Hand", nameof(FindRHand))]
-        public Transform RightHandEquipPoint;
+        [RequiredField] public Transform RightHandEquipPoint;
 
 
-        private void FindRHand()
+        protected virtual void FindRHand()
         {
             if (anim != null && anim.avatar.isHuman)
             {
@@ -170,7 +177,7 @@ namespace MalbersAnimations
                 MTools.SetDirty(this);
             }
         }
-        private void FindLHand()
+        protected virtual void FindLHand()
         {
             if (anim != null && anim.avatar.isHuman)
             {
@@ -179,13 +186,20 @@ namespace MalbersAnimations
             }
         }
 
-
         /// <summary>Path of the Combat Layer on the Resource Folder </summary>
         [SerializeField] internal string m_CombatLayerPath = "Layers/Combat2";
         /// <summary>Name of the Combat Layer </summary>
         [SerializeField] internal string m_CombatLayerName = "Upper Body (AC Weapons)";
 
         public bool debug;
+        #endregion
+
+
+
+        #region Conditions
+        [Tooltip("Pre conditions to check if the character can attack with the current weapon. [Dynamic Target: Weapon]")]
+        public Conditions2 PreAttackConditions;
+
         #endregion
 
         /// <summary>Reference for the Animator component</summary>
@@ -198,7 +212,7 @@ namespace MalbersAnimations
         //private Weapon_Action lastWeaponAction = Weapon_Action.None;
 
         [Tooltip("If the weapon is on the Idle Action it will be stored after X seconds. If Zero, this feature will be ignored.")]
-        public FloatReference StoreAfter = new FloatReference(0);
+        public FloatReference StoreAfter = new(0);
 
         #region Animator Hashs
 
@@ -210,11 +224,8 @@ namespace MalbersAnimations
         [SerializeField, Tooltip("Animator Curve name to set the Auxiliar hand IK Values on the Weapons")]
         private string m_IKFreeHand = "IKFreeHand";
 
-
-
         [SerializeField, Tooltip("Sends to the Animator the Weapon Hand Value. [True -> Left Hand] [False ->Right Hand]")]
         private string m_LeftHand = "LeftHand";
-
 
         [SerializeField, Tooltip("Weapon Charge or power is the same parameter as the Animal Controller Mode Power")]
         private string m_WeaponPower = "ModePower";
@@ -225,34 +236,35 @@ namespace MalbersAnimations
 
         internal int Hash_WType;
         internal int Hash_LeftHand;
-
         //Mode Stuff
         internal int hash_Mode;
         internal int hash_ModeOn;
         internal int Hash_WPower;
-
-        internal int hash_ModeStatus;
-
+        // internal int hash_ModeStatus;
 
         public int Hash_IKFreeHand;
         public int Hash_IKAim;
         #endregion
 
         #region Events
-        public BoolEvent OnCombatMode = new BoolEvent();
-        public BoolEvent OnCanAim = new BoolEvent();
-        public GameObjectEvent OnEquipWeapon = new GameObjectEvent();
-        public GameObjectEvent OnUnequipWeapon = new GameObjectEvent();
-        public IntEvent OnWeaponAction = new IntEvent();
+        public BoolEvent OnCombatMode = new();
+        public BoolEvent OnCanAim = new();
+        public GameObjectEvent OnEquipWeapon = new();
+        public GameObjectEvent OnUnequipWeapon = new();
+
+        public GameObjectEvent OnAttackStart = new();
+        public GameObjectEvent OnAttackReleased = new();
+
+        public IntEvent OnWeaponAction = new();
         //  public GameObjectEvent OnMainAttackStart = new GameObjectEvent();
         #endregion
 
         #region Inputs values
-        public StringReference m_AimInput = new StringReference("Aim");
-        public StringReference m_ReloadInput = new StringReference("Reload");
-        public StringReference m_MainAttack = new StringReference("MainAttack");
-        public StringReference m_SecondAttack = new StringReference("SecondAttack");
-        public StringReference m_SpecialAttack = new StringReference("SpecialAttack");
+        public StringReference m_AimInput = new("Aim");
+        public StringReference m_ReloadInput = new("Reload");
+        public StringReference m_MainAttack = new("MainAttack");
+        public StringReference m_SecondAttack = new("SecondAttack");
+        public StringReference m_SpecialAttack = new("SpecialAttack");
         #endregion
 
 
@@ -262,7 +274,7 @@ namespace MalbersAnimations
         #region Properties
 
         /// <summary>Is the weapon Manager Enabled If is false everything will be ignored </summary>
-        public bool Active
+        public virtual bool Active
         {
             get => enabled;
             set
@@ -281,10 +293,10 @@ namespace MalbersAnimations
         }
 
         /// <summary>  Same As Active  </summary>
-        public void SetActive(bool value) => Active = value;
+        public virtual void SetActive(bool value) => Active = value;
 
         /// <summary>is there an Ability Active and the Active Weapon is Active too</summary>
-        public bool WeaponIsActive => (Weapon && Weapon.Enabled && Weapon.IsEquiped) && Active && !Paused;
+        public bool WeaponIsActive => (Weapon && Weapon.Active && Weapon.IsEquipped) && Active && !Paused;
 
         //   public bool CheckRidingOnly => !UseWeaponsOnlyWhileRiding || (Rider != null && Rider.IsRiding);
 
@@ -294,24 +306,21 @@ namespace MalbersAnimations
 
         public IAim Aimer { get; set; }
 
-        /// <summary>Store the Default aiming Side</summary>
-        public AimSide defaultAimSide { get; set; }
-
-        //public Aim m_Aim { get; set; }
+        /// <summary>Cache the Default aiming Side</summary>
+        public AimSide DefaultAimSide { get; set; }
 
         public float DeltaTime { get; set; }
 
-        private bool combatMode;
+        protected bool combatMode;
 
 
         /// <summary>Enable or Disable the Combat Mode (True When the animal has equipped a weapon)</summary>
-        public bool CombatMode
+        public virtual bool CombatMode
         {
             get => combatMode;
             set
             {
                 combatMode = value;
-
                 //  Debug.Log("CombatMode = " + combatMode);
                 OnCombatMode.Invoke(value);
             }
@@ -323,10 +332,8 @@ namespace MalbersAnimations
             Store_Weapon();
         }
 
-
         private WaitForSeconds StoreAfterTime;
         Coroutine IStoreAfter;
-
 
         public bool DrawWeapon { get; set; }
         public bool StoreWeapon { get; set; }
@@ -346,12 +353,12 @@ namespace MalbersAnimations
         private GameObjectReference startWeapon;
 
         /// <summary> Reference for the Start Weapon</summary>
-        public GameObject StartWeapon { get => startWeapon.Value; set { startWeapon.Value = value; } }
+        public virtual GameObject StartWeapon { get => startWeapon.Value; set { startWeapon.Value = value; } }
 
-        private MWeapon m_weapon;
+        protected MWeapon m_weapon;
 
-        /// <summary>Current active/Equiped Weapon </summary>
-        public MWeapon Weapon
+        /// <summary>Current active/Equipped Weapon </summary>
+        public virtual MWeapon Weapon
         {
             get => m_weapon;
             set
@@ -369,13 +376,13 @@ namespace MalbersAnimations
 
                     m_weapon = value;
                     SetWeapon(true);
-                    SetWeaponHand(value.IsLefttHanded);
+                    SetWeaponHand(value.IsLeftHanded);
                 }
             }
         }
 
         /// <summary>Prepare a new and Old Weapon. False: release the old weapon. True: Listen to the new Weapon </summary>
-        private void SetWeapon(bool new_Weapon)
+        protected virtual void SetWeapon(bool new_Weapon)
         {
             if (new_Weapon)
             {
@@ -390,20 +397,55 @@ namespace MalbersAnimations
             }
         }
 
-        /// <summary>This will recieve the messages Animator Behaviors the moment the rider make an action on the weapon</summary>
+        /// <summary>This will receive the messages Animator Behaviors the moment the rider make an action on the weapon</summary>
         public virtual void Action(int value) => WeaponAction = (Weapon_Action)value;
 
         //#region Bones References 
         //public Transform RightShoulder { get; set; }
         //public Transform LeftShoulder { get; set; }
-        public Transform RightHand { get; set; }
-        public Transform LeftHand { get; set; }
+        public Transform RightHand { get => RightHandEquipPoint; set => RightHandEquipPoint = value; }
+        public Transform LeftHand { get => LeftHandEquipPoint; set => LeftHandEquipPoint = value; }
         //public Transform Head { get; set; }
         //public Transform Chest { get; set; }
         //#endregion
 
         [Tooltip("Set the Aiming to true on the Weapon Manager")]
         public BoolReference aim = new();
+
+
+        [Tooltip("Enable/Disable the Aim Feature for the weapons")]
+        public BoolReference canAim = new(true);
+
+        public bool CanAim
+        {
+            get => canAim.Value;
+            set => CanAim_Set(value);
+        }
+
+        public virtual void CanAim_Set(bool value)
+        {
+            if (CanAim != value)
+            {
+
+                if (!value)
+                {
+                    if (Aim) Aim_Set(false);
+                    OldAimValue = true;
+                    canAim.Value = value;
+                }
+                else
+                {
+                    canAim.Value = value;
+                    if (OldAimValue)
+                        Aim_Set(true);
+                }
+                Debugging($"Weapon Manager Can Aim [{value}]");
+            }
+        }
+
+        protected bool OldAimValue = false;
+
+
         /// <summary>Direction the Rider is Aiming</summary>
         public Vector3 AimDirection => Aimer.AimDirection;
 
@@ -413,12 +455,19 @@ namespace MalbersAnimations
         public bool Weapon_is_RightHand => Weapon.IsRightHanded;
         public bool Weapon_is_LeftHand => !Weapon.IsRightHanded;
 
-        private int weaponType;             //Which Type of weapon is in the active weapon
+        protected int weaponType;             //Which Type of weapon is in the active weapon
         /// <summary>Which Type of Weapon is in the Active Weapon, this value is sent to the animator</summary>
-        public int WeaponType
+        public virtual int WeaponType
         {
             get => weaponType;
-            set => TryAnimParameter(Hash_WType, weaponType = value);          //Set the WeaponType in the Animator
+            set
+            {
+                weaponType = value;
+
+                var weaponFinalVal = (Weapon && Weapon.OverrideWeaponArmPose != null && value != 0) ? Weapon.OverrideWeaponArmPose.ID : weaponType;
+
+                TryAnimParameter(Hash_WType, weaponFinalVal);          //Set the WeaponType in the Animator
+            }
         }
         #endregion  
     }

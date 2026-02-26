@@ -8,8 +8,7 @@ namespace MalbersAnimations.Controller.AI
     {
         public override string DisplayName => "Movement/Set Target";
 
-
-        public enum TargetToFollow { Transform, GameObject, RuntimeGameObjects, ClearTarget, Name }
+        public enum TargetToFollow { Transform, GameObject, RuntimeGameObjects, ClearTarget, Name, LastDamager }
 
         [Space]
         public TargetToFollow targetType = TargetToFollow.Transform;
@@ -22,7 +21,7 @@ namespace MalbersAnimations.Controller.AI
         public IntReference RTIndex = new();
         public StringReference RTName = new();
 
-        [Tooltip("When a new target is assinged it also sets that the Animal should move to that target")]
+        [Tooltip("When a new target is assigned it also sets that the Animal should move to that target")]
         public bool MoveToTarget = true;
 
         public override void StartTask(MAnimalBrain brain, int index)
@@ -64,6 +63,13 @@ namespace MalbersAnimations.Controller.AI
                     {
                         Debug.Log("Using SetTarget.ByName() but there's no Gameobject with that name", this);
                     }
+                    break;
+                case TargetToFollow.LastDamager:
+                    if (brain.Animal.TryGetComponent<MDamageable>(out var damageable))
+                    {
+                        brain.AIControl.SetTarget(damageable.LastDamage.Damager.transform, MoveToTarget);
+                    }
+
                     break;
                 default:
                     break;

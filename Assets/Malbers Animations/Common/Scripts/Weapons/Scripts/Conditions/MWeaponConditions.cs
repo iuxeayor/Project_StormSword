@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace MalbersAnimations.Conditions
 {
-    [System.Serializable]
-    public abstract class MWeaponConditions : MCondition
+    [System.Serializable, MDescription("Is Weapon gameobject")]
+    public abstract class MWeaponConditions : ConditionCore
     {
-        [RequiredField] public MWeapon Target;
+        public MWeapon Target;
         public virtual void SetTarget(MWeapon n) => Target = n;
-        protected override void _SetTarget(Object target) => VerifyTarget(target, ref Target);
+        protected override void _SetTarget(Object target) => MTools.VerifyComponent(target, Target);
     }
 }

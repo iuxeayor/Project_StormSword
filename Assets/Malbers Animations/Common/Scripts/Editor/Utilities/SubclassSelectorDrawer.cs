@@ -11,17 +11,6 @@ namespace MalbersAnimations
     [CustomPropertyDrawer(typeof(SubclassSelectorAttribute))]
     public class SubclassSelectorDrawer : PropertyDrawer
     {
-        readonly struct TypePopupCache
-        {
-            public AdvancedTypePopup TypePopup { get; }
-            public AdvancedDropdownState State { get; }
-            public TypePopupCache(AdvancedTypePopup typePopup, AdvancedDropdownState state)
-            {
-                TypePopup = typePopup;
-                State = state;
-            }
-        }
-
         const int k_MaxTypePopupLineCount = 13;
         static readonly Type k_UnityObjectType = typeof(UnityEngine.Object);
         static readonly GUIContent k_NullDisplayName = new(TypeMenuUtility.k_NullDisplayName);
@@ -43,9 +32,10 @@ namespace MalbersAnimations
 
             position.y += 2;
 
-            GUIStyle d = new GUIStyle(EditorStyles.foldoutHeader);
-
-            d.imagePosition = ImagePosition.TextOnly;
+            GUIStyle d = new(EditorStyles.label)
+            {
+                imagePosition = ImagePosition.TextOnly
+            };
 
             GUI.Box(boxRect, GUIContent.none, d);
 
@@ -69,7 +59,7 @@ namespace MalbersAnimations
                     var delay = property.FindPropertyRelative("delay");
 
 
-                    if (hasActive != null)
+                    if (hasActive != null) //Draw the Active Toggle if it has the active property
                     {
                         var pos = EditorGUI.PrefixLabel(position, new GUIContent(" "));
                         Rect buttonRect = new(pos)
@@ -80,7 +70,7 @@ namespace MalbersAnimations
                         };
 
                         //  hasActive.boolValue = GUI.Toggle(buttonRect, hasActive.boolValue,new GUIContent(""));
-                        hasActive.boolValue = GUI.Toggle(buttonRect, hasActive.boolValue, GUIContent.none);
+                        hasActive.boolValue = EditorGUI.Toggle(buttonRect, GUIContent.none, hasActive.boolValue); //CustomPatch: used EditorGUI to avoid mixing EditorGUI and GUI calls (also better use PropertyField) => did not replace here because maybe you had a better reason to not use EditorGUI.PropertyField ?
                     }
 
                     if (delay != null)
@@ -94,13 +84,16 @@ namespace MalbersAnimations
                         };
 
                         EditorGUIUtility.labelWidth = 10;
-                        delay.floatValue = EditorGUI.FloatField(DelayRect, new GUIContent("D", "Delay the Reaction for this amount of seconds"), delay.floatValue);
+                        //CustomPatch: recommended to use EditorGUI.PropertyField to draw properties like this one (offers automatic handling of a lot of things like automatic undo, multiple values editing, etc)
+                        EditorGUI.PropertyField(DelayRect, delay, new GUIContent("D", "Delay the Reaction for this amount of seconds"));
+                        //delay.floatValue = EditorGUI.FloatField(DelayRect, new GUIContent("D", "Delay the Reaction for this amount of seconds"), delay.floatValue);
+
                         EditorGUIUtility.labelWidth = 0;
 
                         popupPosition.width -= (w + 3);
                     }
 
-                    if (EditorGUI.DropdownButton(popupPosition, GetTypeName(property), FocusType.Keyboard))
+                    if (EditorGUI.DropdownButton(popupPosition, TypePopupCache.GetTypeName(property, m_TypeNameCaches), FocusType.Keyboard))
                     {
                         TypePopupCache popup = GetTypePopup(property);
                         m_TargetProperty = property;
@@ -116,6 +109,9 @@ namespace MalbersAnimations
                 {
                     EditorGUI.LabelField(position, label, k_IsNotManagedReferenceLabel);
                 }
+
+                //CustomPatch: removed unnecessary and faulty ApplyModifiedProperties call here that can mess up Unity's default properties handling system (in a custom property drawer method you should never need to manually call ApplyModifiedProperties on a the actual SerializedProperty being inspected (the one sent as parameter by Unity))
+                // property.serializedObject.ApplyModifiedProperties();
             }
             EditorGUI.EndProperty();
         }
@@ -137,8 +133,7 @@ namespace MalbersAnimations
                         !p.IsGenericType &&
                         !k_UnityObjectType.IsAssignableFrom(p) &&
                         Attribute.IsDefined(p, typeof(SerializableAttribute))
-                    ),
-                    k_MaxTypePopupLineCount, state);
+                    ), 13, state);
 
                 popup.OnItemSelected += item =>
                 {
@@ -155,98 +150,12 @@ namespace MalbersAnimations
             return result;
         }
 
-        GUIContent GetTypeName(SerializedProperty property)
-        {
-            // Cache this string.
-            string managedReferenceFullTypename = property.managedReferenceFullTypename;
 
-            if (string.IsNullOrEmpty(managedReferenceFullTypename))
-            {
-                return k_NullDisplayName;
-            }
-            if (m_TypeNameCaches.TryGetValue(managedReferenceFullTypename, out GUIContent cachedTypeName))
-            {
-                return cachedTypeName;
-            }
-
-            Type type = MSerializedTools.GetType(managedReferenceFullTypename);
-            string typeName = null;
-
-            AddTypeMenuAttribute typeMenu = TypeMenuUtility.GetAttribute(type);
-            if (typeMenu != null)
-            {
-                typeName = typeMenu.GetTypeNameWithoutPath();
-                if (!string.IsNullOrWhiteSpace(typeName))
-                {
-                    typeName = ObjectNames.NicifyVariableName(typeName);
-                }
-            }
-
-            if (string.IsNullOrWhiteSpace(typeName))
-            {
-                typeName = ObjectNames.NicifyVariableName(type.Name);
-            }
-
-            GUIContent result = new(typeName);
-            m_TypeNameCaches.Add(managedReferenceFullTypename, result);
-            return result;
-        }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             return EditorGUI.GetPropertyHeight(property, true) + 8;
         }
-    }
-
-    public static class TypeMenuUtility
-    {
-        public const string k_NullDisplayName = "[Null]";
-
-        public static AddTypeMenuAttribute GetAttribute(Type type)
-        {
-            return Attribute.GetCustomAttribute(type, typeof(AddTypeMenuAttribute)) as AddTypeMenuAttribute;
-        }
-
-        public static string[] GetSplittedTypePath(Type type)
-        {
-            AddTypeMenuAttribute typeMenu = GetAttribute(type);
-            if (typeMenu != null)
-            {
-                return typeMenu.GetSplittedMenuName();
-            }
-            else
-            {
-                int splitIndex = type.FullName.LastIndexOf('.');
-                if (splitIndex >= 0)
-                {
-                    return new string[] { type.FullName[..splitIndex], type.FullName[(splitIndex + 1)..] };
-                }
-                else
-                {
-                    return new string[] { type.Name };
-                }
-            }
-        }
-
-        public static IEnumerable<Type> OrderByType(this IEnumerable<Type> source)
-        {
-            return source.OrderBy(type =>
-            {
-                if (type == null)
-                {
-                    return -999;
-                }
-                return GetAttribute(type)?.Order ?? 0;
-            }).ThenBy(type =>
-            {
-                if (type == null)
-                {
-                    return null;
-                }
-                return GetAttribute(type)?.MenuName ?? type.Name;
-            });
-        }
-
     }
 }
 #endif

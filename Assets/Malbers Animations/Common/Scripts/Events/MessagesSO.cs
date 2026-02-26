@@ -12,8 +12,8 @@ namespace MalbersAnimations.Utilities
 
     public class MessagesSO : ScriptableObject
     {
-        public List<MesssageItem> messages;                                     //Store messages to send it when Enter the animation State
-        
+        public List<MessageItem> messages;                                     //Store messages to send it when Enter the animation State
+
         public bool UseSendMessage = true;
         public bool SendToChildren = false;
         public bool debug;
@@ -25,12 +25,12 @@ namespace MalbersAnimations.Utilities
         {
             foreach (var m in messages)
             {
-                if (m.message == string.Empty || !m.Active) break;          //If the messaje is empty or disabled break.... ignore it
+                if (m.message == string.Empty || !m.Active) break;          //If the menssaje is empty or disabled break.... ignore it
                 Deliver(m, go);
             }
         }
-         
-        private void Deliver(MesssageItem m, Component go)
+
+        private void Deliver(MessageItem m, Component go)
         {
             if (UseSendMessage)
                 m.DeliverMessage(go.transform.root, SendToChildren, debug);
@@ -48,13 +48,13 @@ namespace MalbersAnimations.Utilities
                         m.DeliverAnimListener(list, debug);
                 }
             }
-        } 
+        }
     }
 
     //INSPECTOR
 
 #if UNITY_EDITOR
-    [CustomEditor(typeof(MessagesSO))] 
-    public class MessagesSOEd : MessagesEd{ }
+    [CustomEditor(typeof(MessagesSO))]
+    public class MessagesSOEd : MessagesEd { }
 #endif
 }

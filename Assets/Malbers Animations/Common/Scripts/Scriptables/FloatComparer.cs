@@ -128,6 +128,12 @@ namespace MalbersAnimations
                 compare[i].active = true;
             }
         }
+
+
+        public void SetRandomValue01()
+        {
+            Value = Random.Range(0f, 1f);
+        }
     }
 
 

@@ -14,10 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Active: 1
   animal: {fileID: 0}
-  Input: Jump
+  Input: Sprint
   ExitInput:
     UseConstant: 1
     ConstantValue: Crouch
+    Variable: {fileID: 0}
+  enterInputValue:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  exitInputValue:
+    UseConstant: 1
+    ConstantValue: 0
     Variable: {fileID: 0}
   m_StateProfile:
     UseConstant: 1
@@ -27,12 +35,15 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 0
     Variable: {fileID: 0}
-  Priority: 3
+  Priority: 7
   resetInputOnFailed: 0
   ResetLastState: 0
+  RemoveForceOnEnter: 0
+  ForceDamping: 0
   General:
     modify: 7423
     RootMotion: 1
+    RootMotionRotation: 0
     Sprint: 1
     Gravity: 1
     Grounded: 0
@@ -56,6 +67,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7370df9c769c2764381ad7c76eb3d949, type: 2}
   - {fileID: 11400000, guid: 3787b6d94d5454740bf36d57436185b0, type: 2}
   SleepFromMode: []
+  DisableModes: []
+  noModes:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
   QueueFrom: []
   ResetFrom:
   - {fileID: 11400000, guid: 7370df9c769c2764381ad7c76eb3d949, type: 2}
@@ -64,6 +80,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8078fbdb01991b44b9c1351f444b5efe, type: 2}
   SleepFromStance: []
   stances: []
+  OverrideCapsule: 0
+  newCapsule:
+    name: 
+    enabled: 0
+    isTrigger: 0
+    center: {x: 0, y: 0, z: 0}
+    height: 0
+    direction: 0
+    radius: 0
+    material: {fileID: 0}
+    modify: 0
   TryLoop:
     UseConstant: 1
     ConstantValue: 2
@@ -94,12 +121,20 @@ MonoBehaviour:
   MovementStrafe: 1
   IdleStrafe: 1
   m_debug: 1
-  Editor_Tabs1: 4
+  Editor_Tabs1: 2
+  selectedSpeed: 0
+  SpeedTabs: 0
   SpeedSets: []
   ID: {fileID: 11400000, guid: 2f7727669c8fcdf4999e66cb669e2608, type: 2}
+  EnterConditions:
+    conditions: []
+    active: 0
+  ExitConditions:
+    conditions: []
+    active: 0
   Automatic:
     UseConstant: 1
-    ConstantValue: 1
+    ConstantValue: 0
     Variable: {fileID: 0}
   InputPressed:
     UseConstant: 1
@@ -119,7 +154,7 @@ MonoBehaviour:
     Variable: {fileID: 0}
   StartHeight:
     UseConstant: 1
-    ConstantValue: 0.6
+    ConstantValue: 0.2
     Variable: {fileID: 0}
   Layer:
     UseConstant: 1
@@ -159,3 +194,6 @@ MonoBehaviour:
     ConstantValue: 0.2
     Variable: {fileID: 0}
   UpDrag: 0
+  references:
+    version: 2
+    RefIds: []

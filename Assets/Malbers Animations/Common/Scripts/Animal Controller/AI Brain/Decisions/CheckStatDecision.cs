@@ -43,12 +43,12 @@ namespace MalbersAnimations.Controller.AI
                 case Affected.Self:
                     if (TryGetValue)
                     {
-                        if (brain.AnimalStats.TryGetValue(Stat.ID, out Stat statS))
-                            brain.DecisionsVars[Index].floatValue = statS.Value;
+                        if (brain.AnimalStats.TryGetValue(Stat.ID, out var st))
+                            brain.DecisionsVars[Index].floatValue = st.Value;
                     }
                     else
                     {
-                        brain.DecisionsVars[Index].floatValue = brain.AnimalStats[Stat.ID].Value;
+                        brain.DecisionsVars[Index].floatValue = brain.AnimalStats.Stat_Get(Stat.ID).Value;
                     }
                     break;
 
@@ -63,7 +63,7 @@ namespace MalbersAnimations.Controller.AI
                         }
                         else
                         {
-                            brain.DecisionsVars[Index].floatValue = brain.TargetStats[Stat.ID].Value;
+                            brain.DecisionsVars[Index].floatValue = brain.TargetStats.Stat_Get(Stat.ID).Value; ;
                         }
                     }
                     break;
@@ -86,7 +86,7 @@ namespace MalbersAnimations.Controller.AI
                     }
                     else
                     {
-                        var SelfStatValue = brain.AnimalStats[Stat.ID];
+                        var SelfStatValue = brain.AnimalStats.Stat_Get(Stat.ID);
                         result = CheckStat(SelfStatValue, brain, index);
                     }
                     break;
@@ -101,7 +101,7 @@ namespace MalbersAnimations.Controller.AI
                         }
                         else
                         {
-                            var TargetStatValue = brain.TargetStats[Stat.ID];
+                            var TargetStatValue = brain.TargetStats.Stat_Get(Stat.ID);
                             result = CheckStat(TargetStatValue, brain, index);
                         }
                     }
@@ -117,7 +117,7 @@ namespace MalbersAnimations.Controller.AI
         }
 
         private bool CheckStat(Stat stat, MAnimalBrain brain, int Index)
-        { 
+        {
 
 
             switch (Option)
@@ -191,7 +191,7 @@ namespace MalbersAnimations.Controller.AI
             Description, checkOn, MessageID, send, interval, Stat, Option, StatIs, Value, TryGetValue;
 
         MonoScript script;
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             script = MonoScript.FromScriptableObject((ScriptableObject)target);
 
@@ -232,8 +232,8 @@ namespace MalbersAnimations.Controller.AI
             var m_stlye = new GUIStyle(EditorStyles.miniButton);
             m_stlye.fontStyle = TryGetValue.boolValue ? FontStyle.Bold : FontStyle.Normal;
 
-            TryGetValue.boolValue =  GUILayout.Toggle(TryGetValue.boolValue,
-                new GUIContent("Try*", 
+            TryGetValue.boolValue = GUILayout.Toggle(TryGetValue.boolValue,
+                new GUIContent("Try*",
                 "Uses TryGet Value in case you don't know if your target or your animal has the Stat you are looking for. Disabling this Improves performance"),
                 m_stlye, GUILayout.Width(50));
 
@@ -245,9 +245,9 @@ namespace MalbersAnimations.Controller.AI
 
             var compare = o == CheckStatDecision.checkStatOption.Compare || o == CheckStatDecision.checkStatOption.CompareNormalized;
 
-            if (compare) 
-                EditorGUILayout.PropertyField(StatIs,GUIContent.none, GUILayout.Width(90));
-            
+            if (compare)
+                EditorGUILayout.PropertyField(StatIs, GUIContent.none, GUILayout.Width(90));
+
             EditorGUILayout.EndHorizontal();
 
             if (compare)
@@ -259,6 +259,6 @@ namespace MalbersAnimations.Controller.AI
 
             serializedObject.ApplyModifiedProperties();
         }
-    } 
+    }
 #endif
 }

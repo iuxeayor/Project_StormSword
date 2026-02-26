@@ -6,6 +6,50 @@ namespace MalbersAnimations.Reactions
     [AddTypeMenu("Malbers/Weapon Manager/Equip")]
     public class WeaponReaction : MReaction
     {
+        public override string DynamicName
+        {
+            get
+            {
+                var display = $"Weapon Manager [{Actions}]"; //Name of the Reaction
+
+                switch (Actions)
+                {
+                    case WeaponActions.Equip:
+                        display += $" [{(Weapon != null ? Weapon.name : "None")}]";
+                        break;
+                    case WeaponActions.Unequip:
+                        display += $" [Current Weapon]";
+                        break;
+                    case WeaponActions.EquipFast:
+                        display += $" [{(Weapon != null ? Weapon.name : "None")}]";
+                        break;
+                    case WeaponActions.UnequipFast:
+                        display += $" [Current Weapon]";
+                        break;
+                    case WeaponActions.HolsterClear:
+                        display += $" [{(Holster != null ? Holster.name : "None")}]";
+                        break;
+                    case WeaponActions.HolsterClearAll:
+                        break;
+                    case WeaponActions.NextHolster:
+                        break;
+                    case WeaponActions.PreviousHolster:
+                        break;
+                    case WeaponActions.ResetCombat:
+                        break;
+                    case WeaponActions.StoreWeapon:
+                        display += $" Current";
+                        break;
+                    case WeaponActions.DrawWeapon:
+                        display += $" from active Holster";
+                        break;
+                    default:
+                        break;
+                }
+                return display;
+            }
+        }
+
         public enum WeaponActions
         {
             Equip,
@@ -39,16 +83,16 @@ namespace MalbersAnimations.Reactions
                     else
                         target.Equip_External(Weapon);
                     break;
-                case WeaponActions.Unequip:         target.UnEquip(); break;
-                case WeaponActions.EquipFast:       target.Equip_Fast(Weapon); break;
-                case WeaponActions.UnequipFast:     target.UnEquip_Fast(); break;
-                case WeaponActions.HolsterClear:    target.Holster_Clear(Holster); break;
+                case WeaponActions.Unequip: target.UnEquip(); break;
+                case WeaponActions.EquipFast: target.Equip_Fast(Weapon); break;
+                case WeaponActions.UnequipFast: target.UnEquip_Fast(); break;
+                case WeaponActions.HolsterClear: target.Holster_Clear(Holster); break;
                 case WeaponActions.HolsterClearAll: target.HolsterClearAll(); break;
-                case WeaponActions.NextHolster:     target.Holster_Next(); break;
+                case WeaponActions.NextHolster: target.Holster_Next(); break;
                 case WeaponActions.PreviousHolster: target.Holster_Previus(); break;
-                case WeaponActions.ResetCombat:     target.ResetCombat(); break;
-                case WeaponActions.StoreWeapon:     target.Store_Weapon(); break;
-                case WeaponActions.DrawWeapon:     target.Draw_Weapon(); break;
+                case WeaponActions.ResetCombat: target.ResetCombat(); break;
+                case WeaponActions.StoreWeapon: target.Store_Weapon(); break;
+                case WeaponActions.DrawWeapon: target.Draw_Weapon(); break;
                 default: break;
             }
             return true;

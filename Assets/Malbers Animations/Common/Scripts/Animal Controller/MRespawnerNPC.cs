@@ -11,13 +11,12 @@ namespace MalbersAnimations.Controller.AI
     public class MRespawnerNPC : MonoBehaviour
     {
         #region Respawn
-        [Tooltip("Animal Prefab to Swpawn")]
+        [Tooltip("Animal Prefab to Spawn")]
         public MAnimal NPC;
         public StateID RespawnState;
-        public FloatReference RespawnTime = new FloatReference(10f);
+        public FloatReference RespawnTime = new(10f);
         [Tooltip("If True: it will destroy the MainPlayer GameObject and Respawn a new One")]
-        public BoolReference DestroyAfterRespawn = new BoolReference(true);
-
+        public BoolReference DestroyAfterRespawn = new(true);
 
         /// <summary>Active Animal</summary>
         private MAnimal ActiveAnimal;
@@ -25,7 +24,7 @@ namespace MalbersAnimations.Controller.AI
         #endregion
 
         [FormerlySerializedAs("OnRestartGame")]
-        public GameObjectEvent OnRespawned = new GameObjectEvent();
+        public GameObjectEvent OnRespawned = new();
 
         private bool Respawned;
         private MAnimalBrain NPCBrain;
@@ -86,7 +85,6 @@ namespace MalbersAnimations.Controller.AI
 
         private void SceneAnimal()
         {
-
             ActiveAnimal.OverrideStartState = RespawnState;
             ActiveAnimal.ResetController();
             ActiveAnimal.enabled = true;
@@ -133,9 +131,7 @@ namespace MalbersAnimations.Controller.AI
                         DeathS.DisableAllComponents = false;
                         DeathS.DisableInternalColliders = false;
                         //DeathS.RemoveAllTriggers = false;
-
                         this.Delay_Action(RespawnTime, () => SceneAnimal());
-
                     }
                 }
             }

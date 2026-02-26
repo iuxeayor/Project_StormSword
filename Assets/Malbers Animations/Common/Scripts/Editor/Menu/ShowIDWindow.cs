@@ -2,16 +2,16 @@
 
 #if UNITY_EDITOR
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor; 
 using System.Linq;
+using UnityEditor;
+using UnityEngine;
 
 namespace MalbersAnimations
-{ 
+{
     public class ShowIDWindow : EditorWindow
     {
 
-        [MenuItem("Tools/Malbers Animations/Show All IDs", false, 200)]  
+        [MenuItem("Tools/Malbers Animations/Show All IDs", false, 200)]
         public static ShowIDWindow ShowWindow()
         {
             //Editor_Tabs1 = tab;
@@ -49,7 +49,7 @@ namespace MalbersAnimations
 
         private void OnGUI()
         {
-            Editor_Tabs1 = GUILayout.Toolbar(Editor_Tabs1, new string[] { "States", "Modes", "Stances","Stats", "Actions", "Tags" });
+            Editor_Tabs1 = GUILayout.Toolbar(Editor_Tabs1, new string[] { "States", "Modes", "Stances", "Stats", "Actions", "Tags" });
 
             using (var X = new GUILayout.ScrollViewScope(Scroll))
             {

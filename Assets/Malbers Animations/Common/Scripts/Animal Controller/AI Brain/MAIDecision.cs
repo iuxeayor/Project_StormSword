@@ -38,8 +38,6 @@ namespace MalbersAnimations.Controller.AI
 
         public virtual void FinishDecision(MAnimalBrain brain, int Index) { }
 
-        //   public virtual void RemoveListeners(MAnimalBrain brain, int Index) { }
-
         public virtual void OnAnimalEventDecisionListen(MAnimalBrain brain, MAnimal animal, int Index) { }
 
     }
@@ -80,8 +78,8 @@ namespace MalbersAnimations.Controller.AI
             serializedObject.ApplyModifiedProperties();
         }
 
-        public virtual void DecisionParameters()
-        { }
+        public virtual void DecisionParameters() { }
+       
     }
 #endif
 }

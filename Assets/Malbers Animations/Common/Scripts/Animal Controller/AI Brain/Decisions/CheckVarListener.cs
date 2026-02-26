@@ -15,9 +15,9 @@ namespace MalbersAnimations.Controller.AI
         {
             Self,
             CurrentTarget,
-            Tag, 
+            Tag,
             TransformHook,
-            GameObjectHook, 
+            GameObjectHook,
             RuntimeGameObjectSet
         }
 
@@ -40,14 +40,14 @@ namespace MalbersAnimations.Controller.AI
             "-GameObject Hook: \na in a GameObject Hook\n" +
             "-Runtime GameObject Set: \na in all the GameObject in a Runtime Set")]
         public Affect checkOn = Affect.Self;
-        
+
         [Tooltip("Check if the Var Listener component its placed on:\n\n" +
             "-SameHierarchy: \nsame hierarchy level as the gameobject(s) in the [CheckOn] Option\n" +
             "-Parent: \nany of the parents of the gameobject(s) in the [CheckOn] Option\n" +
             "-Children: \nany of the children of the gameobject(s) in the [CheckOn] Option")]
         public ComponentPlace PlacedOn = ComponentPlace.SameHierarchy;
-        [Hide("checkOn",  (int)Affect.Tag)] public Tag tag;
-        [Hide("checkOn", (int) Affect.TransformHook)] public TransformVar Transform;
+        [Hide("checkOn", (int)Affect.Tag)] public Tag tag;
+        [Hide("checkOn", (int)Affect.TransformHook)] public TransformVar Transform;
         [Hide("checkOn", (int)Affect.GameObjectHook)] public GameObjectVar GameObject;
         [Hide("checkOn", (int)Affect.RuntimeGameObjectSet)] public RuntimeGameObjects GameObjectSet;
 
@@ -56,7 +56,7 @@ namespace MalbersAnimations.Controller.AI
             Tooltip("Check on the Target or Self if it has a Listener Variable Component <Int><Bool><Float> and compares it with the local variable)")]
         public VarType varType = VarType.Bool;
 
-        [Hide("varType",  (int)VarType.Int, (int) VarType.Float)] public ComparerInt comparer;
+        [Hide("varType", (int)VarType.Int, (int)VarType.Float)] public ComparerInt comparer;
         [Hide("varType", (int)VarType.Bool)] public bool boolValue = true;
         [Hide("varType", (int)VarType.Int)] public int intValue = 0;
         [Hide("varType", (int)VarType.Float)] public float floatValue = 0f;
@@ -67,10 +67,6 @@ namespace MalbersAnimations.Controller.AI
 
         public override void PrepareDecision(MAnimalBrain brain, int Index)
         {
-            //if (brain.DecisionsVars[Index].Components.Length == 0)
-            //    brain.DecisionsVars[Index].Components = null;
-
-
             MonoBehaviour[] monoValue = null;
 
             var objectives = GetObjective(brain);
@@ -108,7 +104,7 @@ namespace MalbersAnimations.Controller.AI
             brain.DecisionsVars[Index].AddComponents(monoValue);
         }
 
-        
+
 
         private Transform[] GetObjective(MAnimalBrain brain)
         {
@@ -123,10 +119,10 @@ namespace MalbersAnimations.Controller.AI
                     if (tagH != null)
                     {
                         var TArray = new List<Transform>();
-                        foreach (var t in tagH)TArray.Add(t.transform);
-                        return TArray.ToArray(); 
+                        foreach (var t in tagH) TArray.Add(t.transform);
+                        return TArray.ToArray();
                     }
-                        return null;
+                    return null;
                 case Affect.TransformHook:
                     {
                         if (Transform == null || Transform.Value == null) return null;
@@ -150,28 +146,16 @@ namespace MalbersAnimations.Controller.AI
             }
         }
 
-        
-
         private TVarListener[] GetComponents<TVarListener>(GameObject gameObject)
             where TVarListener : VarListener
         {
-            TVarListener[] list;
-
-            switch (PlacedOn)
+            TVarListener[] list = PlacedOn switch
             {
-                case ComponentPlace.Children:
-                    list = gameObject.GetComponentsInChildren<TVarListener>();
-                    break;
-                case ComponentPlace.Parent:
-                    list = gameObject.GetComponentsInParent<TVarListener>();
-                    break;
-                case ComponentPlace.SameHierarchy:
-                    list = gameObject.GetComponents<TVarListener>();
-                    break;
-                default:
-                    list = gameObject.GetComponents<TVarListener>();
-                    break;
-            }
+                ComponentPlace.Children => gameObject.GetComponentsInChildren<TVarListener>(),
+                ComponentPlace.Parent => gameObject.GetComponentsInParent<TVarListener>(),
+                ComponentPlace.SameHierarchy => gameObject.GetComponents<TVarListener>(),
+                _ => gameObject.GetComponents<TVarListener>(),
+            };
 
             list = list.ToList().FindAll(x => ListenerID.Value == 0 || x.ID == ListenerID.Value).ToArray();
 
@@ -196,19 +180,21 @@ namespace MalbersAnimations.Controller.AI
                             var LB = (varListener as BoolVarListener);
                             result = LB.Value == boolValue;
                             if (debug)
-                                Debug.Log($"{brain.Animal.name}: <B>[{name}]</B> ListenerBool<{LB.transform.name}> ID<{LB.ID.Value}> Value<{LB.Value}>  <B>Result[{result}]</B>");
+                                Debug.Log
+                                    ($"{brain.Animal.name}: <B>[{name}]</B> ListenerBool[{LB.transform.name}] ID [{LB.ID.Value}] Value[{LB.Value}]  <B>Result[{result}]</B>");
                             break;
                         case VarType.Int:
                             var LI = (varListener as IntVarListener);
                             result = CompareInteger(LI.Value);
                             if (debug)
-                                Debug.Log($"{brain.Animal.name}: <B>[{name}]</B> ListenerInt<{LI.transform.name}> ID<{LI.ID.Value}> Value<{LI.Value}>  <B>Result[{result}]</B>");
+                                Debug.Log
+                                    ($"{brain.Animal.name}: <B>[{name}]</B> ListenerInt[{LI.transform.name}] ID<{LI.ID.Value}] Value[{LI.Value}]  <B>Result[{result}]</B>");
                             break;
                         case VarType.Float:
                             var LF = (varListener as FloatVarListener);
                             result = CompareFloat(LF.Value);
                             if (debug)
-                                Debug.Log($"{brain.Animal.name}: <B>[{name}]</B> ListenerInt<{LF.transform.name}> ID<{LF.ID.Value}> Value<{LF.Value}>  <B>Result[{result}]</B>");
+                                Debug.Log($"{brain.Animal.name}: <B>[{name}]</B> ListenerInt[{LF.transform.name}] ID[{LF.ID.Value}] Value[{LF.Value}]  <B>Result[{result}]</B>");
                             break;
                         default:
                             return false;

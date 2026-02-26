@@ -1,18 +1,34 @@
+#if UNITY_EDITOR
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
-#if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-#endif
 
-//AL Serialized Properties and Serialized Reference Extentions and new Methods are located here
+//AL Serialized Properties and Serialized Reference Extensions and new Methods are located here
 namespace MalbersAnimations
 {
-#if UNITY_EDITOR
     public static class MSerializedTools
     {
+
+        public static IEnumerable<SerializedProperty> FindChildrenProperties(this SerializedProperty parent, int depth = 1)
+        {
+            var depthOfParent = parent.depth;
+            var enumerator = parent.GetEnumerator();
+
+            while (enumerator.MoveNext())
+            {
+                if (enumerator.Current is not SerializedProperty childProperty) continue;
+                if (childProperty.depth > depthOfParent + depth) continue;
+
+                yield return childProperty.Copy();
+            }
+        }
+
         private const string ArrayPropertySubstring = ".Array.data[";
         public static object SetManagedReference(this SerializedProperty property, System.Type type)
         {
@@ -56,13 +72,31 @@ namespace MalbersAnimations
             }
         }
 
+        public static void CreateAssetInternal(SerializedProperty property, Type type)
+        {
+            property.objectReferenceValue = ScriptableObject.CreateInstance(type);
+            property.serializedObject.ApplyModifiedProperties();
+        }
+
 
         /// <summary>  Returns the Type of a serialized property </summary>
         public static System.Type GetPropertyType(SerializedProperty property)
         {
             System.Type parentType = property.serializedObject.targetObject.GetType();
             var fi = parentType.GetFieldViaPath(property.propertyPath);
-            return fi.FieldType;
+            return fi != null ? fi.FieldType : null;
+        }
+
+        public static Type GetPropertyType2(SerializedProperty property)
+        {
+            object obj = GetTargetObjectOfProperty(property);
+            Type objType = obj.GetType();
+
+            return objType;
+        }
+        public static bool IsInsideArrayElement(this SerializedProperty property)
+        {
+            return property.propertyPath.Contains("Array");
         }
 
         public static System.Type GetType(string typeName)
@@ -71,53 +105,6 @@ namespace MalbersAnimations
             var assembly = Assembly.Load(typeName[..splitIndex]);
             return assembly.GetType(typeName[(splitIndex + 1)..]);
         }
-
-        public static T GetPropertyAttribute<T>(this SerializedProperty prop, bool inherit) where T : PropertyAttribute
-        {
-            if (prop == null) return null;
-            Type t = prop.serializedObject.targetObject.GetType();
-
-
-            FieldInfo f = null;
-            PropertyInfo p = null;
-
-            Debug.Log($"prop.propertyPath. {prop.propertyPath}");
-
-            foreach (var name in prop.propertyPath.Split('.'))
-            {
-                f = t.GetField(name, (BindingFlags)(-1));
-
-                if (f == null)
-                {
-                    p = t.GetProperty(name, (BindingFlags)(-1));
-                    if (p == null)
-                    {
-                        return null;
-                    }
-
-                    t = p.PropertyType;
-                }
-                t = f.FieldType;
-            }
-
-            T[] attributes;
-
-            if (f != null)
-            {
-                attributes = f.GetCustomAttribute(typeof(T), inherit) as T[];
-            }
-            else if (p != null)
-            {
-                attributes = p.GetCustomAttribute(typeof(T), inherit) as T[];
-            }
-            else
-            {
-                return null;
-            }
-
-            return attributes.Length > 0 ? attributes[0] : null;
-        }
-
 
         /// <summary>  Returns the object value of a serialized property </summary>
         public static object GetValue(this SerializedProperty property)
@@ -180,22 +167,348 @@ namespace MalbersAnimations
 
 
 
-        public static T GetBaseProperty<T>(SerializedProperty prop)
+        /// <summary> Gets the object the property represents.</summary>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public static object GetTargetObjectOfProperty(SerializedProperty property)
         {
-            // Separate the steps it takes to get to this property
-            string[] separatedPaths = prop.propertyPath.Split('.');
+            if (property == null) return null;
 
-            // Go down to the root of this serialized property
-            System.Object reflectionTarget = prop.serializedObject.targetObject as object;
-            // Walk down the path to get the target object
-            foreach (var path in separatedPaths)
+
+            string path = property.propertyPath.Replace(".Array.data[", "[");
+            object obj = property.serializedObject.targetObject;
+            string[] elements = path.Split('.');
+
+            foreach (var element in elements)
             {
-                FieldInfo fieldInfo = reflectionTarget.GetType().GetField(path, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                reflectionTarget = fieldInfo.GetValue(reflectionTarget);
+                if (element.Contains("["))
+                {
+                    string elementName = element.Substring(0, element.IndexOf("["));
+                    int index = Convert.ToInt32(element.Substring(element.IndexOf("[")).Replace("[", "").Replace("]", ""));
+                    obj = GetValue_Imp(obj, elementName, index);
+                }
+                else
+                {
+                    obj = GetValue_Imp(obj, element);
+                }
             }
-            return (T)reflectionTarget;
+
+            return obj;
+        }
+
+        /// <summary> Gets the object that the property is a member of  </summary>
+        public static object GetTargetObjectWithProperty(SerializedProperty property)
+        {
+            string path = property.propertyPath.Replace(".Array.data[", "[");
+            object obj = property.serializedObject.targetObject;
+            string[] elements = path.Split('.');
+
+            for (int i = 0; i < elements.Length - 1; i++)
+            {
+                string element = elements[i];
+                if (element.Contains("["))
+                {
+                    string elementName = element.Substring(0, element.IndexOf("["));
+                    int index = Convert.ToInt32(element.Substring(element.IndexOf("[")).Replace("[", "").Replace("]", ""));
+                    obj = GetValue_Imp(obj, elementName, index);
+                }
+                else
+                {
+                    obj = GetValue_Imp(obj, element);
+                }
+            }
+
+            return obj;
+        }
+
+
+        private static object GetValue_Imp(object source, string name)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+
+            Type type = source.GetType();
+
+            while (type != null)
+            {
+                FieldInfo field = type.GetField(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+                if (field != null)
+                {
+                    return field.GetValue(source);
+                }
+
+                PropertyInfo property = type.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                if (property != null)
+                {
+                    return property.GetValue(source, null);
+                }
+
+                type = type.BaseType;
+            }
+
+            return null;
+        }
+        private static object GetValue_Imp(object source, string name, int index)
+        {
+            IEnumerable enumerable = GetValue_Imp(source, name) as IEnumerable;
+            if (enumerable == null)
+            {
+                return null;
+            }
+
+            IEnumerator enumerator = enumerable.GetEnumerator();
+            for (int i = 0; i <= index; i++)
+            {
+                if (!enumerator.MoveNext())
+                {
+                    return null;
+                }
+            }
+
+            return enumerator.Current;
+        }
+
+
+        //public static T GetPropertyAttribute<T>(this SerializedProperty prop, bool inherit) where T : PropertyAttribute
+        //{
+        //    if (prop == null) return null;
+        //    Type t = prop.serializedObject.targetObject.GetType();
+
+        //    FieldInfo f = null;
+        //    PropertyInfo p = null;
+
+        //    foreach (var name in prop.propertyPath.Split('.'))
+        //    {
+        //        f = t.GetField(name, (BindingFlags)(-1));
+
+        //        if (f == null)
+        //        {
+        //            p = t.GetProperty(name, (BindingFlags)(-1));
+        //            if (p == null)
+        //            {
+        //                return null;
+        //            }
+
+        //            t = p.PropertyType;
+        //        }
+        //        t = f.FieldType;
+        //    }
+
+        //    T[] attributes;
+
+        //    if (f != null)
+        //    {
+        //        attributes = f.GetCustomAttribute(typeof(T), inherit) as T[];
+        //    }
+        //    else if (p != null)
+        //    {
+        //        attributes = p.GetCustomAttribute(typeof(T), inherit) as T[];
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+
+        //    return attributes.Length > 0 ? attributes[0] : null;
+        //}
+
+    }
+
+    public class AdvancedTypePopupItem : AdvancedDropdownItem
+    {
+        public Type Type { get; }
+
+        public AdvancedTypePopupItem(Type type, string name) : base(name) => Type = type;
+    }
+
+    public readonly struct TypePopupCache
+    {
+        const int k_MaxTypePopupLineCount = 10;
+
+        static readonly Type k_UnityObjectType = typeof(UnityEngine.Object);
+
+        public AdvancedTypePopup TypePopup { get; }
+        public AdvancedDropdownState State { get; }
+        public TypePopupCache(AdvancedTypePopup typePopup, AdvancedDropdownState state)
+        {
+            TypePopup = typePopup;
+            State = state;
+        }
+
+        public static GUIContent GetTypeName(SerializedProperty property, Dictionary<string, GUIContent> m_TypeNameCaches)
+        {
+            // Cache this string.
+            string managedReferenceFullTypeName = property.managedReferenceFullTypename;
+
+            if (string.IsNullOrEmpty(managedReferenceFullTypeName))
+            {
+                return new GUIContent("[Null]");
+            }
+            if (m_TypeNameCaches.TryGetValue(managedReferenceFullTypeName, out GUIContent cachedTypeName))
+            {
+                return cachedTypeName;
+            }
+
+            Type type = MSerializedTools.GetType(managedReferenceFullTypeName);
+            string typeName = null;
+
+            AddTypeMenuAttribute typeMenu = TypeMenuUtility.GetAttribute(type);
+            if (typeMenu != null)
+            {
+                typeName = typeMenu.GetTypeNameWithoutPath();
+                if (!string.IsNullOrWhiteSpace(typeName))
+                {
+                    typeName = ObjectNames.NicifyVariableName(typeName);
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(typeName))
+            {
+                typeName = ObjectNames.NicifyVariableName(type.Name);
+            }
+
+            GUIContent result = new(typeName);
+            m_TypeNameCaches.Add(managedReferenceFullTypeName, result);
+            return result;
         }
 
     }
-#endif
+
+    /// <summary> A type popup with a fuzzy finder. </summary>
+    public class AdvancedTypePopup : AdvancedDropdown
+    {
+        const int kMaxNamespaceNestCount = 16;
+
+        public static void AddTo(AdvancedDropdownItem root, IEnumerable<Type> types)
+        {
+            int itemCount = 0;
+
+            // Add null item.
+            var nullItem = new AdvancedTypePopupItem(null, TypeMenuUtility.k_NullDisplayName)
+            {
+                id = itemCount++
+            };
+            root.AddChild(nullItem);
+
+            Type[] typeArray = types.OrderByType().ToArray();
+
+            // Single namespace if the root has one namespace and the nest is unbranched.
+            bool isSingleNamespace = true;
+            string[] namespaces = new string[kMaxNamespaceNestCount];
+            foreach (Type type in typeArray)
+            {
+                string[] splittedTypePath = TypeMenuUtility.GetSplittedTypePath(type);
+                if (splittedTypePath.Length <= 1)
+                {
+                    continue;
+                }
+                // If they explicitly want sub category, let them do.
+                if (TypeMenuUtility.GetAttribute(type) != null)
+                {
+                    isSingleNamespace = false;
+                    break;
+                }
+                for (int k = 0; (splittedTypePath.Length - 1) > k; k++)
+                {
+                    string ns = namespaces[k];
+                    if (ns == null)
+                    {
+                        namespaces[k] = splittedTypePath[k];
+                    }
+                    else if (ns != splittedTypePath[k])
+                    {
+                        isSingleNamespace = false;
+                        break;
+                    }
+                }
+
+                if (!isSingleNamespace) break;
+            }
+
+            // Add type items.
+            foreach (Type type in typeArray)
+            {
+                string[] splittedTypePath = TypeMenuUtility.GetSplittedTypePath(type);
+                if (splittedTypePath.Length == 0)
+                {
+                    continue;
+                }
+
+                AdvancedDropdownItem parent = root;
+
+                // Add namespace items.
+                if (!isSingleNamespace)
+                {
+                    for (int k = 0; (splittedTypePath.Length - 1) > k; k++)
+                    {
+                        AdvancedDropdownItem foundItem = GetItem(parent, splittedTypePath[k]);
+                        if (foundItem != null)
+                        {
+                            parent = foundItem;
+                        }
+                        else
+                        {
+                            var newItem = new AdvancedDropdownItem(splittedTypePath[k])
+                            {
+                                id = itemCount++,
+                            };
+                            parent.AddChild(newItem);
+                            parent = newItem;
+                        }
+                    }
+                }
+
+                // Add type item.
+                var item = new AdvancedTypePopupItem(type, ObjectNames.NicifyVariableName(splittedTypePath[splittedTypePath.Length - 1]))
+                {
+                    id = itemCount++
+                };
+                parent.AddChild(item);
+            }
+        }
+
+        static AdvancedDropdownItem GetItem(AdvancedDropdownItem parent, string name)
+        {
+            foreach (AdvancedDropdownItem item in parent.children)
+            {
+                if (item.name == name) return item;
+            }
+            return null;
+        }
+
+        static readonly float k_HeaderHeight = EditorGUIUtility.singleLineHeight * 2f;
+
+        Type[] m_Types;
+
+        public event Action<AdvancedTypePopupItem> OnItemSelected;
+
+        public AdvancedTypePopup(IEnumerable<Type> types, int maxLineCount, AdvancedDropdownState state) : base(state)
+        {
+            SetTypes(types);
+            minimumSize = new Vector2(minimumSize.x, EditorGUIUtility.singleLineHeight * maxLineCount + k_HeaderHeight);
+        }
+
+        public void SetTypes(IEnumerable<Type> types) => m_Types = types.ToArray();
+
+        protected override AdvancedDropdownItem BuildRoot()
+        {
+            var root = new AdvancedDropdownItem("Select Type");
+            AddTo(root, m_Types);
+            return root;
+        }
+
+        protected override void ItemSelected(AdvancedDropdownItem item)
+        {
+            base.ItemSelected(item);
+            if (item is AdvancedTypePopupItem typePopupItem)
+            {
+                OnItemSelected?.Invoke(typePopupItem);
+            }
+        }
+    }
 }
+
+
+#endif

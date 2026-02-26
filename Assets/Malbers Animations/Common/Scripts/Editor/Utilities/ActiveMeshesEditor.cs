@@ -10,24 +10,30 @@ namespace MalbersAnimations.Utilities
     public class ActiveMeshesEditor : Editor
     {
         private ReorderableList list;
-        SerializedProperty activeMeshesList, showMeshesList, random, RootBone, Owner, debug, selectedMeshIndex;
+        SerializedProperty activeMeshesList, showMeshesList, random, RootBone, Owner, debug, OnMeshChanged,
+            //  MeshItemUpdated,
+
+            selectedMeshIndex
+            ;
 
         private readonly Dictionary<string, ReorderableList> Reo_Abilities = new();
 
         private ActiveMeshes m;
         private readonly string[] tabs = new string[] { "General", "Reactions" };
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             m = (ActiveMeshes)target;
 
             activeMeshesList = serializedObject.FindProperty("Meshes");
+            OnMeshChanged = serializedObject.FindProperty("OnMeshChanged");
             showMeshesList = serializedObject.FindProperty("showMeshesList");
             random = serializedObject.FindProperty("random");
             RootBone = serializedObject.FindProperty("RootBone");
             Owner = serializedObject.FindProperty("Owner");
             debug = serializedObject.FindProperty("debug");
             selectedMeshIndex = serializedObject.FindProperty("selectedMeshIndex");
+            //MeshItemUpdated = serializedObject.FindProperty("MeshItemUpdated");
 
             list = new ReorderableList(serializedObject, activeMeshesList, true, true, true, true);
             {
@@ -80,6 +86,10 @@ namespace MalbersAnimations.Utilities
 
                 }
                 EditorGUILayout.PropertyField(RootBone);
+
+
+                //using (new EditorGUI.DisabledGroupScope(true))
+                //    EditorGUILayout.PropertyField(MeshItemUpdated);
             }
 
 
@@ -101,13 +111,20 @@ namespace MalbersAnimations.Utilities
                                 if (SelectedMeshSet != null)
                                 {
                                     SerializedProperty MeshItemList = SelectedMeshSet.FindPropertyRelative("MeshItems");
+                                    SerializedProperty OnSetMeshChange = SelectedMeshSet.FindPropertyRelative("OnSetMeshChange");
 
                                     EditorGUI.indentLevel++;
                                     EditorGUILayout.PropertyField(SelectedMeshSet, false);
                                     EditorGUI.indentLevel--;
 
+
+
                                     if (SelectedMeshSet.isExpanded)
+                                    {
                                         DrawAbilities(SelectedMeshSet, MeshItemList);
+
+                                        EditorGUILayout.PropertyField(OnSetMeshChange);
+                                    }
                                 }
                             }
                         }
@@ -120,6 +137,9 @@ namespace MalbersAnimations.Utilities
             {
                 Undo.RecordObject(target, "Active Meshes Inspector");
             }
+
+
+            EditorGUILayout.PropertyField(OnMeshChanged);
             serializedObject.ApplyModifiedProperties();
         }
 

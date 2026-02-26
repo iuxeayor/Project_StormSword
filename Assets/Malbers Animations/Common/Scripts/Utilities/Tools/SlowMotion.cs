@@ -17,6 +17,9 @@ namespace MalbersAnimations
         private bool PauseGame = false;
         private float CurrentTime = 1;
 
+        [Tooltip("Enable Slow Motion")]
+        public bool onEnable = false;
+
         IEnumerator SlowTime_C;
 
         private float currentFixedTimeScale;
@@ -25,9 +28,16 @@ namespace MalbersAnimations
             currentFixedTimeScale = Time.fixedDeltaTime;
         }
 
+        protected virtual void OnEnable()
+        {
+            if (onEnable)
+                Slow_Motion();
+        }
+
         public void Slow_Motion()
         {
-            if (SlowTime_C != null || !enabled) return; //Means that the Coroutine for slowmotion is still live
+            // if (SlowTime_C != null || !enabled) return; //Means that the Coroutine for slowmotion is still live
+
 
 
             if (Time.timeScale == 1)
@@ -86,7 +96,7 @@ namespace MalbersAnimations
             {
                 Time.timeScale -= Time.timeScale * slowMoSpeed;
                 Time.fixedDeltaTime = currentFixedTimeScale * Time.timeScale;
-
+                //  Debug.Log("slowtime");
                 yield return null;
             }
 
@@ -115,54 +125,6 @@ namespace MalbersAnimations
             Time.timeScale = CurrentTime = 1;
             Time.fixedDeltaTime = currentFixedTimeScale;
             SlowTime_C = null;
-        }
-
-
-        private void Reset()
-        { CreateInputs(); }
-
-        [ContextMenu("Create Inputs")]
-        protected void CreateInputs()
-        {
-#if UNITY_EDITOR
-
-            if (!TryGetComponent<MInput>(out var input))
-                input = gameObject.AddComponent<MInput>();
-
-            input.IgnoreOnPause.Value = false;
-
-            #region Open Close Input
-            var OpenCloseInput = input.FindInput("Freeze");
-            if (OpenCloseInput == null)
-            {
-                OpenCloseInput = new InputRow("Freeze", "Freeze", KeyCode.Escape, InputButton.Down, InputType.Key);
-                input.inputs.Add(OpenCloseInput);
-                UnityEditor.Events.UnityEventTools.AddPersistentListener(OpenCloseInput.OnInputDown, Freeze_Game);
-            }
-            #endregion
-
-            #region Submit Input
-            var Submit = input.FindInput("Pause Editor");
-            if (Submit == null)
-            {
-                Submit = new InputRow("Pause Editor", "Pause Editor", KeyCode.P, InputButton.Down, InputType.Key);
-                input.inputs.Add(Submit);
-                UnityEditor.Events.UnityEventTools.AddPersistentListener(Submit.OnInputDown, PauseEditor);
-            }
-            #endregion
-
-            #region ChangeLeft Input
-            var ChangeLeft = input.FindInput("SlowMo");
-            if (ChangeLeft == null)
-            {
-                ChangeLeft = new InputRow("SlowMo", "SlowMo", KeyCode.Mouse2, InputButton.Down, InputType.Key);
-                input.inputs.Add(ChangeLeft);
-                UnityEditor.Events.UnityEventTools.AddPersistentListener(ChangeLeft.OnInputDown, Slow_Motion);
-            }
-            #endregion
-            UnityEditor.EditorUtility.SetDirty(this);
-            UnityEditor.EditorUtility.SetDirty(input);
-#endif
         }
     }
 }

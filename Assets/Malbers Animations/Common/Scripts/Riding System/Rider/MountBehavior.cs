@@ -44,7 +44,7 @@ namespace MalbersAnimations.HAP
 
         override public void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            float DeltaTime = animator.updateMode == AnimatorUpdateMode.AnimatePhysics ? Time.fixedDeltaTime : Time.deltaTime;
+            float DeltaTime = animator.updateMode == AnimatorUpdateMode.Fixed ? Time.fixedDeltaTime : Time.deltaTime;
             var TargetRot = animator.rootRotation;
             var TargetPos = rider.RiderRoot.position += ((Fix ? Fix.time : 1) * AnimalScaleFactor * AnimationMult * DeltaTime * animator.velocity);
 
@@ -54,13 +54,10 @@ namespace MalbersAnimations.HAP
             var Mount_Rotation = rider.Montura.MountPoint.rotation;
 
 
-            //Smootly move to the Mount Start Position && rotation
+            //Smoothly move to the Mount Start Position && rotation
             if (norm_time < alignTime)
             {
                 var lerp = norm_time / alignTime;
-
-                // Vector3 NewPos = new Vector3(MountTrigger.position.x, TargetPos.y, MountTrigger.position.z);
-                //TargetPos = Vector3.Lerp(TargetPos, NewPos, lerp);
 
                 TargetPos = Vector3.Lerp(TargetPos, MountTrigger.position, lerp);
                 TargetRot = Quaternion.Lerp(TargetRot, MountTrigger.rotation, lerp);

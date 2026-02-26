@@ -1,31 +1,34 @@
 ﻿#if UNITY_EDITOR
 using UnityEditor;
 #endif
-
 using UnityEngine;
+
 
 namespace MalbersAnimations.Reactions
 {
-    [System.Serializable]
-
-    [AddTypeMenu("[Debug]")]
-
+    [System.Serializable, AddTypeMenu("[Debug]")]
     public class DebugReaction : Reaction
     {
+#if UNITY_EDITOR
+        public override string DynamicName => $"Debug {MessageType} '{log}'. {(pauseEditor ? "Pause Editor" : "")}";
+#else
+        public override string DynamicName => $"Debug '{log}'. {(pauseEditor ? "Pause Editor" : "")}";
+#endif
+
         public override System.Type ReactionType => typeof(Component);
 
         public string log = "debug";
 
-        public bool pauseEditor = false;
 
 #if UNITY_EDITOR
         public MessageType MessageType = MessageType.Info;
 #endif
 
+        public bool pauseEditor = false;
+
         protected override bool _TryReact(Component component)
         {
 #if UNITY_EDITOR
-
             switch (MessageType)
             {
                 case MessageType.None:

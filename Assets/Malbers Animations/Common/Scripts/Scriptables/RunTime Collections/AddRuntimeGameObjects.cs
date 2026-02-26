@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 
-
-
 namespace MalbersAnimations.Scriptables
 {
     [AddComponentMenu("Malbers/Runtime Vars/Add Runtime GameObjects")]
@@ -9,9 +7,12 @@ namespace MalbersAnimations.Scriptables
     {
         [CreateScriptableAsset] public RuntimeGameObjects Collection;
 
-        private void OnEnable() => Collection?.Item_Add(gameObject);
+        protected virtual void OnEnable() => Collection?.Item_Add(gameObject);
 
         private void OnDisable() => Collection?.Item_Remove(gameObject);
+
+        public virtual void RemoveSelf() => Collection?.Item_Remove(gameObject);
+        public virtual void AddSelf() => Collection?.Item_Add(gameObject);
     }
 
 
@@ -21,17 +22,21 @@ namespace MalbersAnimations.Scriptables
     {
         public static GUIStyle StyleBlue => MTools.Style(new Color(0, 0.5f, 1f, 0.3f));
         AddRuntimeGameObjects M;
+        UnityEditor.SerializedProperty Collection;
 
-        private void OnEnable() => M = (AddRuntimeGameObjects)target;
+        protected virtual void OnEnable()
+        {
+            M = (AddRuntimeGameObjects)target;
+            Collection = serializedObject.FindProperty("Collection");
+        }
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            var Collection = serializedObject.FindProperty("Collection");
-            UnityEditor.EditorGUILayout.PropertyField(Collection);
-
             if (M.Collection && !string.IsNullOrEmpty(M.Collection.Description))
                 MalbersEditor.DrawDescription(M.Collection.Description);
+
+            UnityEditor.EditorGUILayout.PropertyField(Collection);
 
             serializedObject.ApplyModifiedProperties();
         }

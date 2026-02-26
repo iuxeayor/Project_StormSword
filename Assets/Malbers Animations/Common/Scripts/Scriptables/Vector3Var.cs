@@ -11,7 +11,7 @@ namespace MalbersAnimations.Scriptables
         [SerializeField] private Vector3 value = Vector3.zero;
 
         /// <summary>Invoked when the value changes </summary>
-        public Action<Vector3> OnValueChanged = delegate { };
+        public Action<Vector3> OnValueChanged;
 
 
         /// <summary> Value of the Float Scriptable variable</summary>
@@ -21,7 +21,7 @@ namespace MalbersAnimations.Scriptables
             set
             {
                 this.value = value;
-                OnValueChanged(value);
+                OnValueChanged?.Invoke(value);
 #if UNITY_EDITOR
                 if (debug) Debug.Log($"<B>{name} -> [<color=gray> {value} </color>] </B>", this);
 #endif

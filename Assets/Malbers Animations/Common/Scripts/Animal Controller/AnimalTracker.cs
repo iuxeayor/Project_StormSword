@@ -6,8 +6,6 @@ using System.Collections;
 
 
 
-
-
 #if UNITY_EDITOR
 using UnityEditorInternal;
 using UnityEditor;
@@ -20,7 +18,8 @@ namespace MalbersAnimations.Controller
     public class AnimalTracker : MonoBehaviour
     {
         [RequiredField] public MAnimal animal;
-        [RequiredField] public Transform Tracker;
+        public Transform Tracker;
+
         [Tooltip("Unparent the Tracker")]
         public bool NoParent = true;
 
@@ -29,14 +28,15 @@ namespace MalbersAnimations.Controller
 
         private float CurrentLerp;
 
-
         public List<TransformTracker> Trackers = new();
 
-
+        [Tooltip("Size of the Debug Cube that shows the Tracker Position in the Scene View")]
         public float DebugSize = 0.05f;
 
 
         private TransformTracker Current;
+
+        private TransformTracker DefaultState;
         public int CurrentIndex { get; private set; }
 
         /// <summary> Store the Current State  </summary>
@@ -55,8 +55,23 @@ namespace MalbersAnimations.Controller
         /// <summary> Store the Current State  </summary>
         public int CurrentExitMode { get; private set; }
 
+        public bool debug = false;
 
-        private void OnEnable()
+
+        private void Awake()
+        {
+            if (Tracker == null) return;
+
+            DefaultState = new TransformTracker
+            {
+                RelativeTo = Tracker.parent,
+                Position = Tracker.localPosition,
+                Rotation = Tracker.localEulerAngles,
+                Lerp = 10
+            };
+        }
+
+        protected virtual void OnEnable()
         {
             animal.OnStateChange.AddListener(OnStateChange);
             animal.OnStanceChange.AddListener(OnStanceChange);
@@ -65,9 +80,7 @@ namespace MalbersAnimations.Controller
 
             //Cast the first state and stance
 
-
-
-            if (NoParent) Tracker.SetParent(null);
+            if (NoParent && Tracker) Tracker.SetParent(null);
 
 
             Initialize();
@@ -97,8 +110,6 @@ namespace MalbersAnimations.Controller
 
         private IEnumerator UpdateCycle()
         {
-            var fixedTime = new WaitForFixedUpdate();
-
             while (true)
             {
                 yield return null;
@@ -127,10 +138,22 @@ namespace MalbersAnimations.Controller
 
         private void OnStateChange(int state)
         {
-            FindState(state);
-
-            LastState = CurrentState; //Store the Last State
-            CurrentState = state; //Store the Current Entering State
+            if (FindState(state))
+            {
+                LastState = CurrentState;   //Store the Last State
+                CurrentState = state;       //Store the Current Entering State
+            }
+            else
+            {
+                if (!FindStance(CurrentStance))
+                {
+                    //If no State or Stance found, go to Default
+                    LastState = CurrentState; //Store the Last State
+                    CurrentState = -1;
+                    Current = DefaultState;
+                    // Debug.Log("NOT FOUND GO TO DEFAULT");
+                }
+            }
         }
 
 
@@ -162,8 +185,12 @@ namespace MalbersAnimations.Controller
                     if (!Found && item.RepositionTracker)
                     {
                         // Debug.Log($"FindState: {item.name}");
-                        item.reaction?.React(animal);
+                        item.reaction.React(animal);
                         Found = true;
+
+                        if (debug)
+                            Debug.Log($"AnimalTracker: State Changed [{animal.ActiveState.name}] Tracker [{item.name}]", this);
+
                         //Update the Reposition Tracker 
                         if (item.RepositionTracker)
                         {
@@ -195,8 +222,11 @@ namespace MalbersAnimations.Controller
                     if (!Found)
                     {
                         //  Debug.Log($"FindStance {item.name}");
-                        item.reaction?.React(animal);
+                        item.reaction.React(animal);
                         Found = true;
+
+                        if (debug)
+                            Debug.Log($"AnimalTracker: Stance Changed [{animal.ActiveStance.ID.name}] Tracker [{item.name}]", this);
 
                         //Update the Reposition Tracker 
                         if (item.RepositionTracker)
@@ -230,7 +260,10 @@ namespace MalbersAnimations.Controller
                             FoundMode = true;
                             //item.OnTrackerChanged.Invoke();
                             // Debug.Log($"OnModeStart {item.name}");
-                            item.reaction?.React(animal);
+                            item.reaction.React(animal);
+
+                            if (debug)
+                                Debug.Log($"AnimalTracker: Mode Started [{animal.ActiveMode.Name}] Tracker [{item.name}]", this);
 
                             //Update the Reposition Tracker 
                             if (item.RepositionTracker)
@@ -259,7 +292,11 @@ namespace MalbersAnimations.Controller
                         if (!item.CheckAbility || (item.CheckAbility && item.Ability == Ability))
                         {
                             // item.OnTrackerChanged.Invoke();
-                            item.reaction?.React(animal);
+                            item.reaction.React(animal);
+
+                            if (debug)
+                                Debug.Log($"AnimalTracker: Mode Ended [{animal.ActiveMode.Name}] Tracker [{item.name}]", this);
+
                             // Debug.Log($"OnModeEnd {item.name}");
                             CurrentLerp = 0;
 
@@ -270,7 +307,6 @@ namespace MalbersAnimations.Controller
 
             if (FoundMode)
                 FindState(CurrentState); //When a Stance changes recheck the current tracker.
-
 
             FoundMode = false;
         }
@@ -422,8 +458,7 @@ namespace MalbersAnimations.Controller
         //public float CurrentLerp;
 
         [Space]
-        [SerializeReference, SubclassSelector]
-        public Reaction reaction;
+        public Reaction2 reaction;
         // public UnityEvent OnTrackerChanged = new();
 
 
@@ -456,13 +491,13 @@ namespace MalbersAnimations.Controller
     {
         private AnimalTracker M;
 
-        private SerializedProperty animal, Tracker, NoParent, Trackers, DebugSize, selectedIndex, FixedUpdate;
+        private SerializedProperty animal, Tracker, NoParent, Trackers, DebugSize, selectedIndex, FixedUpdate, debug;
 
         private ReorderableList Reo_List_Trackers;
 
         private readonly Color selectedColor = new(0.4f, 1f, 2f, 1f);
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             M = (AnimalTracker)target;
 
@@ -474,6 +509,7 @@ namespace MalbersAnimations.Controller
             selectedIndex = serializedObject.FindProperty("selectedIndex");
             selectedIndex = serializedObject.FindProperty("selectedIndex");
             FixedUpdate = serializedObject.FindProperty("FixedUpdate");
+            debug = serializedObject.FindProperty("debug");
 
             Reo_List_Trackers = new(serializedObject, Trackers, true, true, true, true)
             {
@@ -507,10 +543,10 @@ namespace MalbersAnimations.Controller
         {
             float height = EditorGUIUtility.singleLineHeight;
 
-            Rect rect0 = new Rect(rect.x, rect.y + 2, 20, height);
-            Rect rect1 = new Rect(rect.x + 20, rect.y + 2, rect.width / 2, height);
-            Rect rect2 = new Rect(rect.x + 20 + rect.width / 2, rect.y + 2, rect.width / 2 - 20, height);
-            Rect rect3 = new Rect(rect.width + 20, rect.y + 2, 20, height);
+            Rect rect0 = new(rect.x, rect.y + 2, 20, height);
+            Rect rect1 = new(rect.x + 20, rect.y + 2, rect.width / 2, height);
+            Rect rect2 = new(rect.x + 20 + rect.width / 2, rect.y + 2, rect.width / 2 - 20, height);
+            Rect rect3 = new(rect.width + 20, rect.y + 2, 20, height);
 
             // Use rect1 and rect2 as needed
 
@@ -531,10 +567,7 @@ namespace MalbersAnimations.Controller
                 GUI.color = M.CurrentIndex == index ? selectedColor : OldColor;
             }
 
-
-
             GUI.backgroundColor = index == selectedIndex.intValue ? selectedColor : OldColor;
-
 
             EditorGUI.PropertyField(rect0, active, GUIContent.none);
 
@@ -546,7 +579,6 @@ namespace MalbersAnimations.Controller
 
             GUI.backgroundColor = OldColor;
             GUI.color = OldColorRuntime;
-
         }
 
         public override void OnInspectorGUI()
@@ -557,9 +589,15 @@ namespace MalbersAnimations.Controller
 
             using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                EditorGUILayout.PropertyField(animal);
+                using (new GUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.PropertyField(animal);
+                    MalbersEditor.DrawDebugIcon(debug);
+                }
                 EditorGUILayout.PropertyField(Tracker);
-                EditorGUILayout.PropertyField(FixedUpdate);
+
+                if (Tracker.objectReferenceValue)
+                    EditorGUILayout.PropertyField(FixedUpdate);
 
                 using (new GUILayout.HorizontalScope())
                 {
@@ -580,11 +618,11 @@ namespace MalbersAnimations.Controller
 
             using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                if (index != -1)
+                if (index != -1 && index < Trackers.arraySize)
                 {
                     var element = Trackers.GetArrayElementAtIndex(index);
-
-                    EditorGUILayout.PropertyField(element);
+                    if (element != null)
+                        EditorGUILayout.PropertyField(element);
                 }
             }
 
@@ -600,7 +638,7 @@ namespace MalbersAnimations.Controller
 
             if (index == -1) return;
 
-            //   foreach (var item in tracker.Trackers)
+            if (M.Trackers.Count < index)
             {
                 var item = M.Trackers[index];
 

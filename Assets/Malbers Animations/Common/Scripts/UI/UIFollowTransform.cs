@@ -35,6 +35,8 @@ namespace MalbersAnimations.UI
         [Tooltip("Scale of the Instantiated prefab")]
         public Vector3Reference Scale = new(Vector3.one);
 
+        public BoolEvent OnTarget = new();
+
         public Vector3 ScreenCenter { get; set; }
         public Vector3 DefaultScreenCenter { get; set; }
         public Transform FollowT
@@ -72,26 +74,26 @@ namespace MalbersAnimations.UI
             MainCamera = MTools.FindMainCamera();
             StopAllCoroutines();
 
-            if (HideOffScreen) 
+            if (HideOffScreen)
                 HideOffScreen.transform.localScale = Scale;
 
 
-            if (WorldTransform.Value) 
+            if (WorldTransform.Value)
                 Align();
-           
+
 
             SetTransform(WorldTransform);
 
 
             // Choose between FixedUpdate or Late Update
-            YieldInstruction UpdateTime = cycle == UpdateType.FixedUpdate ? new WaitForFixedUpdate() : new WaitForEndOfFrame(); 
+            YieldInstruction UpdateTime = cycle == UpdateType.FixedUpdate ? new WaitForFixedUpdate() : new WaitForEndOfFrame();
 
             StartCoroutine(UpdateCycle(UpdateTime));
 
         }
 
 
-       private IEnumerator UpdateCycle(YieldInstruction waitTime)
+        private IEnumerator UpdateCycle(YieldInstruction waitTime)
         {
             while (true)
             {
@@ -112,7 +114,8 @@ namespace MalbersAnimations.UI
         {
             WorldTransform.Value = null;
             transform.position = ScreenCenter; //Reset the Screen Center Position
-            if (HideOffScreen) HideOffScreen.enabled = !HideOnNull;
+            if (HideOffScreen)
+                HideOffScreen.enabled = !HideOnNull;
         }
 
         public void ListenTransform(Transform newTarget)
@@ -130,13 +133,15 @@ namespace MalbersAnimations.UI
 
             if (FollowT == null)
             {
-                if (HideOffScreen) HideOffScreen.enabled = false;
+                if (HideOffScreen && HideOnNull) HideOffScreen.enabled = false;
             }
             else
             {
                 Align();
                 enabled = newTarget != null;
             }
+
+            OnTarget.Invoke(FollowT != null);
         }
 
         private void FindFollow(Transform newTarget)
@@ -157,7 +162,7 @@ namespace MalbersAnimations.UI
         {
             ScreenCenter = newScreenCenter;
             enabled = true;
-        } 
+        }
         public void Align()
         {
             //Debug.Log($"{name} :followT" + FollowT, this);
@@ -219,7 +224,7 @@ namespace MalbersAnimations.UI
 
         void Reset()
         {
-            
+
             if (!TryGetComponent<MEventListener>(out var MeventL))
             {
                 MeventL = gameObject.AddComponent<MEventListener>();

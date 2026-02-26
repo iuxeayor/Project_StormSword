@@ -4,20 +4,21 @@ using UnityEngine;
 
 namespace MalbersAnimations.Controller
 {
+    [AddTypeMenu("Jump/Root Motion Jump")]
     public class Jump : State
     {
-        public override string StateName => "Jump/Root Motion Jump";
+        //public override string StateName => "Jump/Root Motion Jump";
         public override string StateIDName => "Jump";
 
         /// <summary>If the Jump input is pressed, the Animal will keep going Up while the Jump Animation is Playing</summary>
         [Header("Jump Parameters")]
         [Tooltip("If the Jump input is pressed, the Animal will keep going Up while the Jump Animation is Playing")]
         public BoolReference JumpPressed;
-        [Tooltip("Check if the Animal can control the Forward Movement of the Jump")]
-        public BoolReference ForwardPressed;
-        [Tooltip("Lerp Value for Pressing Jump. THis will smooth out exiting the height of the jump ")]
+        [Hide(nameof(JumpPressed)), Tooltip("Lerp Value for Pressing Jump. THis will smooth out exiting the height of the jump ")]
         public float JumpPressedLerp = 5;
 
+        [Tooltip("Check if the Animal can control the Forward Movement of the Jump")]
+        public BoolReference ForwardPressed;
 
 
         [Tooltip("Can the Animal be Rotated while Jumping?")]
@@ -159,10 +160,10 @@ namespace MalbersAnimations.Controller
                 if (animal.TerrainSlope > 0) //Means we are jumping uphill
                     animal.UseCustomRotation = true;
             }
-            else if (CurrentAnimTag == ExitTagHash && animal.hash_StateOn == 0) //Do not do this on State ON Trigger 
+            else if (CurrentAnimTag == ExitTagHash) //Do not do this on State ON Trigger 
             {
                 CanExit = true;
-                Debugging($"[EnterTag - {ExitTag.Value}] - Allow Exit");
+                Debugging($"[Using ExitTag - {ExitTag.Value}] - Allow Exit");
                 AllowExit();
             }
         }
@@ -195,8 +196,15 @@ namespace MalbersAnimations.Controller
             JumpPressForward = 1;
             JumpPressForwardAdditive = 0;
             //IsPersistent = true;
+
+
             animal.UseGravity = false;
-            animal.ResetGravityValues();
+            animal.Gravity_ResetValues();
+
+
+            //Bug FIX sometimes the jump profile is not found Rare BUG 
+            if (string.IsNullOrEmpty(activeJump.name)) FindJumpProfile();
+
 
             JumpSpeed = new MSpeed(animal.CurrentSpeedModifier) //Inherit the Vertical and the Lerps
             {
@@ -215,6 +223,9 @@ namespace MalbersAnimations.Controller
             if (animal.TerrainSlope > 0 && animal.MovementDetected && KeepHeightOnHighSlope)    //Means we are jumping uphill HACK
                 animal.UseCustomRotation = true;
 
+
+            if (activeJump.JumpLandDistance == 0)
+                animal.Grounded = true;
 
 
             //Debug.Log($"isPersistent: {IsPersistent} ");
@@ -250,7 +261,7 @@ namespace MalbersAnimations.Controller
                 activeJump.CliffTime = new RangedFloat(0.333f, 0.666f);
             }
 
-            Debugging($"Jump Profile: <B>[{activeJump.name}]</B>");
+            Debugging($"Jump Profile: <B><color=green>[{activeJump.name}]</color> - Speed [{activeJump.VerticalSpeed}] Current Speed: [{animal.VerticalSmooth:F2}]</B>");
         }
 
         public override void OnStateMove(float deltaTime)
@@ -347,7 +358,7 @@ namespace MalbersAnimations.Controller
 
         private void CheckForGround(float normalizedTime)
         {
-            if (activeJump.CliffLandDistance == 0) return; //Do nothing if RayLenght is zero
+            if (activeJump.CliffLandDistance == 0) return; //Do nothing if RayLength is zero
 
             if (activeJump.CliffTime.IsInRange(normalizedTime)) //Need to happen the First 1/3 of the Root Jump Animation
             {
@@ -366,7 +377,7 @@ namespace MalbersAnimations.Controller
 
                     if (!DeepSlope)       //Jump to a jumpable cliff not an inclined one
                     {
-                        Debugging($"[Allow Exit] Cliff Time - Near Ground. Normalized time: {normalizedTime:F2} ");
+                        Debugging($"<color=orange>[Allow Exit]</color> Cliff Time - Near Ground. Normalized time: {normalizedTime:F2} ");
                         AllowExit();
                         animal.CheckIfGrounded();
                         //  Debug.Break();
@@ -399,14 +410,14 @@ namespace MalbersAnimations.Controller
 
                 if (Physics.Raycast(MainPivot, Direction, out JumpRay, RayLength, GroundLayer, IgnoreTrigger))
                 {
-                    Debugging($"Min Distance to complete <B>[{activeJump.name}]</B> -> {JumpRay.distance:F4}");
+                    Debugging($"Min Distance to complete <B>[{activeJump.name}]-> <Color=green>[[{JumpRay.distance:F4}]]</color></B>");
                     if (m_debug) MDebug.DebugTriangle(JumpRay.point, 0.1f, Color.yellow);
 
                     var GroundSlope = Vector3.Angle(JumpRay.normal, animal.UpVector);
 
                     if (GroundSlope > animal.SlopeLimit)     //if we found something but there's a deep slope
                     {
-                        Debugging($"[AllowExit] Try to Land but the Sloope was too Deep. Slope: {GroundSlope:F2}");
+                        Debugging($"[AllowExit] Try to Land but the Slope was too Deep. Slope: {GroundSlope:F2}");
                         animal.UseGravity = General.Gravity;
                         return;
                     }

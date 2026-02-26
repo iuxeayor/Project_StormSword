@@ -10,43 +10,68 @@ namespace MalbersAnimations.Utilities
         [Tooltip("The Lock On Target will activate automatically if any target is stored on the list")]
         public BoolReference Auto = new(false);
 
-
         [Tooltip("The Lock On Target requires an Aim Component")]
         [RequiredField] public Aim aim;
 
         [Tooltip("Set of the focused 'potential' Targets")]
         [RequiredField] public RuntimeGameObjects Targets;
 
+        [Tooltip("Time needed to change to the next or previous target")]
+        public FloatReference NextTargetTime = new(0f);
 
+        [Tooltip("If an obstacle is between the target and the character. Locking will be disabled")]
+        public BoolReference CheckForObstacles = new(false);
+
+        [Tooltip("If another target can be found then swap to that target")]
+        public BoolReference AutoSwapOnObstacle = new(false);
+        // public LayerReference ObstacleLayer = new(1);
+        private float CurrentTime;
 
         private int CurrentTargetIndex = -1;
         public bool debug;
 
-
         [Header("Events")]
         public TransformEvent OnTargetChanged = new();
-        public TransformEvent OnTargetAimAssist = new();
+        //  public TransformEvent OnTargetAimAssist = new();
         public BoolEvent OnLockingTarget = new();
 
-        /// <summary> </summary>
+
         public Transform LockedTarget
         {
             get => locketTarget;
 
             private set
             {
-                locketTarget = value;
-                aim.SetTarget(value);
-                OnTargetChanged.Invoke(value);
+                if (CheckForObstacles.Value)
+                {
+                    aim.SetTargetValueInternal(value);  //Temporal set the Value to the new target to check for obstacles
+                    aim.AimLogic(true);                 //Calculate the HIT RAYCAST
+                    aim.SetTargetValueInternal(null);   //Reset the value to the original one
 
-                IsAimTarget = value != null ? value.FindComponent<AimTarget>() : null;
+                    var aimHit = aim.AimHit.transform;
 
-                OnTargetAimAssist.Invoke(IsAimTarget != null ? IsAimTarget.AimPoint : value);
+                    if (aimHit != null && !aimHit.SameHierarchy(value) && value != null && aimHit.gameObject.layer != value.gameObject.layer)
+                    {
+                        value = null;
+                        aim.SetTarget(value);
+                    }
+                }
+
+                if (value != locketTarget)
+                {
+                    locketTarget = value;
+                    aim.SetTarget(value);
+
+                    IsAimTarget = value != null ? value.FindComponent<AimTarget>() : null;
+                    aimTargetAssist = IsAimTarget != null ? IsAimTarget.AimPoint : null;
+
+                    OnTargetChanged.Invoke(aimTargetAssist != null ? aimTargetAssist : value);
+                    // OnTargetAimAssist.Invoke(aimTargetAssist);
+                }
             }
         }
         private Transform locketTarget;
-
-
+        private Transform aimTargetAssist;
         //  private Transform DefaultAimTarget;
 
         public bool LockingOn { get; private set; }
@@ -58,11 +83,10 @@ namespace MalbersAnimations.Utilities
         {
             Targets.Clear();
 
-            //DefaultAimTarget = null;
-            //if (aim != null) DefaultAimTarget = aim.AimTarget;
+            if (aim != null) aim.FindComponent<Aim>();
         }
 
-        private void OnEnable()
+         protected virtual void OnEnable()
         {
             if (Targets != null)
             {
@@ -70,9 +94,11 @@ namespace MalbersAnimations.Utilities
                 Targets.OnItemRemoved.AddListener(OnItemRemoved);
             }
 
+            if (aim != null) aim.OnRayHitChanged += OnHitChanged;
+
+
             ResetLockOn();
         }
-
 
 
 
@@ -85,6 +111,28 @@ namespace MalbersAnimations.Utilities
                 Targets.OnItemRemoved.RemoveListener(OnItemRemoved);
             }
             ResetLockOn();
+
+            if (aim != null) aim.OnRayHitChanged -= OnHitChanged;
+
+        }
+        private void OnHitChanged(RaycastHit hit)
+        {
+            if (CheckForObstacles.Value && LockedTarget != null)
+            {
+                var aimHit = aim.AimHit.transform;
+
+                if (aimHit != null && !aimHit.SameHierarchy(LockedTarget) && aimHit.gameObject.layer != LockedTarget.gameObject.layer)
+                {
+                    if (AutoSwapOnObstacle.Value)
+                    {
+                        FindNextInLineWhenObstacle();
+                    }
+                    else
+                    {
+                        ResetLockOn();
+                    }
+                }
+            }
         }
 
         private void OnItemAdded(GameObject arg0)
@@ -97,14 +145,17 @@ namespace MalbersAnimations.Utilities
 
         public void LockTargetToggle()
         {
+            if (Time.timeScale == 0) return; //Do nothing if the game is paused
+
             LockingOn ^= true;
             LookingTarget();
         }
 
 
-
         public void LockTarget(bool value)
         {
+            if (Time.timeScale == 0) return; //Do nothing if the game is paused
+
             LockingOn = value;
             LookingTarget();
         }
@@ -128,11 +179,12 @@ namespace MalbersAnimations.Utilities
         //Reset the values when the Lock Target is off
         private void ResetLockOn()
         {
-            if (LockedTarget != null)
+            //if (LockedTarget != null)
             {
                 CurrentTargetIndex = -1;
                 LockedTarget = null;
-                OnLockingTarget.Invoke(LockingOn = false);
+                LockingOn = false;
+                OnLockingTarget.Invoke(false);
                 Debugging($"Reset Locked Target: [Empty]");
             }
         }
@@ -144,8 +196,16 @@ namespace MalbersAnimations.Utilities
             if (closest)
             {
                 LockedTarget = closest.transform;
-                CurrentTargetIndex = Targets.items.IndexOf(closest);    //Save the Index so we can cycle to all the targets.
-                Debugging($"Locked Target: {LockedTarget.name}");
+
+                if (LockedTarget != null)
+                {
+                    CurrentTargetIndex = Targets.items.IndexOf(closest);    //Save the Index so we can cycle to all the targets.
+                    Debugging($"Locked Target: {LockedTarget.name}");
+                }
+                else
+                {
+                    if (AutoSwapOnObstacle.Value) FindNextInLineWhenObstacle();
+                }
             }
             else
             {
@@ -153,26 +213,85 @@ namespace MalbersAnimations.Utilities
             }
         }
 
+        private void FindNextInLineWhenObstacle()
+        {
+            for (int i = 0; i < Targets.Count; i++)
+            {
+                LockedTarget = Targets.items[i].transform;
+                if (LockedTarget != null) break;
+            }
+
+            if (LockedTarget == null) ResetLockOn();
+        }
+
+        public void Target_Scroll(Vector2 value)
+        {
+            if (value.y > 0 || value.x > 0)
+                Target_Next();
+            else if (value.y < 0 || value.x < 0)
+                Target_Previous();
+        }
+
+
+        public void Target_Scroll(float value)
+        {
+            if (value > 0) Target_Next();
+            else if (value < 0) Target_Previous();
+        }
+
         public void Target_Next()
         {
+            if (NextTargetTime > 0 && (Time.time - CurrentTime) <= NextTargetTime) return;
+            // if (CurrentTime == Time.time) return;
+
             if (Targets != null && LockedTarget != null && CurrentTargetIndex != -1) //Check everything is working
             {
+                CurrentTime = Time.time;
+
                 CurrentTargetIndex++;
                 CurrentTargetIndex %= Targets.Count; //Cycle to the first in case we are on the last item on the list
+
+                // Debug.Log($"CurrentTargetIndex {CurrentTargetIndex}");
+
+
                 LockedTarget = Targets.Item_Get(CurrentTargetIndex).transform;     //Store the Next Target
-                Debugging($"Locked Next Target: {LockedTarget.name}");
+
+                if (LockedTarget)
+                {
+                    Debugging($"Locked Next Target: {LockedTarget.name}");
+                }
+                else
+                {
+                    if (AutoSwapOnObstacle.Value) FindNextInLineWhenObstacle();
+                }
             }
         }
 
         public void Target_Previous()
         {
+            if (NextTargetTime > 0 && (Time.time - CurrentTime) <= NextTargetTime) return;
+            // if (CurrentTime == Time.time) return;
+
             if (Targets != null && LockedTarget != null && CurrentTargetIndex != -1) //Check everything is working
             {
+                CurrentTime = Time.time;
+
                 CurrentTargetIndex--;
                 if (CurrentTargetIndex == -1) CurrentTargetIndex = Targets.Count - 1;
+
+                //Debug.Log($"CurrentTargetIndex {CurrentTargetIndex}");
+
                 LockedTarget = Targets.Item_Get(CurrentTargetIndex).transform;     //Store the Next Target
 
-                Debugging($"Locked Previous Target: {LockedTarget.name}");
+                if (LockedTarget)
+                {
+                    Debugging($"Locked Previous Target: {LockedTarget.name}");
+
+                }
+                else
+                {
+                    if (AutoSwapOnObstacle.Value) FindNextInLineWhenObstacle();
+                }
             }
         }
 
@@ -212,13 +331,6 @@ namespace MalbersAnimations.Utilities
             UnityEditor.Events.UnityEventTools.AddPersistentListener(OnTargetChanged, CamEvent.Invoke);
             UnityEditor.Events.UnityEventTools.AddPersistentListener(OnTargetChanged, lockedTarget.SetValue);
         }
-
-
-        //[ContextMenu("Create Input")]
-        //private void CreateInput()
-        //{
-
-        //}
 #endif
     }
 }

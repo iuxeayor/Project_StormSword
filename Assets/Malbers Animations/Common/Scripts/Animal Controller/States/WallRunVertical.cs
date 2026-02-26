@@ -5,18 +5,14 @@ using UnityEngine;
 namespace MalbersAnimations.Controller
 {
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/main-components/manimal-controller/states/wallrun")]
-
+    [AddTypeMenu("WallRun/Wall Run Vertical")]
     public class WallRunVertical : State
     {
-        public override string StateName => "WallRun/Wall-Run Vertical";
+        //public override string StateName => "WallRun/Wall-Run Vertical";
         public override string StateIDName => "WallRunVertical";
 
         [Tooltip("If the Animal is going to find the wall automatically to activate the State")]
         public BoolReference Automatic = new(true);
-
-        [Tooltip("Try Finding the Wall only when [Sprint] is true")]
-        public BoolReference OnSprint = new(true);
-
 
         [Tooltip("Another Filter to activate  wallrun Vertical")]
         public StringReference WallTag = new("WallRun");
@@ -33,13 +29,15 @@ namespace MalbersAnimations.Controller
 
         public LayerReference WallLayer = new(1);
 
+
+        [Tooltip("Min Value Angle from the Forward Direction of the caracter  and the wall's normal and activate the state")]
+        public float WallFaceAngle = 20f;
+
         [Tooltip("Angle Limit to Exit the WallRun")]
-        public float WallLimitAngle = 45;
+        public float WallLimitAngle = 45f;
 
         [Tooltip("Use the Rotator to Rotate 90 degree the animal. Use this if you do not have Wall Run Vertical animations")]
         public bool UseRotator = false;
-
-
 
         [Tooltip("Smoothness value to align the animal to the wall")]
         public float AlignSmoothness = 10f;
@@ -48,8 +46,6 @@ namespace MalbersAnimations.Controller
         [Tooltip("Move the Character left and Right while going Up the wall")]
         public FloatReference SideMovement = new(1f);
         public float Bank = 0f;
-
-
 
         [Header("Exit Features")]
         [Tooltip("When there's no wall, wait This time to propelry exit")]
@@ -63,15 +59,7 @@ namespace MalbersAnimations.Controller
 
         /// <summary>Check if the Current Wall its a valid wall</summary>
         public Transform ValidWall { get; private set; }
-        //{
-        //    get => validwall;
-        //    set
-        //    {
-        //        validwall = value;
-        //        //   Debug.Log($"ValidWall [{value}]");
-        //    }
-        //}
-        //Transform validwall;
+
 
         public float WallCurrentDistance { get; private set; }
         public Vector3 WallNormal { get; private set; }
@@ -79,12 +67,20 @@ namespace MalbersAnimations.Controller
 
         public override bool TryActivate()
         {
-            var needsSprint = OnSprint && animal.Sprint || !OnSprint.Value;
-            var HasFoundWall = FindWall();
+            //  var needsSprint = OnSprint && animal.Sprint || !OnSprint.Value;
+            var CanActivate = /*InputValue ||*/ Automatic.Value;// && needsSprint;
 
+            if (!CanActivate) return false;
+
+            var HasFoundWall = FindWall(); //Do not find a wall if easy conditions are not met
             if (!HasFoundWall) return false;
 
-            var CanActivate = InputValue || Automatic.Value && needsSprint;
+
+
+            var angle = Vector3.Angle(-Forward, Vector3.ProjectOnPlane(WallNormal, Up));
+            CanActivate = angle < WallFaceAngle && CanActivate;
+
+            //Debug.Log(angle);
 
             if (CanActivate)
                 Debugging("[Try Activate] Wall detected Front");
@@ -117,8 +113,6 @@ namespace MalbersAnimations.Controller
             if (Physics.Raycast(WoldPos, animal.Forward, out RaycastHit WallHit, WallCheck, WallLayer.Value, QueryTriggerInteraction.Ignore))
             {
                 var WallFound = WallHit.transform;
-
-
 
                 if (ValidWall != WallFound)
                 {
@@ -179,7 +173,7 @@ namespace MalbersAnimations.Controller
                 if (UseRotator)
                 {
                     animal.PitchDirection = animal.UpVector;
-                    animal.FreeMovementRotator(90, 0);
+                    animal.FreeMovementRotator(90, Bank);
                 }
             }
         }
@@ -229,7 +223,7 @@ namespace MalbersAnimations.Controller
             var UP = Vector3.Cross(Forward, UpVector);
             UP = Vector3.Cross(UP, Forward);
 
-            if (Bank != 0) UP = Quaternion.Euler(animal.HorizontalSmooth * Bank, 0, 0) * UP;
+            if (Bank != 0 && !UseRotator) UP = Quaternion.Euler(animal.HorizontalSmooth * Bank, 0, 0) * UP;
 
             AlignRot = Quaternion.FromToRotation(transform.up, UP) * transform.rotation;  //Calculate the orientation to Terrain 
             Inverse_Rot = Quaternion.Inverse(transform.rotation);

@@ -1,10 +1,9 @@
-﻿using MalbersAnimations.Events;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace MalbersAnimations
 {
     /// <summary>Used for identify Interactables</summary>
-    public interface IInteractable
+    public interface IInteractable : IObjectCore
     {
         /// <summary>Reset the Interactable </summary>
         void Restart();
@@ -18,7 +17,7 @@ namespace MalbersAnimations
         /// <summary>Applies an Empty Interaction</summary>
         void Interact();
 
-        /// <summary>Can be interated with only one time</summary>
+        /// <summary>Can be interacted with only one time</summary>
         bool SingleInteraction { get; }
 
         /// <summary>If the Interactable is a single interaction check if it can Interact</summary>
@@ -30,14 +29,17 @@ namespace MalbersAnimations
         /// <summary>Is the Interactable focused by an Interactor? </summary>
         bool Focused { get; set; }
 
-        /// <summary>Who is the Interactor making the Focus</summary>
-        IInteractor CurrentInteractor { get; set; }
-
         /// <summary> ID value to recognize the Interactable. its used on the Events</summary>
         int Index { get; }
 
         /// <summary>GameObject that has the Interactable component</summary>
         GameObject Owner { get; }
+
+        /// <summary>Unfocused by an Interactor</summary>
+        void UnFocus(IInteractor focuser);
+
+        /// <summary>Focus by an Interactor</summary>
+        void Focus(IInteractor focuser);
     }
 
     /// <summary>Used for identify who Interact with the Interactable</summary>
@@ -47,32 +49,31 @@ namespace MalbersAnimations
         int ID { get; }
 
         /// <summary>Can the Interacter Interact?</summary>
-        bool Enabled { get; set; }
+        bool Active { get; set; }
 
         /// <summary> GameObject of who is doing the Interaction  </summary>
         GameObject Owner { get; }
 
+        /// <summary>Makes the Interacter Logic,if there's any interactor focused</summary>
+        void Interact();
+
         /// <summary>Makes the Interacter Logic, It also calls the Interactable.Interact Logic</summary>
         bool Interact(IInteractable interactable);
 
-        /// <summary>Unfocus an Interactable</summary>
+        /// <summary>Unfocused an Interactable</summary>
         void UnFocus(IInteractable interactable);
 
-        /// <summary>Focus an Interable</summary>
+        /// <summary>Focus an Interactable</summary>
         void Focus(IInteractable interactable);
-        void Restart();
-    }
 
-    [System.Serializable]
-    public class InteractionEvents
-    {
-        public GameObjectEvent OnInteractWithGO = new();
-        public IntEvent OnInteractWith = new();
+        void Restart();
     }
 
     /// <summary>Used for Play Animations on a Character, in case of the Animal Controller are the Modes</summary>
     public interface ICharacterAction
     {
+        public GameObject gameObject { get; }
+
         /// <summary>Play an Animation Action on a Character and returns True if it can play it</summary>
         bool PlayAction(int Set, int Index);
 
@@ -81,6 +82,9 @@ namespace MalbersAnimations
 
         /// <summary>Is the Character playing an Action Animation (ICharacterAction Interface) </summary>
         bool IsPlayingAction { get; }
+
+        /// <summary>Is the Character Moving </summary>
+        bool MovementDetected { get; }
 
         /// <summary>Listen when the Character has changed the state. Returns the New State</summary>
         public System.Action<int> OnState { get; set; }

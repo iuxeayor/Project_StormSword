@@ -171,7 +171,7 @@ namespace MalbersAnimations
         {
             if (type == TargetType.MalbersTag && Tag != null)
             {
-                var result = Tags.GambeObjectbyTag(Tag).FirstOrDefault();
+                var result = Tags.GameObjectbyTag(Tag).First();
 
                 if (result != null)
                     target = result.transform;

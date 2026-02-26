@@ -320,7 +320,6 @@ namespace MalbersAnimations
                     obj = GetValue_Imp(obj, element);
                 }
             }
-
             return obj;
         }
 

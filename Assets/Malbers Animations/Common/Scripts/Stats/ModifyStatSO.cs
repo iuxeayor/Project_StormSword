@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using MalbersAnimations.Scriptables;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MalbersAnimations.Controller.Reactions
@@ -7,46 +8,33 @@ namespace MalbersAnimations.Controller.Reactions
     [CreateAssetMenu(menuName = "Malbers Animations/Modifier/Stat", fileName = "New Stat Modifier", order = -100)]
     public class ModifyStatSO : ScriptableObject
     {
-        [HideInInspector]
-        public StatModifier modifier;
-
         public List<StatModifier> modifiers = new();
         /// <summary>Instant Reaction ... without considering Active or Delay parameters</summary>
-        public void Modify(Stats stats)
+
+        public void Modify(Stats stats) => modifiers.ForEach(item => item.ModifyStat(stats));
+
+        public void Modify(Component stats) => Modify(stats.MFindComponentInRoot<Stats>());
+
+        public void Modify(GameObject stats) => Modify(stats.MFindComponentInRoot<Stats>());
+
+        public void Modify(Transform t) => Modify((Component)t);
+
+        public void Modify(GameObjectVar go) => Modify(go.Value);
+
+        public void Modify(TransformVar t) => Modify((Component)t.Value);
+
+        private void Reset()
         {
-            foreach (var item in modifiers)
+            modifiers = new()
             {
-                item.ModifyStat(stats);
-            }
-        }
-
-        public void Modify(Component stats)
-        {
-            Modify(stats.MFindComponentInRoot<Stats>());
-        }
-
-        public void Modify(GameObject stats)
-        {
-            Modify(stats.MFindComponentInRoot<Stats>());
-        }
-
-        [SerializeField, HideInInspector]
-
-        private bool V2Updated;
-
-        private void OnValidate()
-        {
-            if (!V2Updated)
-            {
-                if (modifiers == null || modifiers.Count == 0)
+                new StatModifier()
                 {
-                    modifiers = new() { modifier };
-                    // Debug.Log($"Modify Stat SO [{name}] Updated to List of Modifiers", this);
-
+                    ID = MTools.GetInstance<StatID>("Health"),
+                    Base = null,
+                    MaxValue = new(20),
+                    MinValue = new(20)
                 }
-                V2Updated = true;
-                MTools.SetDirty(this);
-            }
+            };
         }
     }
 }

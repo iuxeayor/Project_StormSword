@@ -7,9 +7,9 @@ namespace MalbersAnimations.Weapons
     /// <summary>  Uses a Line Renderer to Predict and Paint a Trajectory  </summary>
     [AddComponentMenu("Malbers/Damage/DisplayTrajectory")]
 
-    public class MDisplayTrajectory : MonoBehaviour
+    public class MDisplayTrajectory : MonoBehaviour, IAnimatorListener
     {
-        private IThrower Thrower;
+        [SerializeField] private IThrower Thrower;
         [RequiredField, Tooltip("Reference for the line renderer")]
         public LineRenderer line;
         [Tooltip("Reference to Place a Transform at the End of the Line Renderer")]
@@ -28,15 +28,13 @@ namespace MalbersAnimations.Weapons
         [Tooltip("Max Steps")]
         public int MaxSteps = 50;
 
-        private List<Vector3> Trajectory = new List<Vector3>();
+        private List<Vector3> Trajectory = new();
 
         public bool ShowTrayectory { get; set; }
 
         private void Reset()
         {
-            line = GetComponent<LineRenderer>();
-
-            if (line == null)
+            if (!TryGetComponent(out line))
                 line = gameObject.AddComponent<LineRenderer>();
 
             Thrower = GetComponent<IThrower>();
@@ -44,6 +42,15 @@ namespace MalbersAnimations.Weapons
             SetLineRenderer();
         }
 
+        private void Awake()
+        {
+            Thrower ??= GetComponent<IThrower>();
+        }
+
+
+        public virtual void Show_Trayectory(bool value) => ShowTrayectory = value;
+
+        public virtual bool OnAnimatorBehaviourMessage(string message, object value) => this.InvokeWithParams(message, value);
 
         private void OnEnable()
         {
@@ -55,14 +62,16 @@ namespace MalbersAnimations.Weapons
             if (line.sharedMaterial == null)
                 line.material = new Material(Shader.Find("Sprites/Default"));
 
-            if (Thrower == null)
-                Thrower = GetComponent<IThrower>();
 
             if (Thrower != null)
                 Thrower.Predict += DisplayTraj;
         }
 
-        private void OnDisable() { if (Thrower != null) Thrower.Predict -= DisplayTraj; }
+        private void OnDisable()
+        {
+            if (Thrower != null)
+                Thrower.Predict -= DisplayTraj;
+        }
 
 
         private void Update()
@@ -95,6 +104,8 @@ namespace MalbersAnimations.Weapons
         private void DisplayTraj(bool show)
         {
             ShowTrayectory = show;
+
+            // Debug.Log($"DISPLAY TRAJECTORY {show}");
 
             line.enabled = show;
             if (HitPoint) HitPoint.SetActive(show);
@@ -153,7 +164,7 @@ namespace MalbersAnimations.Weapons
                 }
                 points.Add(pos);
 
-               var Direction = (pos - prev);
+                var Direction = (pos - prev);
 
                 //Check if the gravity can be applied after distance
                 if (TraveledDistance < Thrower.AfterDistance)

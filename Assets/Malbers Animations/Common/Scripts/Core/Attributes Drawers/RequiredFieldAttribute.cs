@@ -8,36 +8,18 @@ namespace MalbersAnimations
 
         public RequiredFieldAttribute(FieldColor Fieldcolor = FieldColor.Red)
         {
-            switch (Fieldcolor)
+            color = Fieldcolor switch
             {
-                case FieldColor.Red:
-                    color = Color.red;
-                    break;
-                case FieldColor.Green:
-                    color = Color.green;
-                    break;
-                case FieldColor.Blue:
-                    color = Color.blue;
-                    break;
-                case FieldColor.Magenta:
-                    color = Color.magenta;
-                    break;
-                case FieldColor.Cyan:
-                    color = Color.cyan;
-                    break;
-                case FieldColor.Yellow:
-                    color = Color.yellow;
-                    break;
-                case FieldColor.Orange:
-                    color = new Color(1, 0.5f, 0);
-                    break;
-                case FieldColor.Gray:
-                    color = Color.gray;
-                    break;
-                default:
-                    color = Color.red;
-                    break;
-            }
+                FieldColor.Red => Color.red + Color.yellow,
+                FieldColor.Green => Color.green,
+                FieldColor.Blue => Color.blue,
+                FieldColor.Magenta => Color.magenta,
+                FieldColor.Cyan => Color.cyan,
+                FieldColor.Yellow => Color.yellow,
+                FieldColor.Orange => new Color(1, 0.5f, 0),
+                FieldColor.Gray => Color.gray,
+                _ => Color.red,
+            };
         }
 
         public RequiredFieldAttribute()
@@ -54,12 +36,13 @@ namespace MalbersAnimations
         public override void OnGUI(Rect position, UnityEditor.SerializedProperty property, GUIContent label)
         {
             RequiredFieldAttribute rf = attribute as RequiredFieldAttribute;
+            if (property == null) return;
 
             if (property.objectReferenceValue == null)
             {
                 var oldColor = GUI.color;
 
-                GUI.color = rf.color;
+                GUI.color = new Color(1, 0.3f, 0);
                 UnityEditor.EditorGUI.PropertyField(position, property, label);
                 GUI.color = oldColor;
             }

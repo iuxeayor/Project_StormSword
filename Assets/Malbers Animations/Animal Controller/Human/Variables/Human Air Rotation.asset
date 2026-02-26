@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Human Air Rotation
   m_EditorClassIdentifier: 
   Description: Movement Rotation value for the Human while is on the Air
-  value: 5
+  debug: 0
+  value: 15

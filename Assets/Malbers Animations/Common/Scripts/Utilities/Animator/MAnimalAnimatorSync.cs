@@ -13,7 +13,7 @@ namespace MalbersAnimations
         public Animator MasterAnimator;
 
         [SerializeField]
-        [Tooltip("Slave Animator to receive the parameters values")]
+        [Tooltip("Slave Animator to receive the parameter values")]
         private Animator SlaveAnimator;
 
         [Tooltip("Which Layer Index will be used to sync to the Slave Animator")]
@@ -23,7 +23,7 @@ namespace MalbersAnimations
         [Hide("Resynchronize"), Tooltip("Threshold to check if the slave animator is unsync")]
         public float Threshold = 0.1f;
         [Hide("Resynchronize"), Tooltip("Which State will be synced again")]
-        public List<int> StateCheck = new List<int>();
+        public List<int> StateCheck = new();
 
         [Space]
         [Tooltip("Enables the Offset position and rotation from the Master Animator")]

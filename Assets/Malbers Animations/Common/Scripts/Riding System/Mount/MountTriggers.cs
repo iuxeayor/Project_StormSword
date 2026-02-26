@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using MalbersAnimations.Scriptables;
+﻿using MalbersAnimations.Scriptables;
+using UnityEngine;
 
 namespace MalbersAnimations.HAP
 {
@@ -18,9 +18,9 @@ namespace MalbersAnimations.HAP
 
         /// <summary>Avoids Automount again after Dismounting and Automount was true</summary>
         public bool WasAutomounted { get; internal set; }
-         
+
         /// <summary>The Transition ID value to dismount this kind of Montura.. (is Located on the Animator)</summary>
-        [Tooltip("The Transition ID value to Mount the Animal, to Play the correct Mount Animation"),UnityEngine.Serialization.FormerlySerializedAs("DismountID")]
+        [Tooltip("The Transition ID value to Mount the Animal, to Play the correct Mount Animation"), UnityEngine.Serialization.FormerlySerializedAs("DismountID")]
         public IntReference MountID;
         /// <summary>The Transition ID value to dismount this kind of Montura.. (is Located on the Animator)</summary>
         [Tooltip("The Transition ID value to Dismount the Animal, to Play the correct Mount Animation"), UnityEngine.Serialization.FormerlySerializedAs("DismountID")]
@@ -32,13 +32,13 @@ namespace MalbersAnimations.HAP
         /// <summary>The Local Direction of the Mount Trigger compared with the animal</summary>
         public Vector3Reference Direction;
 
-        public TransformAnimation Adjustment;
+        [CreateScriptableAsset] public TransformAnimation Adjustment;
 
-        
+
 
         /// <summary>Rider that is inside the Trigger</summary>
-        public  MRider NearbyRider
-        { 
+        public MRider NearbyRider
+        {
             get => Montura.NearbyRider;
             internal set => Montura.NearbyRider = value;
         }
@@ -50,7 +50,7 @@ namespace MalbersAnimations.HAP
                 Montura = GetComponentInParent<Mount>(); //Get the Mountable in the parents
         }
 
-        void OnTriggerEnter(Collider other)
+        protected virtual void OnTriggerEnter(Collider other)
         {
             if (!gameObject.activeInHierarchy || other.isTrigger) return; // Do not allow disable triggers
             GetAnimal(other);
@@ -77,7 +77,7 @@ namespace MalbersAnimations.HAP
                     if (NearbyRider == null || NearbyRider.MountTrigger != this)  //If we are checking the same Rider or a new rider
                     {
                         newRider.MountTriggerEnter(Montura, this);   //Set Everything Requiered on the Rider in order to Mount
-                    
+
                         if (AutoMount.Value && !WasAutomounted)
                         {
                             newRider.MountAnimal();
@@ -88,8 +88,7 @@ namespace MalbersAnimations.HAP
         }
 
 
-
-        void OnTriggerExit(Collider other)
+        protected virtual void OnTriggerExit(Collider other)
         {
             if (!gameObject.activeInHierarchy || other.isTrigger) return;       // Do not allow triggers
 

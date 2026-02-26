@@ -6,9 +6,11 @@ using UnityEngine.Serialization;
 namespace MalbersAnimations.Controller
 {
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/main-components/manimal-controller/states/fly")]
+
+    [AddTypeMenu("Air/Fly")]
     public class Fly : State
     {
-        public override string StateName => "Fly";
+        //public override string StateName => "Fly";
         public override string StateIDName => "Fly";
         public enum FlyInput { Toggle, Press, None }
 
@@ -99,8 +101,6 @@ namespace MalbersAnimations.Controller
         public float Variation = 0.3f;
         protected bool isGliding = false;
         protected float FlyStyleTime = 1;
-
-
         protected float AutoGlide_CurrentTime = 1;
 
         [Header("Down Acceleration")]
@@ -143,6 +143,8 @@ namespace MalbersAnimations.Controller
         {
             base.Activate();
             InputValue = true; //Make sure the Input is set to True when the flying is not being activated by an input player
+
+            animal.Force_Reset(); //Remove forces
         }
 
         public override bool KeepForwardMovement => AlwaysForward.Value;
@@ -298,7 +300,7 @@ namespace MalbersAnimations.Controller
                 if (Physics.Raycast(Point, Gravity, out RaycastHit landHit, Dist, LandOn, IgnoreTrigger))
                 {
                     FlyAllowExit(landHit);
-                    Debugging($"[AllowExit] Can Land on <{landHit.collider.name}> [Using Blocking Bone]");
+                    Debugging($"[AllowExit] Can Land on <{landHit.collider.name}> [Using Blocking Bone: {BlockingBone != null}]");
                     return;
                 }
 
@@ -415,6 +417,8 @@ namespace MalbersAnimations.Controller
             base.ExitInputValue = false;    //release the base Input value
         }
 
+
+
         //public override bool InputValue //lets override to Allow exit when the Input Changes
         //{
         //    get => base.InputValue;
@@ -486,14 +490,14 @@ namespace MalbersAnimations.Controller
 
                 var width = 2f;
 
-                var PointDown = Gravity.normalized * (LandMultiplier) * animal.transform.lossyScale.y;
+                var PointDown = (LandMultiplier) * animal.transform.lossyScale.y * Gravity.normalized;
 
                 MDebug.DrawLine(animal.Main_Pivot_Point, animal.Main_Pivot_Point + PointDown, width);
 
                 if (BlockingBone)
                 {
                     var HitPoint = BlockingBone.TransformPoint(BoneOffsetPos);
-                    MDebug.DrawLine(HitPoint, HitPoint + Gravity * BlockLandDist * animal.transform.lossyScale.y, width);
+                    MDebug.DrawLine(HitPoint, HitPoint + animal.transform.lossyScale.y * BlockLandDist * Gravity, width);
                 }
 
                 if (AvoidSurface && !Application.isPlaying)

@@ -1,52 +1,44 @@
 ﻿using System;
-using UnityEditor;
 using UnityEngine;
-
 
 namespace MalbersAnimations.Reactions
 {
     [Serializable]
     public abstract class Reaction
     {
+        [HideInInspector] public string desc = string.Empty;
+
+        public static MonoBehaviour Delay;
+
         /// <summary>Instant Reaction ... without considering Active or Delay parameters</summary>
         protected abstract bool _TryReact(Component reactor);
 
         /// <summary>Get the Type of the reaction</summary>
         public abstract Type ReactionType { get; }
 
-        public void React(Component component) => TryReact(localComponent.useLocal ? localComponent.component : component);
+        public virtual string DynamicName => this.GetType().Name + " Reaction";
+
+        public void React(Component component) => TryReact(useLocal ? localTarget : component);
 
         public void React(GameObject go) => TryReact(go.transform);
 
         [Tooltip("Enable or Disable the Reaction")]
         [HideInInspector] public bool Active = true;
 
-
-        public LocalComponet localComponent;
-
-        //[Tooltip("If local is true, the component used for the reaction will not change when you send a Dynamic value")]
-        //[FormerlySerializedAs("useLocalTarget")]
-        ////[HideInInspector] 
-        //public bool useLocal;
-
-        //[Hide("useLocal")]
-        //[Tooltip("Local component to apply the reaction\n Make sure the Component is the correct Type!!")]
-        //[SerializeField, RequiredField]
-        //[FormerlySerializedAs("LocalTarget")]
-        ////[HideInInspector] 
-        //protected Component LocalComponent;
-
-        //[Tooltip("Delay the Reaction this ammount of seconds")]
-        [HideInInspector]
-        [Min(0)] public float delay = 0;
+        [Tooltip("Use a local Target instead of a dynamic one")]
+        [HideInInspector] public bool useLocal;
+        [HideInInspector] public Component localTarget;
+        [HideInInspector, Min(0)] public float delay = 0;
 
         /// <summary>  Checks and find the correct component to apply a reaction  </summary>  
         public Component VerifyComponent(Component component)
         {
+            if (component == null) return null; //If the component is null return null (No Component to React_)
+
             Component TrueComponent;
 
             //Find if the component is the same 
-            if (ReactionType.IsAssignableFrom(component.GetType()))
+            if (ReactionType.IsAssignableFrom(component.GetType()) || ReactionType == typeof(GameObject))
             {
                 TrueComponent = component;
             }
@@ -61,50 +53,44 @@ namespace MalbersAnimations.Reactions
                 if (TrueComponent == null)
                     TrueComponent = component.GetComponentInChildren(ReactionType);
             }
-
             return TrueComponent;
         }
 
-        public bool TryReact(Component dynamicComponent)
+        public bool TryReact(Component component)
         {
-            if (Application.isPlaying) //Reactions cannot be called in Editor!!
+            if (!Application.isPlaying) return false; //Reactions cannot be called in Editor!!
+            if (Active)
             {
-                if (dynamicComponent == null)
+                component = VerifyComponent(useLocal ? localTarget : component);
+
+                if (component == null) //verification if the component is null
                 {
-                    Debug.Log($"Component is null. Ignoring the Reaction. <b>[{ReactionType.Name}] </b>");
+                    // Debug.Log($"Component is null. Ignoring the Reaction. <b>[{ReactionType.Name}] </b>");
                     return false; //NO Component to React
                 }
 
-
-                if (Active)
+                if (component.gameObject == null || component.gameObject.IsPrefab())
                 {
-                    if (localComponent.useLocal && localComponent.component != null) //Use Local Target and ignore the dynamic Component
+                    Debug.Log($"Component's GameObject is not in the scene. Ignoring the Reaction. <b>[{ReactionType.Name}] </b>. is Loaded: {component.gameObject.scene.isLoaded}", component);
+                    return false; //If the component is in the scene return false
+                }
+                if (delay > 0)
+                {
+                    //Create the Delay Reactions for the first time
+                    if (Delay == null)
                     {
-                        dynamicComponent = VerifyComponent(localComponent.component);
-                    }
-                    else
-                    {
-                        //Check if the component is the correct component.. a first time
-                        if (dynamicComponent != null)
-                        {
-                            dynamicComponent = VerifyComponent(dynamicComponent);
-                        }
+                        var DelayGameObject = new GameObject("Reaction Delay");
+                        Delay = DelayGameObject.AddComponent<UnityUtils>();
+                        // Delay.hideFlags = HideFlags.HideInInspector;
+                        // Debug.Log($"Creating Delay Reaction GameObject for Delay Reactions. Created by [{ReactionType.Name}]", component);
                     }
 
-
-                    //Find the First MonoBehaviour to use Coroutines (Check First if the component is already a Mono)
-                    var Delay = (dynamicComponent is MonoBehaviour MB ? MB : null) ?? dynamicComponent.GetComponent<MonoBehaviour>();
-
-                    //If the Reaction has a Delay
-                    if (delay > 0 && Delay != null)
-                    {
-                        Delay.Delay_Action(delay, () => _TryReact(dynamicComponent));
-                        return true;
-                    }
-                    else
-                    {
-                        return _TryReact(dynamicComponent);
-                    }
+                    Delay.Delay_Action(delay, () => _TryReact(component));
+                    return true;
+                }
+                else
+                {
+                    return _TryReact(component);
                 }
             }
             return false;
@@ -123,52 +109,25 @@ namespace MalbersAnimations.Reactions
             }
             return true;
         }
-    }
 
 
-    [System.Serializable]
-    public struct LocalComponet
-    {
-        [RequiredField] public Component component;
-        public bool useLocal;
-    }
-
-#if UNITY_EDITOR
-    [CustomPropertyDrawer(typeof(LocalComponet))]
-    public class SubclassSelectorDrawer : PropertyDrawer
-    {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        public static implicit operator Reaction(Reaction2 reference)
         {
-            int indent = EditorGUI.indentLevel;
+            if (!reference.IsValid) return null;
 
-            EditorGUI.indentLevel = 0;
-
-            label = EditorGUI.BeginProperty(position, new GUIContent("Use Local", "If local is true, the component used for the reaction will not change when you send a Dynamic value"), property);
-            position = EditorGUI.PrefixLabel(position, label);
-            var component = property.FindPropertyRelative("component");
-            var useLocal = property.FindPropertyRelative("useLocal");
-
-
-            var useLocalRect = new Rect(position)
+            if (reference.reactions.Length == 1)
             {
-                width = 20f,
-                height = EditorGUIUtility.singleLineHeight,
-                x = position.x,
-            };
-
-            EditorGUI.PropertyField(useLocalRect, useLocal, GUIContent.none, false);
-
-            if (useLocal.boolValue)
-            {
-                position.x += 17;
-                position.width -= 17;
-
-                EditorGUI.PropertyField(position, component, GUIContent.none, false);
+                return reference.reactions[0]; //Get the first reaction
             }
+            else
+            {
+                return new ListReaction(reference.reactions);
+            }
+        }
 
-            EditorGUI.indentLevel = indent;
-            EditorGUI.EndProperty();
+        public virtual void DrawGizmos(Component origin)
+        {
+
         }
     }
-#endif
 }

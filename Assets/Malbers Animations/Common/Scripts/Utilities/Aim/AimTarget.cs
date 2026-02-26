@@ -1,4 +1,5 @@
-﻿using MalbersAnimations.Events;
+﻿using MalbersAnimations.Conditions;
+using MalbersAnimations.Events;
 using MalbersAnimations.Scriptables;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace MalbersAnimations.Utilities
     [HelpURL("https://malbersanimations.gitbook.io/animal-controller/utilities/aim-target")]
     public class AimTarget : MonoBehaviour, IAimTarget
     {
+
         /// <summary>All Active AimTargets in the current scene</summary>
         public static List<AimTarget> AimTargets;
 
@@ -18,35 +20,27 @@ namespace MalbersAnimations.Utilities
         [SerializeField, Tooltip("It will center the Aim Ray into this gameObject's collider")]
         private bool aimAssist;
 
-
-
         [SerializeField, Tooltip("Transform Point for to center the Aim Ray")]
         [FormerlySerializedAs("m_AimPoint")]
         private Transform m_AimCenter;
 
-
         /// <summary>This will set AutoAiming for the Aim Logic</summary>
-        [SerializeField, Tooltip("The Aim Assist will use Own Trigers to find Aimers")]
+        [SerializeField, Tooltip("The Aim Assist will use Own Triggers to find Aimers")]
         private bool UseOnTriggerEnter;
-        [Tooltip("Layer to check the Aimer")]
+        [Tooltip("Layer to check on the Aimer")]
         [SerializeField] private LayerReference layer = new(-1);
         public LayerMask Layer { get => layer.Value; set => layer.Value = value; }
+        public bool debug;
+
         [Tooltip("Search only Tags")]
         public Tag[] Tags;
 
-        //   public Vector3Reference Offset;
-
         private IAim aim;
+
+        public Conditions2 checkIf;
 
         public GameObjectEvent OnAimEnter = new();
         public GameObjectEvent OnAimExit = new();
-
-
-        public bool debug;
-
-        //public System.Action<AimTarget> OnAddedAimTarget { get; private set; } = delegate { };
-        //public System.Action<AimTarget> OnRemovedAimTarget { get; private set; } = delegate { };
-
 
         /// <summary>This will set AutoAiming for the Aim Logic</summary>
         public bool AimAssist { get => aimAssist; set => aimAssist = value; }
@@ -58,8 +52,6 @@ namespace MalbersAnimations.Utilities
         /// <summary>All Active AimTargets in the current scene</summary>
         private List<Aim> Aimed_by;
 
-
-
         protected virtual void OnEnable()
         {
             if (m_AimCenter == null) m_AimCenter = transform;
@@ -68,9 +60,6 @@ namespace MalbersAnimations.Utilities
             Aimed_by = new();
             //  OnAddedAimTarget(this);
         }
-
-
-
 
         protected virtual void OnDisable()
         {
@@ -82,7 +71,6 @@ namespace MalbersAnimations.Utilities
             }
         }
 
-
         private void OnValidate()
         {
             if (m_AimCenter == null) m_AimCenter = transform;
@@ -91,27 +79,30 @@ namespace MalbersAnimations.Utilities
         /// <summary>Is the target been aimed by the Aim Ray of the Aim Script</summary>
         public void IsBeenAimed(bool enter, Aim AimedBy)
         {
-            try
+
+            if (Tags != null && Tags.Length > 0)
+                if (!AimedBy.gameObject.HasMalbersTagInParent(Tags)) return; //Check if the Aimer has the right tag
+
+            if (!MTools.Layer_in_LayerMask(AimedBy.gameObject.layer, Layer)) return; //Check if the Aimer is in the right Layer
+
+            if (!checkIf.Evaluate(AimedBy)) return; //Check Additional Conditions
+
+
+            //Wrap this in a debug method call that is automatically compiled out
+            if (debug) MDebug.Log($"[{name}] Is Being Aimed by [{AimedBy.name}]. Enter: {enter}", AimedBy);
+
+            IsBeingAimed = enter;
+
+            if (enter)
             {
-                if (debug) Debug.Log($"[{name}] Is Being Aimed by [{AimedBy.name}]. Enter: {enter}", AimedBy);
-
-                IsBeingAimed = enter;
-
-                if (enter)
-                {
-                    OnAimEnter.Invoke(AimedBy.gameObject);
-                    Aimed_by.Add(AimedBy);
-                }
-                else
-                {
-                    OnAimExit.Invoke(AimedBy.gameObject);
-                    Aimed_by.Remove(AimedBy);
-                }
+                OnAimEnter.Invoke(AimedBy.gameObject);
+                Aimed_by.Add(AimedBy);
             }
-            catch (System.Exception)
+            else
             {
+                OnAimExit.Invoke(AimedBy.gameObject);
+                Aimed_by.Remove(AimedBy);
             }
-
         }
 
 
@@ -141,9 +132,8 @@ namespace MalbersAnimations.Utilities
 
             IAim Aimer = other.FindInterface<IAim>();
 
-            // Aimer ??= other.FindInterface<IObjectCore>().transform.FindInterface<IAim>();
-
-            if (Aimer != null && aim != Aimer)
+            //Corrected null check for possible Unity object type
+            if (!Aimer.IsUnityRefNull() && aim != Aimer)
             {
                 if (debug) Debug.Log($"OnTrigger Enter [{other.name}]", this);
                 Aimer.AimTarget = AimPoint;
@@ -158,7 +148,8 @@ namespace MalbersAnimations.Utilities
 
             IAim Aimer = other.FindInterface<IAim>();
 
-            if (Aimer != null && aim == Aimer)
+            // corrected null check for possible Unity object type
+            if (!Aimer.IsUnityRefNull() && aim == Aimer)
             {
                 Aimer.AimTarget = null;
                 aim = null;

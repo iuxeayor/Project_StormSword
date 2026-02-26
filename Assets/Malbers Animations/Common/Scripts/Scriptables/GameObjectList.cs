@@ -10,7 +10,7 @@ namespace MalbersAnimations.Scriptables
     {
         public List<GameObject> list;
 
-        readonly System.Random Random = new System.Random();
+        readonly System.Random Random = new();
 
         /// <summary> Value of the Bool variable</summary>
         public override GameObject Value
@@ -18,7 +18,7 @@ namespace MalbersAnimations.Scriptables
             get => GetValue();
             set
             {
-               list.Add(value);
+                list.Add(value);
             }
         }
 

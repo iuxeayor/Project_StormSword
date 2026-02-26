@@ -54,6 +54,7 @@ MonoBehaviour:
     Variable: {fileID: 0}
   tasks:
   - {fileID: -9132107728525205275, guid: 4deba6402e498544e9d8d4f86f1d0f4c, type: 2}
+  - {fileID: 1106831248377205780}
   transitions:
   - decision: {fileID: -5277100357860639556}
     trueState: {fileID: 11400000, guid: 2294f87c65fdbf343ab4e8316acca518, type: 2}
@@ -63,3 +64,36 @@ MonoBehaviour:
   CreateDecisionAsset: 1
   TasksIndex: -1
   DecisionIndex: 0
+--- !u!114 &1106831248377205780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5aaefcc8cb0c31046bdac1700fd93837, type: 3}
+  m_Name: T_SetLookAtTask
+  m_EditorClassIdentifier: 
+  active: 1
+  Description: Find a child gameObject with the name given on the Target and set
+    it as the Target for Aim Component
+  MessageID:
+    UseConstant: 1
+    ConstantValue: 0
+    Variable: {fileID: 0}
+  UpdateInterval:
+    UseConstant: 1
+    ConstantValue: 0.2
+    Variable: {fileID: 0}
+  WaitForPreviousTask: 0
+  SetAimOn: 0
+  LookAtTargetS: 0
+  LookAtTargetT: 0
+  TargetVar: {fileID: 0}
+  UseTag: 0
+  BoneName: Head
+  tag: {fileID: 0}
+  DisableOnExit: 0
+  showTransformVar: 0

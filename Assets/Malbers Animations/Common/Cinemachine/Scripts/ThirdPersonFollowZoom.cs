@@ -1,10 +1,15 @@
+#if UNITY_6000_0_OR_NEWER
+using Unity.Cinemachine;
+#else
 using Cinemachine;
+#endif
 using MalbersAnimations.Scriptables;
 using UnityEngine;
 
 namespace MalbersAnimations
 {
     [AddComponentMenu("Malbers/Camera/Third Person Follow Zoom (Cinemachine)")]
+    [DefaultExecutionOrder(121)]
     public class ThirdPersonFollowZoom : MonoBehaviour
     {
         [Tooltip("Update mode for the Aim Logic")]
@@ -24,18 +29,31 @@ namespace MalbersAnimations
         [Tooltip("Zoom smooth value to change between steps")]
         public FloatReference ZoomLerp = new(5);
 
-        private float TargetZoom;
-        private Cinemachine3rdPersonFollow TPF;
+        /// <summary> Current Target Zoom </summary>
+        private float TargetZoom { get; set; }
 
+
+#if UNITY_6000_0_OR_NEWER
+        private CinemachineThirdPersonFollow TPF;
+#else
+        private Cinemachine3rdPersonFollow TPF;
+#endif
 
         public bool UnScaledTime { get => unscaledTime; set => unscaledTime.Value = value; }
 
-        private void OnEnable()
+        private void Start()
         {
-            TPF = this.FindComponent<Cinemachine3rdPersonFollow>();
 
-            if (TPF != null)
-                TargetZoom = TPF.CameraDistance;
+#if UNITY_6000_0_OR_NEWER
+            TPF = this.FindComponent<CinemachineThirdPersonFollow>();
+#else
+            TPF = this.FindComponent<Cinemachine3rdPersonFollow>();
+#endif
+
+            if (TryGetComponent<ThirdPersonFollowTarget>(out var follow))
+            {
+                TargetZoom = follow.CameraDistance;
+            }
         }
 
 

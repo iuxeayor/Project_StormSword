@@ -19,6 +19,8 @@ namespace MalbersAnimations
 
         void OnDrawGizmos()
         {
+            if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this)) return;
+
             if (!enabled) return;
 
             UnityEditor.Handles.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);

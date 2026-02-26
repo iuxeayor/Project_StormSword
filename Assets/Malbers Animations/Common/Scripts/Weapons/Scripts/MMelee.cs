@@ -2,7 +2,6 @@
 using MalbersAnimations.Events;
 using MalbersAnimations.Utilities;
 
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -16,17 +15,16 @@ namespace MalbersAnimations.Weapons
         [Tooltip("Do not interact with Static Objects")]
         public bool ignoreStaticObjects = true;
         public BoolEvent OnCauseDamage = new();
+
         public Color DebugColor = new(1, 0.25f, 0, 0.5f);
 
         public bool UseCameraSide;
         public bool InvertCameraSide;
 
-
-
-        [Tooltip("What Abilities to apply to the meleee weapons if they are not using any Combo")]
+        [Tooltip("What Abilities to apply to the melee weapons if they are not using any Combo")]
         public int[] GroundAttackAbilities;
 
-        [Tooltip("What Abilities to apply to the meleee weapons if they are not using any Combo")]
+        [Tooltip("What Abilities to apply to the melee weapons if they are not using any Combo")]
         public int[] RidingAttackAbilities;
 
         protected bool canCauseDamage;                      //The moment in the Animation the weapon can cause Damage 
@@ -45,17 +43,10 @@ namespace MalbersAnimations.Weapons
                     if (C_Direction != null) { StopCoroutine(C_Direction); C_Direction = null; }
                     StartCoroutine(C_Direction = I_CalculateDirection(meleeTrigger));
                 }
-
-                //if (!value)
-                //{
-                //    WeaponAction.Invoke((int)Weapon_Action.Idle);
-                //}
             }
         }
 
-
         protected TriggerProxy Proxy { get; private set; }
-
 
         /// <summary>Damager from the Attack Triger Behaviour</summary>
         public override void ActivateDamager(int value, int profile)
@@ -104,6 +95,8 @@ namespace MalbersAnimations.Weapons
         {
             if (Proxy)
             {
+                Proxy.SetLayer(Layer, triggerInteraction, Owner ? Owner.transform : null, Tags); //Set the Layer of the Proxy
+
                 Proxy.EnterTriggerInteraction += AttackTriggerEnter;
                 // proxy.ExitTriggerInteraction += AttackTriggerExit;
             }
@@ -127,7 +120,7 @@ namespace MalbersAnimations.Weapons
 
 
         #region Main Attack 
-        internal override void MainAttack_Start(IMWeaponOwner RC)
+        public override void MainAttack_Start(IMWeaponOwner RC)
         {
             base.MainAttack_Start(RC);
 
@@ -150,43 +143,53 @@ namespace MalbersAnimations.Weapons
         }
 
         #endregion
-        void AttackTriggerEnter(GameObject root, Collider other)
+        void AttackTriggerEnter(GameObject root, Collider other, TriggerProxy proxy)
         {
-            //Debug.Log("AttackTriggerEnter = " + other);
             if (IsInvalid(other)) return;                                               //Check Layers and Don't hit yourself
             if (other.transform.root == IgnoreTransform) return;                        //Check an Extra transform that you cannot hit...e.g your mount
             if (ignoreStaticObjects && other.transform.gameObject.isStatic) return;     //Ignore Static Objects
 
             var damagee = other.GetComponentInParent<IMDamage>();                      //Get the Animal on the Other collider
 
+            //CustomPatch: Avoid multiple hits on the same damageable in the same attack
+            if (preventDuplicateDamage && damagee != null && IsHitDamageableRegistered(damagee))
+            {
+                if (IsHitDamageableRegistered(damagee))
+                {
+                    Debugging($"Ignoring duplicate hit on damageable. Already hit damageable with collider: [{other.name}]", this);
+                    return; //If the Damageable is already registered, then ignore it
+                }
+
+                RegisterHitDamageable(damagee); //Register the Damageable to avoid hitting it again
+            }
+
             if (!AttackDirection)
                 Direction = Owner.transform.forward;
 
             var center = meleeTrigger.bounds.center;
 
-            Debugging($"Hit [{other.name}]", this);
-
-            TryInteract(other.gameObject);                                              //Get the interactable on the Other collider
-            TryPhysics(other.attachedRigidbody, other, center, Force);       //If the other has a riggid body and it can be pushed
-            TryStopAnimator();
-            TryHitEffect(other, meleeTrigger.bounds.center, damagee);
+            if (damagee != null) { damagee.HitCollider = other; }
 
             var Damage = new StatModifier(statModifier)
             { Value = Mathf.Lerp(MinDamage, MaxDamage, ChargedNormalized) };            //Do the Damage depending the charge
 
-            if (damagee != null) { damagee.HitCollider = other; }
-            TryDamage(damagee, Damage); //if the other does'nt have the Damagable Interface dont send the Damagable stuff 
+            var MissedAttack = MissAttack();
 
-            //Store the Last Collider that the animal hit
+            TryDamage(damagee, Damage, MissedAttack); //if the other doesn't have the Damageable Interface dont send the Damageable stuff  
+            if (MissedAttack) return;
+
+            Debugging($"Hit [{other.name}]", this);
+
+            TryInteract(other.gameObject);                                              //Get the interactable on the Other collider
+            TryPhysics(other.attachedRigidbody, other, center, Force);       //If the other has a rigid body and it can be pushed
+            TryStopAnimator();
+            TryHitEffect(other, meleeTrigger.bounds.center, damagee);
         }
-
-
 
         public override void ResetWeapon()
         {
-            if (meleeTrigger)
+            if (meleeTrigger && Proxy)
             {
-
                 meleeTrigger.enabled = false;
                 Proxy.Active = false;
             }
@@ -199,11 +202,11 @@ namespace MalbersAnimations.Weapons
 
             if (meleeTrigger)
             {
-                Proxy = TriggerProxy.CheckTriggerProxy(meleeTrigger, Layer, TriggerInteraction, Owner.transform);
+                Proxy = TriggerProxy.CheckTriggerProxy(meleeTrigger, Layer, TriggerInteraction, Owner.transform, true);
 
                 meleeTrigger.enabled = false;
                 Proxy.Active = meleeTrigger.enabled;
-                Proxy.EnterTriggerInteraction = delegate { }; //Clear all of them in start
+                Proxy.EnterTriggerInteraction = null; //Clear all of them in start
             }
             else
             {
@@ -217,12 +220,16 @@ namespace MalbersAnimations.Weapons
 #if UNITY_EDITOR
         void OnDrawGizmos()
         {
+            if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this)) return;
+
             if (meleeTrigger != null)
                 DrawTriggers(meleeTrigger.transform, meleeTrigger, DebugColor, false);
         }
 
         void OnDrawGizmosSelected()
         {
+            if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this)) return;
+
             if (!Application.isPlaying)
                 if (meleeTrigger != null)
                     DrawTriggers(meleeTrigger.transform, meleeTrigger, DebugColor, true);
@@ -251,7 +258,7 @@ namespace MalbersAnimations.Weapons
             GroundCombo, GroundAttackAbilities, RidingCombo,
             RidingAttackAbilities, ignoreStaticObjects;
 
-        void OnEnable()
+        protected override void OnEnable()
         {
             WeaponTab = "Melee";
             SetOnEnable();
@@ -260,6 +267,7 @@ namespace MalbersAnimations.Weapons
             OnCauseDamage = serializedObject.FindProperty("OnCauseDamage");
             InvertCameraSide = serializedObject.FindProperty("InvertCameraSide");
             UseCameraSide = serializedObject.FindProperty("UseCameraSide");
+
             //  Attacks = serializedObject.FindProperty("Attacks");
             RidingAttackAbilities = serializedObject.FindProperty("RidingAttackAbilities");
             GroundAttackAbilities = serializedObject.FindProperty("GroundAttackAbilities");
@@ -288,6 +296,7 @@ namespace MalbersAnimations.Weapons
         protected override void ChildWeaponEvents()
         {
             EditorGUILayout.PropertyField(OnCauseDamage, new GUIContent("On AttackTrigger Active"));
+
         }
 
         protected override void DrawAdvancedWeapon()
@@ -295,6 +304,8 @@ namespace MalbersAnimations.Weapons
             using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 EditorGUILayout.PropertyField(ignoreStaticObjects);
+                //CustomPatch: Avoid multiple hits on the same damageable in the same attack
+                EditorGUILayout.PropertyField(preventDuplicateDamage);
                 EditorGUILayout.PropertyField(meleeCollider,
                     new GUIContent("Melee Trigger", "Gets the reference of where is the Melee Collider of this weapon (Not Always is in the same gameobject level)"));
             }

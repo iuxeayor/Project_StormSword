@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.Collections;
-
+using MalbersAnimations.Conditions;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -12,7 +12,8 @@ using UnityEditor;
 
 namespace MalbersAnimations
 {
-    [AddComponentMenu("Malbers/Animal Controller/Mode Align")]
+    [AddComponentMenu("Malbers/Animal Controller/Mode Align [Obsolete]")]
+    [HelpURL("https://malbersanimations.gitbook.io/animal-controller/main-components/mode-aligner2")]
     public class MModeAlign : MonoBehaviour
     {
         [RequiredField] public MAnimal animal;
@@ -30,39 +31,41 @@ namespace MalbersAnimations
         [Tooltip("The animal will keep attacking the current target until the target enters in any of the ignore states")]
         public BoolReference KeepCurrentTarget = new(true);
 
-        //[Tooltip("It will search any gameobject that is a Animals on the Radius. ")]
-        //public bool Animals = true;
-
         [Tooltip("Search only Tags")]
         public Tag[] Tags;
         public LayerReference Layer = new(0);
         [Tooltip("Radius used for the Search")]
-
 
         [Min(0)] public float SearchRadius = 2f;
         [Tooltip("Radius used push closer/farther the Target when playing the Mode")]
         [Min(0)] public float Distance = 0;
         //[Tooltip("Multiplier To apply to AITarget found. Set this to Zero to ignore IAI Targets")]
         //[Min(0)] public float TargetMultiplier = 1;
-        [Tooltip("Time needed to complete the Position aligment")]
+        [Tooltip("Time needed to complete the Position alignment")]
         [Min(0)] public float AlignTime = 0.3f;
 
+        [Tooltip("Delay to start the alignment")]
+        [Min(0)] public float Delay = 0.0f;
 
+        [Tooltip("Front Offset of the Animal to use as Pivot point for the orientation for the alignment")]
+        [Min(0)] public float FrontOffset = 0.15f;
 
-        [Tooltip("Front Offset of the Animal")]
-        [Min(0)] public float FrontOffet = 0.15f;
-
-        [Tooltip("Ignore Moving the character if we are already too close to the target. Only aplpy look At rotation")]
+        [Tooltip("Ignore Moving the character if we are already too close to the target. Only apply look At rotation. Use this for Quadruped animals")]
         public bool IgnoreClose = true;
+        [Tooltip("Override default Distance with th e AI Target Distance on a Target")]
+        public bool UseAITargetDistance = true;
 
-        [Tooltip("Align Curve")]
+        [Tooltip("Align Curve used for the alignment")]
         public AnimationCurve AlignCurve = new(new Keyframe[] { new(0, 0), new(1, 1) });
+
 
         public Color debugColor = new(1, 0.5f, 0, 0.2f);
 
         [HideInInspector, SerializeField] private int EditorTab; //Editor Tabs
 
         public bool debug;
+
+        private bool Aligning;
 
         void Awake()
         {
@@ -80,13 +83,33 @@ namespace MalbersAnimations
 
         void OnEnable()
         {
-            animal.OnModeStart.AddListener(StartingMode);
+            Debug.LogWarning("MModeAlign is Obsolete. Please use ModeAligner2 component instead.", this);
 
+            if (animal)
+            {
+                animal.OnModeStart.AddListener(StartingMode);
+                animal.PostStateMovement += PosStateMovement;
+            }
         }
 
         void OnDisable()
         {
-            animal.OnModeStart.RemoveListener(StartingMode);
+            if (animal)
+            {
+                animal.OnModeStart.RemoveListener(StartingMode);
+                animal.PostStateMovement -= PosStateMovement;
+            }
+        }
+
+        private Vector3 OverrideAdditivePos;
+
+        private void PosStateMovement(MAnimal animal)
+        {
+            if (Aligning)
+            {
+                //Debug.Log($"Overriding ADPOS {OverrideAdditivePos}");
+                animal.additivePosition = OverrideAdditivePos;
+            }
         }
 
         void StartingMode(int ModeID, int ability)
@@ -112,7 +135,14 @@ namespace MalbersAnimations
             //Search first Animals ... if did not find anyone then search for colliders
             if (!FindAnimals())
             {
-                AlignCollider();
+                if (Delay > 0)
+                {
+                    Invoke(nameof(AlignCollider), Delay);
+                }
+                else
+                {
+                    AlignCollider();
+                }
             }
         }
 
@@ -160,26 +190,36 @@ namespace MalbersAnimations
             if (ClosestAnimal)
             {
                 if (!GetClosestAITarget(ClosestAnimal.transform))
-                    Debuging($"Alinging to [{ClosestAnimal.name}]", this);
-
+                {
+                    Debuging($"Aligning to [{ClosestAnimal.name}]", this);
+                }
+                //else
+                //{
+                //    StartAligning(ClosestAnimal.Center, null);
+                //}
                 return true;
             }
             return false;
         }
 
+        private readonly Collider[] AllColliders = new Collider[20];
+
         private void AlignCollider()
         {
             var pos = animal.Center;
 
-            Collider[] AllColliders = Physics.OverlapSphere(pos, SearchRadius * animal.ScaleFactor, Layer.Value, QueryTriggerInteraction.Ignore);
+            var ColliderLength = Physics.OverlapSphereNonAlloc(pos, SearchRadius * animal.ScaleFactor, AllColliders, Layer.Value, QueryTriggerInteraction.Ignore);
 
             Collider ClosestCollider = null;
 
             float ClosestDistance = float.MaxValue;
 
-            foreach (var col in AllColliders)
+            for (int i = 0; i < ColliderLength; i++)
             {
-                if ((col.transform.SameHierarchy(animal.transform)  //Don't Find yourself
+                var col = AllColliders[i];
+
+                if (col == null
+                    || (col.transform.SameHierarchy(animal.transform)  //Don't Find yourself
                     || Tags != null && Tags.Length > 0 && !col.gameObject.HasMalbersTagInParent(Tags) //Skip Tags
                     || !col.gameObject.activeInHierarchy            //Don't Find invisible colliders
                     || col.gameObject.isStatic                      //Don't Find Static colliders
@@ -199,20 +239,22 @@ namespace MalbersAnimations
             if (ClosestCollider)
             {
                 if (!GetClosestAITarget(ClosestCollider.transform))
-                    Debuging($"[{name}], Alinging to [{ClosestCollider.name}]", this);
+                    Debuging($"[{name}], Aligning to [{ClosestCollider.name}]", this);
             }
         }
 
         private bool GetClosestAITarget(Transform target)
         {
-            var Center = target.position;
+            var Center = ClosestAnimal != null && ClosestAnimal.transform == target ? ClosestAnimal.Center : target.position;
+            var TargetTransform = ClosestAnimal != null && ClosestAnimal.transform == target ? ClosestAnimal.transform : target;
+
             var Origin = animal.Position;
             var radius = SearchRadius * animal.ScaleFactor;
 
             var Core = target.GetComponentInParent<IObjectCore>();
             if (Core != null) { target = Core.transform; } //Find the Core Transform
 
-            var AllAITargets = target.FindInterfaces<IAITarget>();
+            var AllAITargets = target.FindInterfaces<IAITarget>(); //Find all
 
             IAITarget ClosestAI = null;
             var ClosestDistance = float.MaxValue;
@@ -237,32 +279,36 @@ namespace MalbersAnimations
                             ClosestDistance = dist;
                             Center = a.GetCenterPosition(-1);
                             ClosestAI = a;
+                            TargetTransform = a.transform;
                         }
                     }
                 }
             }
 
-            StartAligning(Center, ClosestAI);
+            Center = TargetTransform.InverseTransformPoint(Center); //Convert to Local Position
+
+            var Distance = this.Distance; //Store the Distance
+
+            //Change to the AI Stop Distance if is not Zero and we found an AI
+            if (UseAITargetDistance && Distance != 0 && ClosestAI != null)
+            {
+                Distance = ClosestAI.StopDistance();
+            }
+
+            StartAligning(Center, Distance, TargetTransform);
 
             return ClosestAI != null;
         }
 
-        private void StartAligning(Vector3 TargetCenter, IAITarget isAI)
+        private void StartAligning(Vector3 LocalTargetCenter, float currentStopDistance, Transform Target)
         {
             StopAllCoroutines();
 
-            if (!animal.FreeMovement) TargetCenter.y = animal.transform.position.y;
+            // if (!animal.FreeMovement) TargetCenter.y = animal.transform.position.y;
 
-            var currentStopDistance = Distance * animal.ScaleFactor;
 
-            if (isAI != null)
-            {
-                currentStopDistance = isAI.StopDistance();// * TargetMultiplier;
-                if (Distance == 0) currentStopDistance = 0; //Remove if Distance is 0
+            var TargetCenter = Target.TransformPoint(LocalTargetCenter); //Convert to Global Position
 
-                TargetCenter = isAI.GetCenterPosition();
-                Debuging($" Alinging <B>AI Target</B> [{isAI.transform.name}]", isAI.transform);
-            }
 
             if (debug)
             {
@@ -285,39 +331,35 @@ namespace MalbersAnimations
             //Align Look At the Zone Using Distance
             if (currentStopDistance > 0)
             {
-                currentStopDistance += FrontOffet * animal.ScaleFactor; //Align from the Position of the Aligner
-                StartCoroutine(MTools.AlignLookAtTransform(animal.transform, TargetCenter, AlignTime, AlignCurve));
+                currentStopDistance += FrontOffset * animal.ScaleFactor; //Align from the Position of the Aligner
 
-                var TargetDistance = Vector3.Distance(animal.Position, TargetCenter);
+                StartCoroutine(
+                    LookAt(animal.transform, Target, TargetCenter, FrontOffset, AlignTime, animal.ScaleFactor, AlignCurve));
 
-                if (IgnoreClose && TargetDistance < currentStopDistance) return; //Ignore if we are already to cloose to the target
+                MDebug.DrawLine(animal.Center, TargetCenter, Color.yellow, 2f);
 
-                StartCoroutine(MTools.AlignTransformRadius(animal.transform, TargetCenter, AlignTime, currentStopDistance, AlignCurve));
+                StartCoroutine(AlignTransformRadius(animal, Target, LocalTargetCenter, AlignTime, currentStopDistance, AlignCurve));
             }
             else
             {
                 StartCoroutine(
-                    AlignLookAtTransform(animal.transform, TargetCenter, FrontOffet, AlignTime, animal.ScaleFactor, AlignCurve));
+                    LookAt(animal.transform, Target, TargetCenter, FrontOffset, AlignTime, animal.ScaleFactor, AlignCurve));
             }
         }
 
-
-        private void Debuging(string deb, Object ob)
-        {
-            if (debug) Debug.Log($"<B>[{animal.name}]</B> {deb}", ob);
-        }
-
-
-        public IEnumerator AlignLookAtTransform(Transform t1, Vector3 target, float AlignOffset, float time, float scale, AnimationCurve AlignCurve)
+        public IEnumerator LookAt(Transform t1, Transform t2, Vector3 LocalTargetPos, float AlignOffset, float time, float scale, AnimationCurve AlignCurve)
         {
             float elapsedTime = 0;
             var wait = new WaitForFixedUpdate();
 
             Quaternion CurrentRot = t1.rotation;
+            var target = t2.TransformPoint(LocalTargetPos); //Convert to Global Position
             Vector3 direction = (target - t1.position);
 
-            direction = Vector3.ProjectOnPlane(direction, t1.up);
+            direction = Vector3.ProjectOnPlane(direction, t1.up); //Clear Y values
+
             Quaternion FinalRot = Quaternion.LookRotation(direction);
+
             Vector3 Offset = t1.position + AlignOffset * scale * t1.forward; //Use Offset
 
             if (AlignOffset != 0)
@@ -327,9 +369,10 @@ namespace MalbersAnimations
                 Quaternion TargetDelta = TargetInverse_Rot * FinalRot;
 
                 var TargetPosition = t1.position + t1.DeltaPositionFromRotate(Offset, TargetDelta);
-                direction = ((target) - TargetPosition);
 
-                var debTime = 3f;
+                direction = (target - TargetPosition);
+
+                var debTime = 2f;
 
                 if (debug)
                 {
@@ -337,23 +380,28 @@ namespace MalbersAnimations
                     MDebug.DrawWireSphere(TargetPosition, 0.1f, Color.green, debTime);
                     MDebug.DrawWireSphere(target, 0.1f, Color.yellow, debTime);
                 }
-                direction = Vector3.ProjectOnPlane(direction, t1.up); //Remove Y values
             }
 
             if (direction.CloseToZero())
             {
                 Debug.LogWarning("Direction is Zero. Please set a correct rotation", t1);
-                yield return null;
+                yield break;
             }
             else
             {
-                direction = Vector3.ProjectOnPlane(direction, t1.up); //Remove Y values
-                FinalRot = Quaternion.LookRotation(direction);
+                Aligning = true;
 
                 Quaternion Last_Platform_Rot = t1.rotation;
 
                 while ((time > 0) && (elapsedTime <= time))
                 {
+                    yield return wait;
+
+                    direction = (t2.position - t1.position);
+                    direction = Vector3.ProjectOnPlane(direction, t1.up); //Remove Y values
+                    FinalRot = Quaternion.LookRotation(direction);
+
+
                     //Evaluation of the Pos curve
                     float result = AlignCurve != null ? AlignCurve.Evaluate(elapsedTime / time) : elapsedTime / time;
 
@@ -368,21 +416,102 @@ namespace MalbersAnimations
 
                     elapsedTime += Time.fixedDeltaTime;
                     Last_Platform_Rot = t1.rotation;
-
-                    if (debug)
-                    {
-                        MDebug.DrawRay(Offset, Vector3.up, Color.white);
-                        MDebug.DrawWireSphere(t1.position, t1.rotation, 0.05f * scale, Color.white, 0.2f);
-                        MDebug.DrawWireSphere(t1.position, t1.rotation, 0.05f * scale, Color.white, 0.2f);
-                        MDebug.DrawWireSphere(Offset, 0.05f * scale, Color.white, 0.2f);
-                        MDebug.Draw_Arrow(t1.position, t1.forward, Color.white, 0.2f);
-                    }
-
-                    yield return wait;
                 }
+
+
+                Aligning = false;
             }
         }
 
+        public IEnumerator AlignTransformRadius(MAnimal animal, Transform Target, Vector3 localTargetPos, float time, float radius, AnimationCurve curve = null)
+        {
+            if (radius > 0)
+            {
+                float elapsedTime = 0;
+
+                var Wait = new WaitForFixedUpdate();
+
+                Vector3 StartingPos = animal.Position;
+
+                var WorldTargetPos = Target.TransformPoint(localTargetPos); //Convert to Global Position
+                var Direction = (animal.Position - WorldTargetPos).normalized * radius;
+
+                Ray TargetRay = new(WorldTargetPos, (animal.Position - WorldTargetPos).normalized);
+                Vector3 TargetPos = TargetRay.GetPoint(radius);
+
+                Debug.DrawRay(animal.Position, -Direction, Color.cyan, 1f);
+
+                animal.TryResetDeltaRootMotion(); //Reset delta RootMotion
+
+                MDebug.DrawWireSphere(TargetPos, Color.red, 0.05f, 3);
+
+                var TargetDistance = Vector3.Distance(animal.Center, WorldTargetPos);
+
+                Aligning = true;
+
+                while ((time > 0) && (elapsedTime <= time))
+                {
+                    yield return Wait;
+
+                    WorldTargetPos = Target.TransformPoint(localTargetPos); //Convert to Global Position
+                    TargetDistance = Vector3.Distance(animal.Center, WorldTargetPos);
+
+                    if (!IgnoreClose || TargetDistance >= radius)
+                    {
+                        //Evaluation of the Pos curve
+                        float result = curve != null ? curve.Evaluate(elapsedTime / time) : elapsedTime / time;
+                        Direction = (-animal.Position + WorldTargetPos).normalized * radius;
+
+                        var TargetPoint = WorldTargetPos - Direction;
+
+                        var nextPos = Vector3.Lerp(StartingPos, TargetPoint, result);
+                        var deltaPos = nextPos - animal.Position;
+
+                        OverrideAdditivePos = deltaPos; //Override the Delta Position
+
+                        MDebug.DrawWireSphere(animal.Position, Color.yellow, 0.05f, 3);
+                        MDebug.DrawWireSphere(TargetPos, Color.yellow, 0.05f, 3);
+
+                        MDebug.DrawCircle(WorldTargetPos, Target.rotation, radius, Color.red);
+                        MDebug.DrawWireSphere(TargetPoint, Color.white, 0.05f);
+                    }
+                    else //if (TargetDistance < radius)
+                    {
+                        OverrideAdditivePos = Vector3.zero;
+                    }
+                    elapsedTime += Time.fixedDeltaTime;
+
+                    // animal.GlobalRootMotion.Value = TargetDistance >= radius; //Only apply RootMotion if we are not close to the target
+                }
+
+                WorldTargetPos = Target.TransformPoint(localTargetPos); //Convert to Global Position
+                Direction = (-animal.Position + WorldTargetPos).normalized * radius;
+                var FinalPos = WorldTargetPos - Direction;//Override the Delta Position
+
+                animal.additivePosition = FinalPos - animal.Position;
+
+                animal.InertiaPositionSpeed = Vector3.zero;
+
+                //Make sure is not moving inside the target after the mode ends
+                while (animal.IsPlayingMode && TargetDistance < radius)
+                {
+                    Aligning = true;
+                    yield return Wait;
+                    TargetDistance = Vector3.Distance(animal.Center, WorldTargetPos);
+                    OverrideAdditivePos = Vector3.zero;
+                }
+                Aligning = false;
+            }
+            yield return null;
+        }
+
+        [HideInCallstack]
+        private void Debuging(string deb, Object ob)
+        {
+#if UNITY_EDITOR
+            if (debug) MDebug.Log($"<B>[{animal.name}]</B> {deb}", ob);
+#endif
+        }
 
 
 #if UNITY_EDITOR
@@ -413,13 +542,101 @@ namespace MalbersAnimations
             MTools.SetDirty(this);
         }
 
+
+        [ContextMenu("Upgrade to Mode Aligner 2")]
+        public virtual void UpgradeToAligner()
+        {
+            if (!gameObject.TryGetComponent<ModeAligner2>(out var a2))
+            {
+                a2 = gameObject.AddComponent<ModeAligner2>();
+                a2.aligners = new List<ModeAligner2.AlignData>();
+            }
+
+            a2.animal = animal;
+            a2.searchDistance = SearchRadius;
+            debug = true;
+
+            foreach (var mod in modes)
+            {
+                var newAligner = a2.aligners.FirstOrDefault(x => x.mode == mod);
+
+                if (newAligner == null)
+                {
+                    newAligner = new ModeAligner2.AlignData
+                    {
+                        mode = mod,
+                        name = mod.name,
+                        //specificAbilities = ExcludeAbilities,
+                        AlignTime = AlignTime,
+                        //frontOffset = FrontOffset,
+                        IgnoreClose = IgnoreClose,
+                        //UseAITargetDistance = UseAITargetDistance,
+                        AlignCurve = AlignCurve,
+                        delay = Delay,
+                        UseRadius = Distance > 0,
+                        debugColor = new Color(Random.value, Random.value, Random.value, 0.2f)
+                    };
+
+
+                    a2.aligners.Add(newAligner);
+                }
+
+                newAligner.conditions.active = true;
+
+                newAligner.conditions.Add
+                    (
+                    new C2_Layers()
+                    {
+                        OrAnd = true,
+                        Layer = Layer,
+                    }
+                    );
+
+
+                if (ignoreStates != null && ignoreStates.Count > 0)
+                {
+                    for (int i = 0; i < ignoreStates.Count; i++)
+                    {
+                        newAligner.conditions.Add(
+
+                          new C2_AnimalState()
+                          {
+                              OrAnd = false, //Set to true
+                              invert = true,
+                              Condition = C2_AnimalState.StateCondition.ActiveState,
+                              LocalTarget = false,
+                              Value = ignoreStates[i]
+                          }
+                          );
+                    }
+                }
+
+                if (Tags != null && Tags.Length > 0)
+                {
+                    newAligner.conditions.Add(
+                        new C2_MalbersTag()
+                        {
+                            OrAnd = false,
+                            tags = Tags
+                        }
+                        );
+                }
+            }
+
+            Debug.Log("Upgraded. Remove this Component.");
+
+            MTools.SetDirty(a2);
+
+
+        }
+
 #if MALBERS_DEBUG
         void OnDrawGizmosSelected()
         {
             if (animal && debug)
             {
                 var scale = animal.ScaleFactor;
-                var Pos = animal.Position + (FrontOffet * scale * animal.Forward);
+                var Pos = animal.Position + (FrontOffset * scale * animal.Forward);
 
                 Handles.color = debugColor;
                 var c = debugColor; c.a = 1;
@@ -440,6 +657,10 @@ namespace MalbersAnimations
 #endif
     }
 
+
+
+
+
 #if UNITY_EDITOR
 
     [CustomEditor(typeof(MModeAlign)), CanEditMultipleObjects]
@@ -448,11 +669,16 @@ namespace MalbersAnimations
         SerializedProperty animal,
             modes, ignoreStates, ExcludeAbilities, EditorTab,
             // AnimalsOnly,
-            Layer, Tags, debug, LookRadius, DistanceRadius, AlignTime, FrontOffet, IgnoreClose, //TargetMultiplier, 
-            AlignCurve, debugColor/*, pushTarget*/;
-        private void OnEnable()
+            Layer, Tags, debug, LookRadius, DistanceRadius, UseAITargetDistance, AlignTime, FrontOffset, IgnoreClose, //TargetMultiplier, 
+            AlignCurve, Delay,
+            debugColor/*, pushTarget*/;
+
+        MModeAlign M;
+        protected virtual void OnEnable()
         {
+            M = (MModeAlign)target;
             animal = serializedObject.FindProperty("animal");
+            Delay = serializedObject.FindProperty("Delay");
             EditorTab = serializedObject.FindProperty("EditorTab");
             IgnoreClose = serializedObject.FindProperty("IgnoreClose");
             modes = serializedObject.FindProperty("modes");
@@ -463,11 +689,12 @@ namespace MalbersAnimations
             Tags = serializedObject.FindProperty("Tags");
             LookRadius = serializedObject.FindProperty("SearchRadius");
             DistanceRadius = serializedObject.FindProperty("Distance");
+            UseAITargetDistance = serializedObject.FindProperty("UseAITargetDistance");
 
             AlignTime = serializedObject.FindProperty("AlignTime");
             debugColor = serializedObject.FindProperty("debugColor");
             //TargetMultiplier = serializedObject.FindProperty("TargetMultiplier");
-            FrontOffet = serializedObject.FindProperty("FrontOffet");
+            FrontOffset = serializedObject.FindProperty("FrontOffset");
             debug = serializedObject.FindProperty("debug");
             AlignCurve = serializedObject.FindProperty("AlignCurve");
 
@@ -480,6 +707,19 @@ namespace MalbersAnimations
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
+
+            //draw a button to upgrade to Mode Aligner 2
+            if (GUILayout.Button("Upgrade to Mode Aligner 2", GUILayout.Height(30)))
+            {
+                M.UpgradeToAligner();
+                DestroyImmediate(target);
+                return;
+            }
+
+
+
+
+
             MalbersEditor.DrawDescription($"Execute a LookAt towards the closest Animal or GameObject  when is playing a Mode on the list");
             EditorTab.intValue = GUILayout.Toolbar(EditorTab.intValue, Tabs);
 
@@ -530,7 +770,6 @@ namespace MalbersAnimations
                 EditorGUILayout.PropertyField(LookRadius);
                 if (LookRadius.floatValue > 0)
                 {
-
                     EditorGUILayout.PropertyField(DistanceRadius);
                     using (new GUILayout.HorizontalScope())
                     {
@@ -538,8 +777,10 @@ namespace MalbersAnimations
                         EditorGUILayout.PropertyField(AlignTime);
                         EditorGUILayout.PropertyField(AlignCurve, GUIContent.none, GUILayout.Width(50));
                     }
-                    EditorGUILayout.PropertyField(FrontOffet);
+                    EditorGUILayout.PropertyField(Delay);
+                    EditorGUILayout.PropertyField(FrontOffset);
                     EditorGUILayout.PropertyField(IgnoreClose);
+                    EditorGUILayout.PropertyField(UseAITargetDistance);
                 }
             }
         }

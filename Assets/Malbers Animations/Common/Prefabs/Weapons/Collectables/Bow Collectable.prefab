@@ -136,13 +136,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 114000013777553486, guid: 7b615104e974f564faa2d8db65d150fe,
         type: 3}
-      propertyPath: Editor_Tabs1
+      propertyPath: debug
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114000013777553486, guid: 7b615104e974f564faa2d8db65d150fe,
         type: 3}
-      propertyPath: Editor_Tabs2
+      propertyPath: Editor_Tabs1
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000013777553486, guid: 7b615104e974f564faa2d8db65d150fe,
+        type: 3}
+      propertyPath: Editor_Tabs2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114000013777553486, guid: 7b615104e974f564faa2d8db65d150fe,
         type: 3}
@@ -242,7 +247,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!65 &7112515089088709850
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -282,6 +287,10 @@ MonoBehaviour:
   DebugColor: {r: 0, g: 0.6545739, b: 1, a: 0.27058825}
   DrawAxis: 0
   AxisSize: 0.65
+  _collider: {fileID: 7112515089088709850}
+  DrawLineTo: 0
+  ConnectTo: {fileID: 0}
+  Rect: {x: 1, y: 1, z: 1}
 --- !u!114 &5953020359679114554
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -295,9 +304,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Align: 0
-  AlignPos: 0
   AlignTime: 0.15
-  AlignDistance: 1
   PickDelay:
     UseConstant: 1
     ConstantValue: 0.15
@@ -326,9 +333,13 @@ MonoBehaviour:
     UseConstant: 1
     ConstantValue: 1
     Variable: {fileID: 0}
-  m_AutoPick:
+  canBePicked:
     UseConstant: 1
     ConstantValue: 1
+    Variable: {fileID: 0}
+  m_AutoPick:
+    UseConstant: 1
+    ConstantValue: 0
     Variable: {fileID: 0}
   m_ID:
     UseConstant: 1
@@ -372,6 +383,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  OnPickedFailed:
+    m_PersistentCalls:
+      m_Calls: []
   OnPrePicked:
     m_PersistentCalls:
       m_Calls: []
@@ -394,8 +408,21 @@ MonoBehaviour:
   PreDroppedReaction:
     rid: -2
   rb: {fileID: 722624809569109699}
-  m_colliders: []
-  EditorTabs: 2
+  DestroyRbOnPick:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  m_colliders:
+  - {fileID: 7112515089088709850}
+  kinematicOnPick:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  disableColliders:
+    UseConstant: 1
+    ConstantValue: 1
+    Variable: {fileID: 0}
+  EditorTabs: 0
   references:
     version: 2
     RefIds:
@@ -406,8 +433,8 @@ MonoBehaviour:
       data:
         Active: 1
         localComponent:
-          component: {fileID: 0}
           useLocal: 0
+          component: {fileID: 0}
         delay: 0
         type: 0
         ID: {fileID: 11400000, guid: c0d938e24e7fe1f4a8f00633ce81a5b1, type: 2}
